@@ -1,0 +1,2489 @@
+{
+  "nodes": [
+    {
+      "id": "Role of Microeconomics in Society",
+      "domain": "Introduction",
+      "difficulty": 1,
+      "description": "This is a concept about Role of Microeconomics in Society in the domain of Introduction.",
+      "resources": {
+        "quiz": "/quiz/role_of_microeconomics_in_society",
+        "content": "/content/role_of_microeconomics_in_society",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Role_of_Microeconomics_in_Society"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Definition and Scope of Microeconomics",
+      "domain": "Introduction",
+      "difficulty": 1,
+      "description": "This is a concept about Definition and Scope of Microeconomics in the domain of Introduction.",
+      "resources": {
+        "quiz": "/quiz/definition_and_scope_of_microeconomics",
+        "content": "/content/definition_and_scope_of_microeconomics",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Definition_and_Scope_of_Microeconomics"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Scarcity",
+      "domain": "Introduction",
+      "difficulty": 2,
+      "description": "This is a concept about Scarcity in the domain of Introduction.",
+      "resources": {
+        "quiz": "/quiz/scarcity",
+        "content": "/content/scarcity",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Scarcity"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Choice",
+      "domain": "Introduction",
+      "difficulty": 2,
+      "description": "This is a concept about Choice in the domain of Introduction.",
+      "resources": {
+        "quiz": "/quiz/choice",
+        "content": "/content/choice",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Choice"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Opportunity Cost",
+      "domain": "Introduction",
+      "difficulty": 3,
+      "description": "This is a concept about Opportunity Cost in the domain of Introduction.",
+      "resources": {
+        "quiz": "/quiz/opportunity_cost",
+        "content": "/content/opportunity_cost",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Opportunity_Cost"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Law of Demand",
+      "domain": "Supply and Demand",
+      "difficulty": 4,
+      "description": "This is a concept about Law of Demand in the domain of Supply and Demand.",
+      "resources": {
+        "quiz": "/quiz/law_of_demand",
+        "content": "/content/law_of_demand",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Law_of_Demand"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Law of Supply",
+      "domain": "Supply and Demand",
+      "difficulty": 4,
+      "description": "This is a concept about Law of Supply in the domain of Supply and Demand.",
+      "resources": {
+        "quiz": "/quiz/law_of_supply",
+        "content": "/content/law_of_supply",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Law_of_Supply"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Equilibrium Price and Quantity",
+      "domain": "Supply and Demand",
+      "difficulty": 5,
+      "description": "This is a concept about Equilibrium Price and Quantity in the domain of Supply and Demand.",
+      "resources": {
+        "quiz": "/quiz/equilibrium_price_and_quantity",
+        "content": "/content/equilibrium_price_and_quantity",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Equilibrium_Price_and_Quantity"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Shifts in Demand and Supply",
+      "domain": "Supply and Demand",
+      "difficulty": 1,
+      "description": "This is a concept about Shifts in Demand and Supply in the domain of Supply and Demand.",
+      "resources": {
+        "quiz": "/quiz/shifts_in_demand_and_supply",
+        "content": "/content/shifts_in_demand_and_supply",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Shifts_in_Demand_and_Supply"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Price Elasticity of Demand",
+      "domain": "Supply and Demand",
+      "difficulty": 5,
+      "description": "This is a concept about Price Elasticity of Demand in the domain of Supply and Demand.",
+      "resources": {
+        "quiz": "/quiz/price_elasticity_of_demand",
+        "content": "/content/price_elasticity_of_demand",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Price_Elasticity_of_Demand"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Price Elasticity of Supply",
+      "domain": "Supply and Demand",
+      "difficulty": 5,
+      "description": "This is a concept about Price Elasticity of Supply in the domain of Supply and Demand.",
+      "resources": {
+        "quiz": "/quiz/price_elasticity_of_supply",
+        "content": "/content/price_elasticity_of_supply",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Price_Elasticity_of_Supply"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Consumer Surplus",
+      "domain": "Supply and Demand",
+      "difficulty": 3,
+      "description": "This is a concept about Consumer Surplus in the domain of Supply and Demand.",
+      "resources": {
+        "quiz": "/quiz/consumer_surplus",
+        "content": "/content/consumer_surplus",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Consumer_Surplus"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Producer Surplus",
+      "domain": "Supply and Demand",
+      "difficulty": 3,
+      "description": "This is a concept about Producer Surplus in the domain of Supply and Demand.",
+      "resources": {
+        "quiz": "/quiz/producer_surplus",
+        "content": "/content/producer_surplus",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Producer_Surplus"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Total Utility",
+      "domain": "Consumer Behavior",
+      "difficulty": 3,
+      "description": "This is a concept about Total Utility in the domain of Consumer Behavior.",
+      "resources": {
+        "quiz": "/quiz/total_utility",
+        "content": "/content/total_utility",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Total_Utility"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Marginal Utility",
+      "domain": "Consumer Behavior",
+      "difficulty": 3,
+      "description": "This is a concept about Marginal Utility in the domain of Consumer Behavior.",
+      "resources": {
+        "quiz": "/quiz/marginal_utility",
+        "content": "/content/marginal_utility",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Marginal_Utility"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Budget Constraints",
+      "domain": "Consumer Behavior",
+      "difficulty": 3,
+      "description": "This is a concept about Budget Constraints in the domain of Consumer Behavior.",
+      "resources": {
+        "quiz": "/quiz/budget_constraints",
+        "content": "/content/budget_constraints",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Budget_Constraints"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Indifference Curves",
+      "domain": "Consumer Behavior",
+      "difficulty": 3,
+      "description": "This is a concept about Indifference Curves in the domain of Consumer Behavior.",
+      "resources": {
+        "quiz": "/quiz/indifference_curves",
+        "content": "/content/indifference_curves",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Indifference_Curves"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Consumer Choice Optimization",
+      "domain": "Consumer Behavior",
+      "difficulty": 4,
+      "description": "This is a concept about Consumer Choice Optimization in the domain of Consumer Behavior.",
+      "resources": {
+        "quiz": "/quiz/consumer_choice_optimization",
+        "content": "/content/consumer_choice_optimization",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Consumer_Choice_Optimization"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Substitution Effect",
+      "domain": "Consumer Behavior",
+      "difficulty": 3,
+      "description": "This is a concept about Substitution Effect in the domain of Consumer Behavior.",
+      "resources": {
+        "quiz": "/quiz/substitution_effect",
+        "content": "/content/substitution_effect",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Substitution_Effect"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Income Effect",
+      "domain": "Consumer Behavior",
+      "difficulty": 3,
+      "description": "This is a concept about Income Effect in the domain of Consumer Behavior.",
+      "resources": {
+        "quiz": "/quiz/income_effect",
+        "content": "/content/income_effect",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Income_Effect"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Production Function",
+      "domain": "Production and Costs",
+      "difficulty": 3,
+      "description": "This is a concept about Production Function in the domain of Production and Costs.",
+      "resources": {
+        "quiz": "/quiz/production_function",
+        "content": "/content/production_function",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Production_Function"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Short Run Production",
+      "domain": "Production and Costs",
+      "difficulty": 4,
+      "description": "This is a concept about Short Run Production in the domain of Production and Costs.",
+      "resources": {
+        "quiz": "/quiz/short_run_production",
+        "content": "/content/short_run_production",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Short_Run_Production"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Long Run Production",
+      "domain": "Production and Costs",
+      "difficulty": 4,
+      "description": "This is a concept about Long Run Production in the domain of Production and Costs.",
+      "resources": {
+        "quiz": "/quiz/long_run_production",
+        "content": "/content/long_run_production",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Long_Run_Production"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Law of Diminishing Returns",
+      "domain": "Production and Costs",
+      "difficulty": 5,
+      "description": "This is a concept about Law of Diminishing Returns in the domain of Production and Costs.",
+      "resources": {
+        "quiz": "/quiz/law_of_diminishing_returns",
+        "content": "/content/law_of_diminishing_returns",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Law_of_Diminishing_Returns"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Fixed Costs",
+      "domain": "Production and Costs",
+      "difficulty": 3,
+      "description": "This is a concept about Fixed Costs in the domain of Production and Costs.",
+      "resources": {
+        "quiz": "/quiz/fixed_costs",
+        "content": "/content/fixed_costs",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Fixed_Costs"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Variable Costs",
+      "domain": "Production and Costs",
+      "difficulty": 3,
+      "description": "This is a concept about Variable Costs in the domain of Production and Costs.",
+      "resources": {
+        "quiz": "/quiz/variable_costs",
+        "content": "/content/variable_costs",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Variable_Costs"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Total Costs",
+      "domain": "Production and Costs",
+      "difficulty": 3,
+      "description": "This is a concept about Total Costs in the domain of Production and Costs.",
+      "resources": {
+        "quiz": "/quiz/total_costs",
+        "content": "/content/total_costs",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Total_Costs"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Average Costs",
+      "domain": "Production and Costs",
+      "difficulty": 3,
+      "description": "This is a concept about Average Costs in the domain of Production and Costs.",
+      "resources": {
+        "quiz": "/quiz/average_costs",
+        "content": "/content/average_costs",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Average_Costs"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Marginal Costs",
+      "domain": "Production and Costs",
+      "difficulty": 3,
+      "description": "This is a concept about Marginal Costs in the domain of Production and Costs.",
+      "resources": {
+        "quiz": "/quiz/marginal_costs",
+        "content": "/content/marginal_costs",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Marginal_Costs"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Economies of Scale",
+      "domain": "Production and Costs",
+      "difficulty": 4,
+      "description": "This is a concept about Economies of Scale in the domain of Production and Costs.",
+      "resources": {
+        "quiz": "/quiz/economies_of_scale",
+        "content": "/content/economies_of_scale",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Economies_of_Scale"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Diseconomies of Scale",
+      "domain": "Production and Costs",
+      "difficulty": 4,
+      "description": "This is a concept about Diseconomies of Scale in the domain of Production and Costs.",
+      "resources": {
+        "quiz": "/quiz/diseconomies_of_scale",
+        "content": "/content/diseconomies_of_scale",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Diseconomies_of_Scale"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Perfect Competition",
+      "domain": "Market Structures",
+      "difficulty": 3,
+      "description": "This is a concept about Perfect Competition in the domain of Market Structures.",
+      "resources": {
+        "quiz": "/quiz/perfect_competition",
+        "content": "/content/perfect_competition",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Perfect_Competition"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Monopoly",
+      "domain": "Market Structures",
+      "difficulty": 2,
+      "description": "This is a concept about Monopoly in the domain of Market Structures.",
+      "resources": {
+        "quiz": "/quiz/monopoly",
+        "content": "/content/monopoly",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Monopoly"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Market Power",
+      "domain": "Market Structures",
+      "difficulty": 3,
+      "description": "This is a concept about Market Power in the domain of Market Structures.",
+      "resources": {
+        "quiz": "/quiz/market_power",
+        "content": "/content/market_power",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Market_Power"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Price Setting",
+      "domain": "Market Structures",
+      "difficulty": 3,
+      "description": "This is a concept about Price Setting in the domain of Market Structures.",
+      "resources": {
+        "quiz": "/quiz/price_setting",
+        "content": "/content/price_setting",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Price_Setting"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Monopolistic Competition",
+      "domain": "Market Structures",
+      "difficulty": 3,
+      "description": "This is a concept about Monopolistic Competition in the domain of Market Structures.",
+      "resources": {
+        "quiz": "/quiz/monopolistic_competition",
+        "content": "/content/monopolistic_competition",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Monopolistic_Competition"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Product Differentiation",
+      "domain": "Market Structures",
+      "difficulty": 3,
+      "description": "This is a concept about Product Differentiation in the domain of Market Structures.",
+      "resources": {
+        "quiz": "/quiz/product_differentiation",
+        "content": "/content/product_differentiation",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Product_Differentiation"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Oligopoly",
+      "domain": "Market Structures",
+      "difficulty": 2,
+      "description": "This is a concept about Oligopoly in the domain of Market Structures.",
+      "resources": {
+        "quiz": "/quiz/oligopoly",
+        "content": "/content/oligopoly",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Oligopoly"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Game Theory",
+      "domain": "Market Structures",
+      "difficulty": 3,
+      "description": "This is a concept about Game Theory in the domain of Market Structures.",
+      "resources": {
+        "quiz": "/quiz/game_theory",
+        "content": "/content/game_theory",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Game_Theory"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Labor Markets",
+      "domain": "Factor Markets",
+      "difficulty": 3,
+      "description": "This is a concept about Labor Markets in the domain of Factor Markets.",
+      "resources": {
+        "quiz": "/quiz/labor_markets",
+        "content": "/content/labor_markets",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Labor_Markets"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Capital Markets",
+      "domain": "Factor Markets",
+      "difficulty": 3,
+      "description": "This is a concept about Capital Markets in the domain of Factor Markets.",
+      "resources": {
+        "quiz": "/quiz/capital_markets",
+        "content": "/content/capital_markets",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Capital_Markets"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Land Markets",
+      "domain": "Factor Markets",
+      "difficulty": 3,
+      "description": "This is a concept about Land Markets in the domain of Factor Markets.",
+      "resources": {
+        "quiz": "/quiz/land_markets",
+        "content": "/content/land_markets",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Land_Markets"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Natural Resources",
+      "domain": "Factor Markets",
+      "difficulty": 3,
+      "description": "This is a concept about Natural Resources in the domain of Factor Markets.",
+      "resources": {
+        "quiz": "/quiz/natural_resources",
+        "content": "/content/natural_resources",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Natural_Resources"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Wage Determination",
+      "domain": "Factor Markets",
+      "difficulty": 3,
+      "description": "This is a concept about Wage Determination in the domain of Factor Markets.",
+      "resources": {
+        "quiz": "/quiz/wage_determination",
+        "content": "/content/wage_determination",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Wage_Determination"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Human Capital",
+      "domain": "Factor Markets",
+      "difficulty": 3,
+      "description": "This is a concept about Human Capital in the domain of Factor Markets.",
+      "resources": {
+        "quiz": "/quiz/human_capital",
+        "content": "/content/human_capital",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Human_Capital"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Positive Externalities",
+      "domain": "Market Failures",
+      "difficulty": 3,
+      "description": "This is a concept about Positive Externalities in the domain of Market Failures.",
+      "resources": {
+        "quiz": "/quiz/positive_externalities",
+        "content": "/content/positive_externalities",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Positive_Externalities"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Negative Externalities",
+      "domain": "Market Failures",
+      "difficulty": 3,
+      "description": "This is a concept about Negative Externalities in the domain of Market Failures.",
+      "resources": {
+        "quiz": "/quiz/negative_externalities",
+        "content": "/content/negative_externalities",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Negative_Externalities"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Public Goods",
+      "domain": "Market Failures",
+      "difficulty": 3,
+      "description": "This is a concept about Public Goods in the domain of Market Failures.",
+      "resources": {
+        "quiz": "/quiz/public_goods",
+        "content": "/content/public_goods",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Public_Goods"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Common Resources",
+      "domain": "Market Failures",
+      "difficulty": 3,
+      "description": "This is a concept about Common Resources in the domain of Market Failures.",
+      "resources": {
+        "quiz": "/quiz/common_resources",
+        "content": "/content/common_resources",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Common_Resources"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Asymmetric Information",
+      "domain": "Market Failures",
+      "difficulty": 3,
+      "description": "This is a concept about Asymmetric Information in the domain of Market Failures.",
+      "resources": {
+        "quiz": "/quiz/asymmetric_information",
+        "content": "/content/asymmetric_information",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Asymmetric_Information"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Government Regulation",
+      "domain": "Market Failures",
+      "difficulty": 3,
+      "description": "This is a concept about Government Regulation in the domain of Market Failures.",
+      "resources": {
+        "quiz": "/quiz/government_regulation",
+        "content": "/content/government_regulation",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Government_Regulation"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Taxation",
+      "domain": "Market Failures",
+      "difficulty": 2,
+      "description": "This is a concept about Taxation in the domain of Market Failures.",
+      "resources": {
+        "quiz": "/quiz/taxation",
+        "content": "/content/taxation",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Taxation"
+          }
+        ]
+      }
+    },
+    {
+      "id": "Welfare Economics",
+      "domain": "Market Failures",
+      "difficulty": 3,
+      "description": "This is a concept about Welfare Economics in the domain of Market Failures.",
+      "resources": {
+        "quiz": "/quiz/welfare_economics",
+        "content": "/content/welfare_economics",
+        "external_links": [
+          {
+            "title": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Welfare_Economics"
+          }
+        ]
+      }
+    }
+  ],
+  "links": [
+    {
+      "source": "Role of Microeconomics in Society",
+      "target": "Definition and Scope of Microeconomics",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Definition and Scope of Microeconomics",
+      "target": "Role of Microeconomics in Society",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Law of Supply",
+      "target": "Law of Demand",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Equilibrium Price and Quantity",
+      "target": "Law of Demand",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Shifts in Demand and Supply",
+      "target": "Law of Demand",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Price Elasticity of Demand",
+      "target": "Law of Demand",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Price Elasticity of Supply",
+      "target": "Law of Demand",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Consumer Surplus",
+      "target": "Law of Demand",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Producer Surplus",
+      "target": "Law of Demand",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Law of Demand",
+      "target": "Law of Supply",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Equilibrium Price and Quantity",
+      "target": "Law of Supply",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Shifts in Demand and Supply",
+      "target": "Law of Supply",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Price Elasticity of Demand",
+      "target": "Law of Supply",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Price Elasticity of Supply",
+      "target": "Law of Supply",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Consumer Surplus",
+      "target": "Law of Supply",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Producer Surplus",
+      "target": "Law of Supply",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Law of Demand",
+      "target": "Equilibrium Price and Quantity",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Law of Supply",
+      "target": "Equilibrium Price and Quantity",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Shifts in Demand and Supply",
+      "target": "Equilibrium Price and Quantity",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Price Elasticity of Demand",
+      "target": "Equilibrium Price and Quantity",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Price Elasticity of Supply",
+      "target": "Equilibrium Price and Quantity",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Consumer Surplus",
+      "target": "Equilibrium Price and Quantity",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Producer Surplus",
+      "target": "Equilibrium Price and Quantity",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Law of Demand",
+      "target": "Shifts in Demand and Supply",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Law of Supply",
+      "target": "Shifts in Demand and Supply",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Equilibrium Price and Quantity",
+      "target": "Shifts in Demand and Supply",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Price Elasticity of Demand",
+      "target": "Shifts in Demand and Supply",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Price Elasticity of Supply",
+      "target": "Shifts in Demand and Supply",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Consumer Surplus",
+      "target": "Shifts in Demand and Supply",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Producer Surplus",
+      "target": "Shifts in Demand and Supply",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Law of Demand",
+      "target": "Price Elasticity of Demand",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Law of Supply",
+      "target": "Price Elasticity of Demand",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Equilibrium Price and Quantity",
+      "target": "Price Elasticity of Demand",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Shifts in Demand and Supply",
+      "target": "Price Elasticity of Demand",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Price Elasticity of Supply",
+      "target": "Price Elasticity of Demand",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Consumer Surplus",
+      "target": "Price Elasticity of Demand",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Law of Demand",
+      "target": "Price Elasticity of Supply",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Law of Supply",
+      "target": "Price Elasticity of Supply",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Equilibrium Price and Quantity",
+      "target": "Price Elasticity of Supply",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Shifts in Demand and Supply",
+      "target": "Price Elasticity of Supply",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Price Elasticity of Demand",
+      "target": "Price Elasticity of Supply",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Producer Surplus",
+      "target": "Price Elasticity of Supply",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Law of Demand",
+      "target": "Consumer Surplus",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Law of Supply",
+      "target": "Consumer Surplus",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Equilibrium Price and Quantity",
+      "target": "Consumer Surplus",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Shifts in Demand and Supply",
+      "target": "Consumer Surplus",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Price Elasticity of Demand",
+      "target": "Consumer Surplus",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Producer Surplus",
+      "target": "Consumer Surplus",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Law of Demand",
+      "target": "Producer Surplus",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Law of Supply",
+      "target": "Producer Surplus",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Equilibrium Price and Quantity",
+      "target": "Producer Surplus",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Shifts in Demand and Supply",
+      "target": "Producer Surplus",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Price Elasticity of Supply",
+      "target": "Producer Surplus",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Consumer Surplus",
+      "target": "Producer Surplus",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Marginal Utility",
+      "target": "Total Utility",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Budget Constraints",
+      "target": "Total Utility",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Indifference Curves",
+      "target": "Total Utility",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Consumer Choice Optimization",
+      "target": "Total Utility",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Income Effect",
+      "target": "Total Utility",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Total Utility",
+      "target": "Marginal Utility",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Budget Constraints",
+      "target": "Marginal Utility",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Indifference Curves",
+      "target": "Marginal Utility",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Consumer Choice Optimization",
+      "target": "Marginal Utility",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Substitution Effect",
+      "target": "Marginal Utility",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Income Effect",
+      "target": "Marginal Utility",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Total Utility",
+      "target": "Budget Constraints",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Marginal Utility",
+      "target": "Budget Constraints",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Consumer Choice Optimization",
+      "target": "Budget Constraints",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Total Utility",
+      "target": "Indifference Curves",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Marginal Utility",
+      "target": "Indifference Curves",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Consumer Choice Optimization",
+      "target": "Indifference Curves",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Income Effect",
+      "target": "Indifference Curves",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Total Utility",
+      "target": "Consumer Choice Optimization",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Marginal Utility",
+      "target": "Consumer Choice Optimization",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Budget Constraints",
+      "target": "Consumer Choice Optimization",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Indifference Curves",
+      "target": "Consumer Choice Optimization",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Marginal Utility",
+      "target": "Substitution Effect",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Income Effect",
+      "target": "Substitution Effect",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Total Utility",
+      "target": "Income Effect",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Marginal Utility",
+      "target": "Income Effect",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Indifference Curves",
+      "target": "Income Effect",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Substitution Effect",
+      "target": "Income Effect",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Short Run Production",
+      "target": "Production Function",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Long Run Production",
+      "target": "Production Function",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Fixed Costs",
+      "target": "Production Function",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Variable Costs",
+      "target": "Production Function",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Total Costs",
+      "target": "Production Function",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Average Costs",
+      "target": "Production Function",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Marginal Costs",
+      "target": "Production Function",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Economies of Scale",
+      "target": "Production Function",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Diseconomies of Scale",
+      "target": "Production Function",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Production Function",
+      "target": "Short Run Production",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Long Run Production",
+      "target": "Short Run Production",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Fixed Costs",
+      "target": "Short Run Production",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Variable Costs",
+      "target": "Short Run Production",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Total Costs",
+      "target": "Short Run Production",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Average Costs",
+      "target": "Short Run Production",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Marginal Costs",
+      "target": "Short Run Production",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Diseconomies of Scale",
+      "target": "Short Run Production",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Production Function",
+      "target": "Long Run Production",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Short Run Production",
+      "target": "Long Run Production",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Fixed Costs",
+      "target": "Long Run Production",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Variable Costs",
+      "target": "Long Run Production",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Total Costs",
+      "target": "Long Run Production",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Average Costs",
+      "target": "Long Run Production",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Marginal Costs",
+      "target": "Long Run Production",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Economies of Scale",
+      "target": "Long Run Production",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Diseconomies of Scale",
+      "target": "Long Run Production",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Variable Costs",
+      "target": "Law of Diminishing Returns",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Production Function",
+      "target": "Fixed Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Short Run Production",
+      "target": "Fixed Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Long Run Production",
+      "target": "Fixed Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Variable Costs",
+      "target": "Fixed Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Total Costs",
+      "target": "Fixed Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Average Costs",
+      "target": "Fixed Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Marginal Costs",
+      "target": "Fixed Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Economies of Scale",
+      "target": "Fixed Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Diseconomies of Scale",
+      "target": "Fixed Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Production Function",
+      "target": "Variable Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Short Run Production",
+      "target": "Variable Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Long Run Production",
+      "target": "Variable Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Law of Diminishing Returns",
+      "target": "Variable Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Fixed Costs",
+      "target": "Variable Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Total Costs",
+      "target": "Variable Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Average Costs",
+      "target": "Variable Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Marginal Costs",
+      "target": "Variable Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Economies of Scale",
+      "target": "Variable Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Diseconomies of Scale",
+      "target": "Variable Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Production Function",
+      "target": "Total Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Short Run Production",
+      "target": "Total Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Long Run Production",
+      "target": "Total Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Fixed Costs",
+      "target": "Total Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Variable Costs",
+      "target": "Total Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Average Costs",
+      "target": "Total Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Marginal Costs",
+      "target": "Total Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Economies of Scale",
+      "target": "Total Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Diseconomies of Scale",
+      "target": "Total Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Production Function",
+      "target": "Average Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Short Run Production",
+      "target": "Average Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Long Run Production",
+      "target": "Average Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Fixed Costs",
+      "target": "Average Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Variable Costs",
+      "target": "Average Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Total Costs",
+      "target": "Average Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Marginal Costs",
+      "target": "Average Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Economies of Scale",
+      "target": "Average Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Diseconomies of Scale",
+      "target": "Average Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Production Function",
+      "target": "Marginal Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Short Run Production",
+      "target": "Marginal Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Long Run Production",
+      "target": "Marginal Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Fixed Costs",
+      "target": "Marginal Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Variable Costs",
+      "target": "Marginal Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Total Costs",
+      "target": "Marginal Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Average Costs",
+      "target": "Marginal Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Economies of Scale",
+      "target": "Marginal Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Diseconomies of Scale",
+      "target": "Marginal Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Production Function",
+      "target": "Economies of Scale",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Long Run Production",
+      "target": "Economies of Scale",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Fixed Costs",
+      "target": "Economies of Scale",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Variable Costs",
+      "target": "Economies of Scale",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Total Costs",
+      "target": "Economies of Scale",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Average Costs",
+      "target": "Economies of Scale",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Marginal Costs",
+      "target": "Economies of Scale",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Diseconomies of Scale",
+      "target": "Economies of Scale",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Production Function",
+      "target": "Diseconomies of Scale",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Short Run Production",
+      "target": "Diseconomies of Scale",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Long Run Production",
+      "target": "Diseconomies of Scale",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Fixed Costs",
+      "target": "Diseconomies of Scale",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Variable Costs",
+      "target": "Diseconomies of Scale",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Total Costs",
+      "target": "Diseconomies of Scale",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Average Costs",
+      "target": "Diseconomies of Scale",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Marginal Costs",
+      "target": "Diseconomies of Scale",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Economies of Scale",
+      "target": "Diseconomies of Scale",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Monopoly",
+      "target": "Perfect Competition",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Market Power",
+      "target": "Perfect Competition",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Price Setting",
+      "target": "Perfect Competition",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Monopolistic Competition",
+      "target": "Perfect Competition",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Product Differentiation",
+      "target": "Perfect Competition",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Oligopoly",
+      "target": "Perfect Competition",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Game Theory",
+      "target": "Perfect Competition",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Perfect Competition",
+      "target": "Monopoly",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Market Power",
+      "target": "Monopoly",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Price Setting",
+      "target": "Monopoly",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Monopolistic Competition",
+      "target": "Monopoly",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Product Differentiation",
+      "target": "Monopoly",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Oligopoly",
+      "target": "Monopoly",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Game Theory",
+      "target": "Monopoly",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Perfect Competition",
+      "target": "Market Power",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Monopoly",
+      "target": "Market Power",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Price Setting",
+      "target": "Market Power",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Oligopoly",
+      "target": "Market Power",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Perfect Competition",
+      "target": "Price Setting",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Monopoly",
+      "target": "Price Setting",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Market Power",
+      "target": "Price Setting",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Monopolistic Competition",
+      "target": "Price Setting",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Product Differentiation",
+      "target": "Price Setting",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Oligopoly",
+      "target": "Price Setting",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Game Theory",
+      "target": "Price Setting",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Perfect Competition",
+      "target": "Monopolistic Competition",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Monopoly",
+      "target": "Monopolistic Competition",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Price Setting",
+      "target": "Monopolistic Competition",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Product Differentiation",
+      "target": "Monopolistic Competition",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Oligopoly",
+      "target": "Monopolistic Competition",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Game Theory",
+      "target": "Monopolistic Competition",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Perfect Competition",
+      "target": "Product Differentiation",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Monopoly",
+      "target": "Product Differentiation",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Price Setting",
+      "target": "Product Differentiation",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Monopolistic Competition",
+      "target": "Product Differentiation",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Oligopoly",
+      "target": "Product Differentiation",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Perfect Competition",
+      "target": "Oligopoly",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Monopoly",
+      "target": "Oligopoly",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Market Power",
+      "target": "Oligopoly",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Price Setting",
+      "target": "Oligopoly",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Monopolistic Competition",
+      "target": "Oligopoly",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Product Differentiation",
+      "target": "Oligopoly",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Game Theory",
+      "target": "Oligopoly",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Perfect Competition",
+      "target": "Game Theory",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Monopoly",
+      "target": "Game Theory",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Price Setting",
+      "target": "Game Theory",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Monopolistic Competition",
+      "target": "Game Theory",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Oligopoly",
+      "target": "Game Theory",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Capital Markets",
+      "target": "Labor Markets",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Land Markets",
+      "target": "Labor Markets",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Natural Resources",
+      "target": "Labor Markets",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Wage Determination",
+      "target": "Labor Markets",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Human Capital",
+      "target": "Labor Markets",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Labor Markets",
+      "target": "Capital Markets",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Land Markets",
+      "target": "Capital Markets",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Natural Resources",
+      "target": "Capital Markets",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Wage Determination",
+      "target": "Capital Markets",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Human Capital",
+      "target": "Capital Markets",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Labor Markets",
+      "target": "Land Markets",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Capital Markets",
+      "target": "Land Markets",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Natural Resources",
+      "target": "Land Markets",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Labor Markets",
+      "target": "Natural Resources",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Capital Markets",
+      "target": "Natural Resources",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Land Markets",
+      "target": "Natural Resources",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Labor Markets",
+      "target": "Wage Determination",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Capital Markets",
+      "target": "Wage Determination",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Human Capital",
+      "target": "Wage Determination",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Labor Markets",
+      "target": "Human Capital",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Capital Markets",
+      "target": "Human Capital",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Wage Determination",
+      "target": "Human Capital",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Negative Externalities",
+      "target": "Positive Externalities",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Public Goods",
+      "target": "Positive Externalities",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Common Resources",
+      "target": "Positive Externalities",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Asymmetric Information",
+      "target": "Positive Externalities",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Taxation",
+      "target": "Positive Externalities",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Welfare Economics",
+      "target": "Positive Externalities",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Positive Externalities",
+      "target": "Negative Externalities",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Public Goods",
+      "target": "Negative Externalities",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Common Resources",
+      "target": "Negative Externalities",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Asymmetric Information",
+      "target": "Negative Externalities",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Taxation",
+      "target": "Negative Externalities",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Welfare Economics",
+      "target": "Negative Externalities",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Positive Externalities",
+      "target": "Public Goods",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Negative Externalities",
+      "target": "Public Goods",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Common Resources",
+      "target": "Public Goods",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Government Regulation",
+      "target": "Public Goods",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Taxation",
+      "target": "Public Goods",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Welfare Economics",
+      "target": "Public Goods",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Positive Externalities",
+      "target": "Common Resources",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Negative Externalities",
+      "target": "Common Resources",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Public Goods",
+      "target": "Common Resources",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Welfare Economics",
+      "target": "Common Resources",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Positive Externalities",
+      "target": "Asymmetric Information",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Negative Externalities",
+      "target": "Asymmetric Information",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Public Goods",
+      "target": "Government Regulation",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Taxation",
+      "target": "Government Regulation",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Positive Externalities",
+      "target": "Taxation",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Negative Externalities",
+      "target": "Taxation",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Public Goods",
+      "target": "Taxation",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Government Regulation",
+      "target": "Taxation",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Welfare Economics",
+      "target": "Taxation",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Positive Externalities",
+      "target": "Welfare Economics",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Negative Externalities",
+      "target": "Welfare Economics",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Public Goods",
+      "target": "Welfare Economics",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Common Resources",
+      "target": "Welfare Economics",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Taxation",
+      "target": "Welfare Economics",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Production Function",
+      "target": "Marginal Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Production Function",
+      "target": "Total Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Production Function",
+      "target": "Variable Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Production Function",
+      "target": "Fixed Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Production Function",
+      "target": "Economies of Scale",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Production Function",
+      "target": "Diseconomies of Scale",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Production Function",
+      "target": "Law of Diminishing Returns",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Production Function",
+      "target": "Short Run Production",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Production Function",
+      "target": "Long Run Production",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Production Function",
+      "target": "Average Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Marginal Costs",
+      "target": "Total Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Variable Costs",
+      "target": "Total Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Fixed Costs",
+      "target": "Total Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Economies of Scale",
+      "target": "Average Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Diseconomies of Scale",
+      "target": "Average Costs",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Law of Diminishing Returns",
+      "target": "Short Run Production",
+      "type": "prerequisite"
+    },
+    {
+      "source": "Short Run Production",
+      "target": "Long Run Production",
+      "type": "prerequisite"
+    },
+    {
+      "source": "production_function",
+      "target": "marginal_costs",
+      "type": "relationship"
+    },
+    {
+      "source": "production_function",
+      "target": "total_costs",
+      "type": "relationship"
+    },
+    {
+      "source": "production_function",
+      "target": "variable_costs",
+      "type": "relationship"
+    },
+    {
+      "source": "production_function",
+      "target": "fixed_costs",
+      "type": "relationship"
+    },
+    {
+      "source": "production_function",
+      "target": "short_run",
+      "type": "relationship"
+    },
+    {
+      "source": "production_function",
+      "target": "long_run",
+      "type": "relationship"
+    },
+    {
+      "source": "marginal_costs",
+      "target": "total_costs",
+      "type": "relationship"
+    },
+    {
+      "source": "marginal_costs",
+      "target": "average_costs",
+      "type": "relationship"
+    },
+    {
+      "source": "marginal_costs",
+      "target": "variable_costs",
+      "type": "relationship"
+    },
+    {
+      "source": "marginal_costs",
+      "target": "economies_scale",
+      "type": "relationship"
+    },
+    {
+      "source": "marginal_costs",
+      "target": "diseconomies_scale",
+      "type": "relationship"
+    },
+    {
+      "source": "total_costs",
+      "target": "fixed_costs",
+      "type": "relationship"
+    },
+    {
+      "source": "total_costs",
+      "target": "variable_costs",
+      "type": "relationship"
+    },
+    {
+      "source": "total_costs",
+      "target": "average_costs",
+      "type": "relationship"
+    },
+    {
+      "source": "total_costs",
+      "target": "short_run",
+      "type": "relationship"
+    },
+    {
+      "source": "total_costs",
+      "target": "long_run",
+      "type": "relationship"
+    },
+    {
+      "source": "variable_costs",
+      "target": "fixed_costs",
+      "type": "relationship"
+    },
+    {
+      "source": "variable_costs",
+      "target": "average_costs",
+      "type": "relationship"
+    },
+    {
+      "source": "variable_costs",
+      "target": "short_run",
+      "type": "relationship"
+    },
+    {
+      "source": "fixed_costs",
+      "target": "average_costs",
+      "type": "relationship"
+    },
+    {
+      "source": "fixed_costs",
+      "target": "long_run",
+      "type": "relationship"
+    },
+    {
+      "source": "economies_scale",
+      "target": "diseconomies_scale",
+      "type": "relationship"
+    },
+    {
+      "source": "economies_scale",
+      "target": "long_run",
+      "type": "relationship"
+    },
+    {
+      "source": "economies_scale",
+      "target": "average_costs",
+      "type": "relationship"
+    },
+    {
+      "source": "diseconomies_scale",
+      "target": "long_run",
+      "type": "relationship"
+    },
+    {
+      "source": "diseconomies_scale",
+      "target": "average_costs",
+      "type": "relationship"
+    },
+    {
+      "source": "diminishing_returns",
+      "target": "short_run",
+      "type": "relationship"
+    },
+    {
+      "source": "diminishing_returns",
+      "target": "marginal_costs",
+      "type": "relationship"
+    },
+    {
+      "source": "diminishing_returns",
+      "target": "production_function",
+      "type": "relationship"
+    },
+    {
+      "source": "short_run",
+      "target": "long_run",
+      "type": "relationship"
+    },
+    {
+      "source": "short_run",
+      "target": "average_costs",
+      "type": "relationship"
+    },
+    {
+      "source": "long_run",
+      "target": "average_costs",
+      "type": "relationship"
+    }
+  ]
+}
