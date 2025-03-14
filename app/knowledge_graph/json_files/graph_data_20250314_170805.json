@@ -1,0 +1,356 @@
+{
+  "nodes": [
+    {
+      "id": "Module 1: Python Basics",
+      "type": "module",
+      "difficulty": 1,
+      "description": "Module 1: Python Basics",
+      "degree": 3,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Variables",
+      "type": "concept",
+      "module": "Module 1: Python Basics",
+      "difficulty": 1,
+      "description": "Concept: Variables",
+      "degree": 2,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Data Types",
+      "type": "concept",
+      "module": "Module 1: Python Basics",
+      "difficulty": 1,
+      "description": "Concept: Data Types",
+      "degree": 3,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Control Flow",
+      "type": "concept",
+      "module": "Module 1: Python Basics",
+      "difficulty": 1,
+      "description": "Concept: Control Flow",
+      "degree": 3,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Module 2: Functions",
+      "type": "module",
+      "difficulty": 2,
+      "description": "Module 2: Functions",
+      "degree": 3,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Function Definition",
+      "type": "concept",
+      "module": "Module 2: Functions",
+      "difficulty": 2,
+      "description": "Concept: Function Definition",
+      "degree": 3,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Parameters",
+      "type": "concept",
+      "module": "Module 2: Functions",
+      "difficulty": 2,
+      "description": "Concept: Parameters",
+      "degree": 3,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Return Values",
+      "type": "concept",
+      "module": "Module 2: Functions",
+      "difficulty": 2,
+      "description": "Concept: Return Values",
+      "degree": 3,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Module 3: Data Structures",
+      "type": "module",
+      "difficulty": 3,
+      "description": "Module 3: Data Structures",
+      "degree": 3,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Lists",
+      "type": "concept",
+      "module": "Module 3: Data Structures",
+      "difficulty": 3,
+      "description": "Concept: Lists",
+      "degree": 3,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Dictionaries",
+      "type": "concept",
+      "module": "Module 3: Data Structures",
+      "difficulty": 3,
+      "description": "Concept: Dictionaries",
+      "degree": 3,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Tuples",
+      "type": "concept",
+      "module": "Module 3: Data Structures",
+      "difficulty": 3,
+      "description": "Concept: Tuples",
+      "degree": 2,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    }
+  ],
+  "links": [
+    {
+      "source": "Module 1: Python Basics",
+      "target": "Variables",
+      "type": "module_concept",
+      "strength": 1,
+      "metadata": {
+        "semantic_type": "module_concept"
+      }
+    },
+    {
+      "source": "Module 1: Python Basics",
+      "target": "Data Types",
+      "type": "module_concept",
+      "strength": 1,
+      "metadata": {
+        "semantic_type": "module_concept"
+      }
+    },
+    {
+      "source": "Module 1: Python Basics",
+      "target": "Control Flow",
+      "type": "module_concept",
+      "strength": 1,
+      "metadata": {
+        "semantic_type": "module_concept"
+      }
+    },
+    {
+      "source": "Module 2: Functions",
+      "target": "Function Definition",
+      "type": "module_concept",
+      "strength": 1,
+      "metadata": {
+        "semantic_type": "module_concept"
+      }
+    },
+    {
+      "source": "Module 2: Functions",
+      "target": "Parameters",
+      "type": "module_concept",
+      "strength": 1,
+      "metadata": {
+        "semantic_type": "module_concept"
+      }
+    },
+    {
+      "source": "Module 2: Functions",
+      "target": "Return Values",
+      "type": "module_concept",
+      "strength": 1,
+      "metadata": {
+        "semantic_type": "module_concept"
+      }
+    },
+    {
+      "source": "Module 3: Data Structures",
+      "target": "Lists",
+      "type": "module_concept",
+      "strength": 1,
+      "metadata": {
+        "semantic_type": "module_concept"
+      }
+    },
+    {
+      "source": "Module 3: Data Structures",
+      "target": "Dictionaries",
+      "type": "module_concept",
+      "strength": 1,
+      "metadata": {
+        "semantic_type": "module_concept"
+      }
+    },
+    {
+      "source": "Module 3: Data Structures",
+      "target": "Tuples",
+      "type": "module_concept",
+      "strength": 1,
+      "metadata": {
+        "semantic_type": "module_concept"
+      }
+    },
+    {
+      "source": "Variables",
+      "target": "Data Types",
+      "type": "prerequisite",
+      "strength": 3,
+      "description": "Variables is a prerequisite for Data Types",
+      "metadata": {
+        "semantic_type": "prerequisite"
+      }
+    },
+    {
+      "source": "Data Types",
+      "target": "Control Flow",
+      "type": "prerequisite",
+      "strength": 3,
+      "description": "Data Types is a prerequisite for Control Flow",
+      "metadata": {
+        "semantic_type": "prerequisite"
+      }
+    },
+    {
+      "source": "Function Definition",
+      "target": "Parameters",
+      "type": "prerequisite",
+      "strength": 3,
+      "description": "Function Definition is a prerequisite for Parameters",
+      "metadata": {
+        "semantic_type": "prerequisite"
+      }
+    },
+    {
+      "source": "Parameters",
+      "target": "Return Values",
+      "type": "prerequisite",
+      "strength": 3,
+      "description": "Parameters is a prerequisite for Return Values",
+      "metadata": {
+        "semantic_type": "prerequisite"
+      }
+    },
+    {
+      "source": "Lists",
+      "target": "Dictionaries",
+      "type": "prerequisite",
+      "strength": 3,
+      "description": "Lists is a prerequisite for Dictionaries",
+      "metadata": {
+        "semantic_type": "prerequisite"
+      }
+    },
+    {
+      "source": "Dictionaries",
+      "target": "Tuples",
+      "type": "prerequisite",
+      "strength": 3,
+      "description": "Dictionaries is a prerequisite for Tuples",
+      "metadata": {
+        "semantic_type": "prerequisite"
+      }
+    },
+    {
+      "source": "Control Flow",
+      "target": "Function Definition",
+      "type": "builds_on",
+      "strength": 2,
+      "description": "Function Definition builds on knowledge from Control Flow",
+      "metadata": {
+        "semantic_type": "builds_on"
+      }
+    },
+    {
+      "source": "Return Values",
+      "target": "Lists",
+      "type": "builds_on",
+      "strength": 2,
+      "description": "Lists builds on knowledge from Return Values",
+      "metadata": {
+        "semantic_type": "builds_on"
+      }
+    }
+  ],
+  "metadata": {
+    "timestamp": "2025-03-14T17:08:05.929298",
+    "node_count": 12,
+    "link_count": 17,
+    "modules": [
+      "Module 1: Python Basics",
+      "Module 2: Functions",
+      "Module 3: Data Structures"
+    ],
+    "course_title": "Introduction to Python",
+    "generated_at": "2025-03-14T17:08:05.929201",
+    "validation_status": "in_progress",
+    "generator": "GraphGenerator",
+    "node_types": {
+      "module": 3,
+      "concept": 9
+    },
+    "link_types": {
+      "module_concept": 9,
+      "prerequisite": 6,
+      "builds_on": 2
+    },
+    "connectivity": {
+      "average_degree": 2.8333333333333335,
+      "density": 0.25757575757575757,
+      "max_degree": 3,
+      "isolated_nodes": 0
+    },
+    "stats": {
+      "total_nodes": 12,
+      "total_links": 17,
+      "average_degree": 2.8333333333333335,
+      "validated_links": 0,
+      "high_confidence_links": 0
+    }
+  }
+}

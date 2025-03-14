@@ -1,0 +1,61 @@
+Course Title: Principles of Microeconomics
+
+Course Description:
+This course introduces students to the fundamental principles of microeconomics, 
+focusing on the behavior of individuals, firms, and markets. Students will learn about 
+supply and demand, consumer theory, production theory, market structures, and market failures.
+
+Learning Outcomes:
+- Understand how markets operate and how prices are determined
+- Analyze consumer behavior and decision-making processes
+- Explain how firms make production decisions
+- Compare different market structures and their implications
+- Evaluate market failures and potential policy solutions
+
+Prerequisites:
+- Basic understanding of mathematics (algebra)
+- Introduction to Economics (recommended but not required)
+
+Modules:
+
+1. Fundamentals of Economics
+   - Scarcity and Choice
+   - Opportunity Cost
+   - Production Possibilities Frontier
+   - Comparative Advantage
+   - Economic Systems
+
+2. Supply and Demand
+   - Demand Curves
+   - Supply Curves
+   - Market Equilibrium
+   - Price Elasticity
+   - Consumer and Producer Surplus
+
+3. Consumer Theory
+   - Utility Maximization
+   - Budget Constraints
+   - Indifference Curves
+   - Income and Substitution Effects
+   - Consumer Choice
+
+4. Production Theory
+   - Production Functions
+   - Cost Curves
+   - Profit Maximization
+   - Short-run vs. Long-run Decisions
+   - Economies of Scale
+
+5. Market Structures
+   - Perfect Competition
+   - Monopoly
+   - Monopolistic Competition
+   - Oligopoly
+   - Game Theory
+
+6. Market Failures
+   - Externalities
+   - Public Goods
+   - Common Resources
+   - Information Asymmetry
+   - Government Regulation 

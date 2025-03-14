@@ -1,0 +1,531 @@
+{
+  "Variables:Data Types:prerequisite": {
+    "confidence": 0.9,
+    "reasoning": "Understanding variables is fundamental to grasping data types, as variables hold values defined by their types.",
+    "evidence": [
+      "Programming language documentation",
+      "Educational resources on data types"
+    ],
+    "bidirectional": false,
+    "semantic_type": "prerequisite",
+    "common_misconceptions": [
+      "Variables are the same as data types",
+      "Data types can be used without understanding variables"
+    ],
+    "historical_context": ""
+  },
+  "Data Types:Control Flow:prerequisite": {
+    "confidence": 0.85,
+    "reasoning": "Data types are essential for understanding control flow, as they determine how data is processed in conditional statements and loops.",
+    "evidence": [
+      "Programming tutorials on control structures",
+      "Books on programming fundamentals"
+    ],
+    "bidirectional": false,
+    "semantic_type": "prerequisite",
+    "common_misconceptions": [
+      "Control flow does not depend on data types",
+      "Any data type can be used interchangeably in control flow"
+    ],
+    "historical_context": ""
+  },
+  "Function Definition:Parameters:prerequisite": {
+    "confidence": 0.9,
+    "reasoning": "Function definitions inherently require parameters, as they define the inputs required for the function to operate.",
+    "evidence": [
+      "Documentation on function syntax",
+      "Programming language specifications"
+    ],
+    "bidirectional": false,
+    "semantic_type": "prerequisite",
+    "common_misconceptions": [
+      "Functions can exist without parameters",
+      "Parameters are optional for every function"
+    ],
+    "historical_context": ""
+  },
+  "Parameters:Return Values:prerequisite": {
+    "confidence": 0.8,
+    "reasoning": "Parameters are inputs to functions, and return values are outputs; thus, understanding parameters is necessary to know what a function returns.",
+    "evidence": [
+      "Software development courses",
+      "Books on function design"
+    ],
+    "bidirectional": false,
+    "semantic_type": "prerequisite",
+    "common_misconceptions": [
+      "Return values can be understood without knowing parameters",
+      "All functions have return values regardless of parameters"
+    ],
+    "historical_context": ""
+  },
+  "Lists:Dictionaries:prerequisite": {
+    "confidence": 0.75,
+    "reasoning": "Lists and dictionaries are both data structures; understanding lists provides a foundation for understanding dictionaries, but they serve different purposes.",
+    "evidence": [
+      "Data structure textbooks",
+      "Online programming courses on data types"
+    ],
+    "bidirectional": false,
+    "semantic_type": "prerequisite",
+    "common_misconceptions": [
+      "Lists and dictionaries are the same",
+      "You can understand dictionaries without knowing about lists"
+    ],
+    "historical_context": ""
+  },
+  "Dictionaries:Tuples:prerequisite": {
+    "confidence": 0.7,
+    "reasoning": "While dictionaries and tuples are both data structures in Python, dictionaries do not directly lead to an understanding of tuples; they serve different purposes.",
+    "evidence": [
+      "Both are data structures",
+      "Dictionaries store key-value pairs, while tuples are ordered collections"
+    ],
+    "bidirectional": false,
+    "semantic_type": "related",
+    "common_misconceptions": [
+      "Tuples are a type of dictionary",
+      "Dictionaries can only contain strings as keys"
+    ],
+    "historical_context": ""
+  },
+  "Control Flow:Function Definition:builds_on": {
+    "confidence": 0.85,
+    "reasoning": "Control flow statements are essential for understanding how functions operate, as they dictate the execution order within function definitions.",
+    "evidence": [
+      "Control flow includes if statements, loops, which are often used within functions"
+    ],
+    "bidirectional": false,
+    "semantic_type": "prerequisite",
+    "common_misconceptions": [
+      "Functions can exist without control flow",
+      "Control flow only applies to loops, not function definitions"
+    ],
+    "historical_context": ""
+  },
+  "Return Values:Lists:builds_on": {
+    "confidence": 0.6,
+    "reasoning": "Return values can be of any type, including lists, but not all return values are lists, making this relationship less certain.",
+    "evidence": [
+      "Functions can return various data types, including integers, strings, and lists"
+    ],
+    "bidirectional": false,
+    "semantic_type": "example_of",
+    "common_misconceptions": [
+      "All functions return lists",
+      "Return values are always mutable"
+    ],
+    "historical_context": ""
+  },
+  "Scarcity and Choice:Opportunity Cost:prerequisite": {
+    "confidence": 0.9,
+    "reasoning": "Scarcity leads to the need for choice, which in turn leads to the concept of opportunity cost, making this a fundamental relationship in economics.",
+    "evidence": [
+      "Basic economic principles in textbooks",
+      "Educational resources on economics"
+    ],
+    "bidirectional": false,
+    "semantic_type": "prerequisite",
+    "common_misconceptions": [
+      "Scarcity does not affect choice",
+      "Opportunity cost is only about monetary loss"
+    ],
+    "historical_context": ""
+  },
+  "Opportunity Cost:Production Possibilities Frontier:prerequisite": {
+    "confidence": 0.85,
+    "reasoning": "Understanding opportunity cost is essential to grasping the concept of the Production Possibilities Frontier, as it illustrates the trade-offs involved in production.",
+    "evidence": [
+      "Microeconomic theory studies",
+      "Analysis of PPF graphs"
+    ],
+    "bidirectional": false,
+    "semantic_type": "prerequisite",
+    "common_misconceptions": [
+      "Opportunity cost is irrelevant to production",
+      "PPF only deals with resources, not costs"
+    ],
+    "historical_context": ""
+  },
+  "Production Possibilities Frontier:Comparative Advantage:prerequisite": {
+    "confidence": 0.8,
+    "reasoning": "The Production Possibilities Frontier illustrates the limits of production and trade-offs, which are key to understanding comparative advantage.",
+    "evidence": [
+      "International trade theories",
+      "Economics instructional materials"
+    ],
+    "bidirectional": false,
+    "semantic_type": "prerequisite",
+    "common_misconceptions": [
+      "Comparative advantage only applies in theory",
+      "Production Possibilities Frontier shows absolute advantage"
+    ],
+    "historical_context": ""
+  },
+  "Comparative Advantage:Economic Systems:prerequisite": {
+    "confidence": 0.75,
+    "reasoning": "Comparative advantage is foundational in discussing different economic systems, as it influences how resources are allocated and trade occurs.",
+    "evidence": [
+      "Economic analysis of trade systems",
+      "Comparative economics studies"
+    ],
+    "bidirectional": false,
+    "semantic_type": "prerequisite",
+    "common_misconceptions": [
+      "Economic systems are unrelated to comparative advantage",
+      "All economic systems operate similarly regarding trade"
+    ],
+    "historical_context": ""
+  },
+  "Demand Curves:Supply Curves:prerequisite": {
+    "confidence": 0.7,
+    "reasoning": "Demand curves and supply curves are fundamental concepts in market economics, but their relationship is not strictly prerequisite since they can be analyzed independently.",
+    "evidence": [
+      "Market equilibrium theory",
+      "Principles of microeconomics"
+    ],
+    "bidirectional": false,
+    "semantic_type": "correlated",
+    "common_misconceptions": [
+      "Demand and supply curves represent the same concept",
+      "One can exist without the other in market analysis"
+    ],
+    "historical_context": ""
+  },
+  "Supply Curves:Market Equilibrium:prerequisite": {
+    "confidence": 0.9,
+    "reasoning": "Supply curves are essential for determining the market equilibrium as they illustrate how quantity supplied varies with price.",
+    "evidence": [
+      "The intersection of supply and demand curves determines market equilibrium"
+    ],
+    "bidirectional": false,
+    "semantic_type": "prerequisite",
+    "common_misconceptions": [
+      "Supply curves do not impact market equilibrium",
+      "Market equilibrium can exist without supply curves"
+    ],
+    "historical_context": ""
+  },
+  "Market Equilibrium:Price Elasticity:prerequisite": {
+    "confidence": 0.85,
+    "reasoning": "Market equilibrium provides the necessary conditions to analyze price elasticity, as it reflects how quantity demanded responds to price changes.",
+    "evidence": [
+      "Price elasticity is calculated based on changes in price at equilibrium"
+    ],
+    "bidirectional": false,
+    "semantic_type": "prerequisite",
+    "common_misconceptions": [
+      "Price elasticity is independent of market equilibrium",
+      "Market equilibrium is not related to consumer behavior"
+    ],
+    "historical_context": ""
+  },
+  "Price Elasticity:Consumer and Producer Surplus:prerequisite": {
+    "confidence": 0.8,
+    "reasoning": "Price elasticity affects the calculation of consumer and producer surplus, as it indicates how consumers and producers will react to price changes.",
+    "evidence": [
+      "Changes in price elasticity alter the areas representing consumer and producer surplus on a graph"
+    ],
+    "bidirectional": false,
+    "semantic_type": "prerequisite",
+    "common_misconceptions": [
+      "Consumer and producer surplus can be understood without considering price elasticity",
+      "Price elasticity does not influence surplus calculations"
+    ],
+    "historical_context": ""
+  },
+  "Utility Maximization:Budget Constraints:prerequisite": {
+    "confidence": 0.9,
+    "reasoning": "Utility maximization is inherently tied to budget constraints as consumers allocate their limited resources to maximize satisfaction.",
+    "evidence": [
+      "The consumer equilibrium occurs where the highest utility is achieved given the budget constraint"
+    ],
+    "bidirectional": false,
+    "semantic_type": "prerequisite",
+    "common_misconceptions": [
+      "Utility maximization can occur without considering budget constraints",
+      "Budget constraints do not affect utility maximization"
+    ],
+    "historical_context": ""
+  },
+  "Budget Constraints:Indifference Curves:prerequisite": {
+    "confidence": 0.85,
+    "reasoning": "Budget constraints define the limits within which consumers choose their optimal combinations of goods represented by indifference curves.",
+    "evidence": [
+      "Indifference curves are tangent to the budget line at the point of consumer maximization"
+    ],
+    "bidirectional": false,
+    "semantic_type": "prerequisite",
+    "common_misconceptions": [
+      "Indifference curves are unrelated to budget constraints",
+      "Consumers can maximize utility without considering their budget"
+    ],
+    "historical_context": ""
+  },
+  "Indifference Curves:Income and Substitution Effects:prerequisite": {
+    "confidence": 0.9,
+    "reasoning": "Indifference curves illustrate consumer preferences, which are essential for understanding how income and substitution effects work.",
+    "evidence": [
+      "Indifference curves help explain how consumers substitute between goods when income changes."
+    ],
+    "bidirectional": false,
+    "semantic_type": "prerequisite",
+    "common_misconceptions": [
+      "Indifference curves are the same as demand curves",
+      "Income and substitution effects do not relate to consumer preferences"
+    ],
+    "historical_context": ""
+  },
+  "Income and Substitution Effects:Consumer Choice:prerequisite": {
+    "confidence": 0.95,
+    "reasoning": "Income and substitution effects directly influence consumer choice by affecting how consumers allocate their budget among different goods.",
+    "evidence": [
+      "Changes in price lead to shifts in consumer choice based on these effects."
+    ],
+    "bidirectional": false,
+    "semantic_type": "prerequisite",
+    "common_misconceptions": [
+      "Consumer choice is solely based on price",
+      "Income and substitution effects are independent of each other"
+    ],
+    "historical_context": ""
+  },
+  "Production Functions:Cost Curves:prerequisite": {
+    "confidence": 0.85,
+    "reasoning": "Production functions describe the relationship between inputs and outputs, which are fundamental for deriving cost curves.",
+    "evidence": [
+      "Cost curves are derived from the efficiency of production as defined by production functions."
+    ],
+    "bidirectional": false,
+    "semantic_type": "prerequisite",
+    "common_misconceptions": [
+      "Production functions are irrelevant to cost considerations",
+      "Cost curves can be determined without understanding production functions"
+    ],
+    "historical_context": ""
+  },
+  "Cost Curves:Profit Maximization:prerequisite": {
+    "confidence": 0.9,
+    "reasoning": "Cost curves are essential for understanding profit maximization, as firms need to know their costs to determine optimal output levels.",
+    "evidence": [
+      "Profit maximization occurs where marginal cost equals marginal revenue, which relies on cost curves."
+    ],
+    "bidirectional": false,
+    "semantic_type": "prerequisite",
+    "common_misconceptions": [
+      "Profit maximization can be achieved without knowing cost structures",
+      "Cost curves do not impact business decisions"
+    ],
+    "historical_context": ""
+  },
+  "Profit Maximization:Short-run vs. Long-run Decisions:prerequisite": {
+    "confidence": 0.8,
+    "reasoning": "Profit maximization strategies differ in the short run and long run, making this relationship critical for understanding business decision-making.",
+    "evidence": [
+      "Firms optimize production and pricing differently based on time horizon considerations in response to market conditions."
+    ],
+    "bidirectional": false,
+    "semantic_type": "prerequisite",
+    "common_misconceptions": [
+      "Short-run decisions are identical to long-run decisions",
+      "Profit maximization doesn't change over time"
+    ],
+    "historical_context": ""
+  },
+  "Short-run vs. Long-run Decisions:Economies of Scale:prerequisite": {
+    "confidence": 0.8,
+    "reasoning": "Short-run decisions typically focus on immediate operational efficiencies, while long-run decisions encompass strategic planning that can lead to economies of scale.",
+    "evidence": [
+      "Economies of scale are often realized through long-term investments and planning."
+    ],
+    "bidirectional": false,
+    "semantic_type": "causal",
+    "common_misconceptions": [
+      "Economies of scale only apply in the long run",
+      "Short-run decisions do not impact long-run outcomes"
+    ],
+    "historical_context": ""
+  },
+  "Perfect Competition:Monopoly:prerequisite": {
+    "confidence": 0.7,
+    "reasoning": "Understanding perfect competition is essential to grasp the extreme opposite market structure of monopoly, but transitioning from one to the other is not straightforward.",
+    "evidence": [
+      "Economic theories outline clear distinctions between market structures."
+    ],
+    "bidirectional": false,
+    "semantic_type": "contrast",
+    "common_misconceptions": [
+      "Perfect competition and monopoly are the same",
+      "Monopolies can emerge easily from perfect competition"
+    ],
+    "historical_context": ""
+  },
+  "Monopoly:Monopolistic Competition:prerequisite": {
+    "confidence": 0.65,
+    "reasoning": "Monopoly is a more restricted form of market structure compared to monopolistic competition; understanding one provides insights into the other, but they are fundamentally different.",
+    "evidence": [
+      "Market structure theories explain the characteristics that differentiate monopolies from monopolistic competition."
+    ],
+    "bidirectional": false,
+    "semantic_type": "contrast",
+    "common_misconceptions": [
+      "Monopolistic competition means the absence of monopoly",
+      "All monopolies can transition to monopolistic competition easily"
+    ],
+    "historical_context": ""
+  },
+  "Monopolistic Competition:Oligopoly:prerequisite": {
+    "confidence": 0.6,
+    "reasoning": "Monopolistic competition can lead to oligopoly under certain conditions, but this transition is not universally applicable, making the relationship weaker.",
+    "evidence": [
+      "Market dynamics studies indicate various paths of market evolution."
+    ],
+    "bidirectional": false,
+    "semantic_type": "causal",
+    "common_misconceptions": [
+      "Monopolistic competition and oligopoly are interchangeable",
+      "All markets evolve from monopolistic competition to oligopoly"
+    ],
+    "historical_context": ""
+  },
+  "Oligopoly:Game Theory:prerequisite": {
+    "confidence": 0.75,
+    "reasoning": "Oligopolies often employ game theory to strategize their competitive interactions, making this relationship stronger than others, as game theory is fundamental in analyzing oligopolistic behavior.",
+    "evidence": [
+      "Numerous economic models utilize game theory to explain oligopoly behavior."
+    ],
+    "bidirectional": true,
+    "semantic_type": "application",
+    "common_misconceptions": [
+      "Game theory only applies to perfect competition",
+      "Oligopolies do not require strategy to compete"
+    ],
+    "historical_context": ""
+  },
+  "Externalities:Public Goods:prerequisite": {
+    "confidence": 0.8,
+    "reasoning": "Externalities can affect the provision of public goods, as positive externalities may lead to under-provision while negative externalities can impact funding.",
+    "evidence": [
+      "Externalities can lead to market failures in public goods provision"
+    ],
+    "bidirectional": false,
+    "semantic_type": "influence",
+    "common_misconceptions": [
+      "All externalities are negative",
+      "Public goods do not involve externalities"
+    ],
+    "historical_context": ""
+  },
+  "Public Goods:Common Resources:prerequisite": {
+    "confidence": 0.75,
+    "reasoning": "Public goods can often lead to common resources due to shared usage; however, they are distinct in terms of their accessibility and consumption.",
+    "evidence": [
+      "Public goods are non-excludable, whereas common resources can be depleted"
+    ],
+    "bidirectional": false,
+    "semantic_type": "consequence",
+    "common_misconceptions": [
+      "Public goods and common resources are the same",
+      "Common resources are always free to access"
+    ],
+    "historical_context": ""
+  },
+  "Common Resources:Information Asymmetry:prerequisite": {
+    "confidence": 0.7,
+    "reasoning": "Common resources often lead to information asymmetry as users may not have complete information regarding the sustainability of the resource.",
+    "evidence": [
+      "Overfishing is an example of common resources leading to information asymmetry"
+    ],
+    "bidirectional": false,
+    "semantic_type": "causal",
+    "common_misconceptions": [
+      "Information asymmetry only applies to financial markets",
+      "Common resources are always well-managed"
+    ],
+    "historical_context": ""
+  },
+  "Information Asymmetry:Government Regulation:prerequisite": {
+    "confidence": 0.85,
+    "reasoning": "Information asymmetry frequently necessitates government regulation to correct market failures and protect consumers.",
+    "evidence": [
+      "Laws requiring transparency in financial disclosures are examples of regulation due to information asymmetry"
+    ],
+    "bidirectional": false,
+    "semantic_type": "regulatory",
+    "common_misconceptions": [
+      "Government regulation is always negative",
+      "Information asymmetry does not require intervention"
+    ],
+    "historical_context": ""
+  },
+  "Economic Systems:Demand Curves:builds_on": {
+    "confidence": 0.9,
+    "reasoning": "Economic systems are foundational to understanding demand curves, as they dictate how resources are allocated and prices are determined.",
+    "evidence": [
+      "Different economic systems (capitalism, socialism) affect demand curves differently"
+    ],
+    "bidirectional": true,
+    "semantic_type": "foundation",
+    "common_misconceptions": [
+      "Demand curves only apply to one type of economic system",
+      "Economic systems do not influence demand curves"
+    ],
+    "historical_context": ""
+  },
+  "Consumer and Producer Surplus:Utility Maximization:builds_on": {
+    "confidence": 0.85,
+    "reasoning": "Consumer and Producer Surplus are essential concepts in welfare economics that contribute to understanding Utility Maximization, as they reflect the benefits consumers and producers gain from market transactions.",
+    "evidence": [
+      "The welfare economics framework connects surplus to utility maximization."
+    ],
+    "bidirectional": false,
+    "semantic_type": "builds_on",
+    "common_misconceptions": [
+      "Consumer surplus only benefits consumers",
+      "Producer surplus only benefits producers"
+    ],
+    "historical_context": ""
+  },
+  "Consumer Choice:Production Functions:builds_on": {
+    "confidence": 0.7,
+    "reasoning": "Consumer Choice is foundational for understanding Production Functions, as consumer preferences influence the demand side, which in turn affects how production functions are shaped.",
+    "evidence": [
+      "Consumer preferences dictate the types of goods that producers must create."
+    ],
+    "bidirectional": false,
+    "semantic_type": "builds_on",
+    "common_misconceptions": [
+      "Production functions are independent of consumer choice",
+      "Consumer choice does not impact production decisions"
+    ],
+    "historical_context": ""
+  },
+  "Economies of Scale:Perfect Competition:builds_on": {
+    "confidence": 0.75,
+    "reasoning": "Economies of Scale are a key aspect influencing market structures like Perfect Competition, as they affect the cost structures and competitive dynamics within industries.",
+    "evidence": [
+      "Firms in perfect competition can achieve economies of scale, impacting their market behavior."
+    ],
+    "bidirectional": false,
+    "semantic_type": "builds_on",
+    "common_misconceptions": [
+      "Economies of scale only apply to monopolies",
+      "Perfect competition means no economies of scale exist"
+    ],
+    "historical_context": ""
+  },
+  "Game Theory:Externalities:builds_on": {
+    "confidence": 0.65,
+    "reasoning": "Game Theory provides insights into strategic interactions that can lead to Externalities, particularly in situations where individual decisions affect others' utility.",
+    "evidence": [
+      "Game theory models can illustrate how strategic decisions create external effects on third parties."
+    ],
+    "bidirectional": false,
+    "semantic_type": "builds_on",
+    "common_misconceptions": [
+      "Game theory only applies to competitive scenarios",
+      "Externalities are always negative"
+    ],
+    "historical_context": ""
+  }
+}
