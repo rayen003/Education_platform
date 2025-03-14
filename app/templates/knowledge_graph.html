@@ -1,90 +1,675 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Graph Test</title>
+    <title>Business Mathematics Knowledge Graph</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-        #graph {
-            border: 1px solid black;
-            margin: 20px;
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        #graph-container {
+            width: 1000px;
+            height: 700px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #ffffff;
+            margin-right: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        #sidebar {
+            width: 300px;
+            height: 700px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            background-color: #ffffff;
+            overflow-y: auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            display: none;
+        }
+        #sidebar h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .controls {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        button {
+            padding: 10px 18px;
+            margin: 0 5px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .tooltip {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            max-width: 300px;
+            font-size: 14px;
+            pointer-events: none;
+            color: #333;
+        }
+        .tooltip strong {
+            color: #2c3e50;
+            font-size: 16px;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .resource {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .resource h4 {
+            margin: 5px 0;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+        .resource p {
+            color: #555;
+            margin: 8px 0;
+            line-height: 1.4;
+        }
+        .resource a {
+            display: inline-block;
+            margin-top: 8px;
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 4px;
+            background-color: #f0f7ff;
+            transition: background-color 0.2s;
+        }
+        .resource a:hover {
+            background-color: #e1f0ff;
+            text-decoration: none;
+        }
+        .legend {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 0 20px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .module-color {
+            background-color: #3498db;
+        }
+        .concept-color {
+            background-color: #2ecc71;
+        }
+        .prerequisite-link {
+            stroke: #e74c3c;
+            stroke-width: 2px;
+        }
+        .related-link {
+            stroke: #9b59b6;
+            stroke-width: 1.5px;
+        }
+        .part-of-link {
+            stroke: #f39c12;
+            stroke-width: 2px;
+        }
+        #debug-info {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <h1>Graph Test</h1>
-    <div id="graph"></div>
+    <h1>Business Mathematics Knowledge Graph</h1>
+    
+    <div class="controls">
+        <button onclick="resetView()">Reset View</button>
+        <button onclick="toggleLabels()">Toggle Labels</button>
+        <button onclick="closeSidebar()">Close Sidebar</button>
+        <button onclick="toggleDebug()">Toggle Debug Info</button>
+    </div>
+    
+    <div class="container">
+        <div id="graph-container"></div>
+        <div id="sidebar">
+            <h2>Resources</h2>
+            <div id="resource-content"></div>
+        </div>
+    </div>
+    
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color module-color"></div>
+            <span>Module</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color concept-color"></div>
+            <span>Concept</span>
+        </div>
+    </div>
+    
+    <div id="debug-info"></div>
+    
     <script>
+        // Initialize variables
+        let svg, simulation, nodeElements, linkElements, textElements;
+        let showLabels = true;
+        let graphData = null;
+        
+        // Debug function
+        function updateDebugInfo(message) {
+            const debugElement = document.getElementById('debug-info');
+            const timestamp = new Date().toLocaleTimeString();
+            debugElement.innerHTML += `[${timestamp}] ${message}\n`;
+            debugElement.scrollTop = debugElement.scrollHeight;
+            console.log(message);
+        }
+        
+        // Toggle debug info
+        window.toggleDebug = function() {
+            const debugElement = document.getElementById('debug-info');
+            debugElement.style.display = debugElement.style.display === 'none' ? 'block' : 'none';
+        };
+        
         // Create the SVG container
-        const svg = d3.select("#graph")
+        svg = d3.select("#graph-container")
             .append("svg")
-            .attr("width", 800)
-            .attr("height", 600)
-            .style("background-color", "#f8f9fa");
-
+            .attr("width", "100%")
+            .attr("height", "100%");
+            
+        // Add zoom behavior
+        const zoom = d3.zoom()
+            .scaleExtent([0.1, 3])
+            .on("zoom", (event) => {
+                svg.select("g").attr("transform", event.transform);
+            });
+            
+        svg.call(zoom);
+        
+        // Create a group for all elements
+        const g = svg.append("g");
+        
+        // Create tooltip
+        const tooltip = d3.select("body")
+            .append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+            
+        // Get sidebar elements
+        const sidebar = d3.select("#sidebar");
+        const resourceContent = d3.select("#resource-content");
+        
+        updateDebugInfo("Initializing graph visualization...");
+        
         // Load the data
         fetch('/api/knowledge_graph')
-            .then(response => response.json())
+            .then(response => {
+                updateDebugInfo(`Response status: ${response.status}`);
+                return response.json();
+            })
             .then(data => {
-                console.log('Received data:', data);  // Debug log
-
+                updateDebugInfo(`Received data with ${data.nodes ? data.nodes.length : 0} nodes and ${data.links ? data.links.length : 0} links`);
+                console.log('Received data:', data);
+                graphData = data;
+                
+                // Dump the first few nodes and links for debugging
+                if (data.nodes && data.nodes.length > 0) {
+                    updateDebugInfo(`First node: ${JSON.stringify(data.nodes[0])}`);
+                    if (data.nodes.length > 1) {
+                        updateDebugInfo(`Second node: ${JSON.stringify(data.nodes[1])}`);
+                    }
+                }
+                
+                if (data.links && data.links.length > 0) {
+                    updateDebugInfo(`First link: ${JSON.stringify(data.links[0])}`);
+                    if (data.links.length > 1) {
+                        updateDebugInfo(`Second link: ${JSON.stringify(data.links[1])}`);
+                    }
+                }
+                
+                if (!data.nodes || !data.links) {
+                    updateDebugInfo("ERROR: Invalid data format - missing nodes or links");
+                    document.getElementById('graph-container').innerHTML = 
+                        '<div style="padding: 20px; color: red;">Error: Invalid graph data format. Missing nodes or links.</div>';
+                    return;
+                }
+                
+                if (data.nodes.length === 0 || data.links.length === 0) {
+                    updateDebugInfo("WARNING: Empty graph data - no nodes or links to display");
+                    document.getElementById('graph-container').innerHTML = 
+                        '<div style="padding: 20px; color: orange;">Warning: No graph data to display. The knowledge graph is empty.</div>';
+                    return;
+                }
+                
                 // Create the force simulation
-                const simulation = d3.forceSimulation(data.nodes)
-                    .force("link", d3.forceLink(data.links).id(d => d.id))
-                    .force("charge", d3.forceManyBody().strength(-200))
-                    .force("center", d3.forceCenter(400, 300));
-
-                // Draw the links
-                const link = svg.append("g")
-                    .attr("class", "links")
-                    .selectAll("line")
-                    .data(data.links)
-                    .enter()
-                    .append("line")
-                    .style("stroke", "#999")
-                    .style("stroke-width", 2);
-
-                // Draw the nodes
-                const node = svg.append("g")
-                    .attr("class", "nodes")
-                    .selectAll("circle")
-                    .data(data.nodes)
-                    .enter()
-                    .append("circle")
-                    .attr("r", 20)
-                    .style("fill", "#69b3a2");
-
-                // Add labels
-                const label = svg.append("g")
-                    .attr("class", "labels")
-                    .selectAll("text")
-                    .data(data.nodes)
-                    .enter()
-                    .append("text")
-                    .text(d => d.name)
-                    .style("text-anchor", "middle")
-                    .style("font-family", "Arial")
-                    .style("font-size", "12px");
-
-                // Update positions on each tick
-                simulation.on("tick", () => {
-                    link
-                        .attr("x1", d => d.source.x)
-                        .attr("y1", d => d.source.y)
-                        .attr("x2", d => d.target.x)
-                        .attr("y2", d => d.target.y);
-
-                    node
-                        .attr("cx", d => d.x)
-                        .attr("cy", d => d.y);
-
-                    label
-                        .attr("x", d => d.x)
-                        .attr("y", d => d.y + 30);
-                });
+                updateDebugInfo("Creating force simulation...");
+                
+                try {
+                    // Make a deep copy of the data to avoid reference issues
+                    const nodes = JSON.parse(JSON.stringify(data.nodes));
+                    const links = JSON.parse(JSON.stringify(data.links));
+                    
+                    // Add fake resources to nodes that don't have them
+                    nodes.forEach(node => {
+                        if (!node.resources) {
+                            node.resources = generateFakeResources(node.id, node.type);
+                        }
+                    });
+                    
+                    // Improve link types for better visualization
+                    links.forEach(link => {
+                        if (!link.type || link.type === "module_prerequisite") {
+                            // Assign more specific link types based on node types
+                            const sourceNode = nodes.find(n => n.id === link.source);
+                            const targetNode = nodes.find(n => n.id === link.target);
+                            
+                            if (sourceNode && targetNode) {
+                                if (sourceNode.type === "module" && targetNode.type === "module") {
+                                    link.type = "prerequisite";
+                                } else if (sourceNode.type === "module" && targetNode.type !== "module") {
+                                    link.type = "part_of";
+                                } else if (targetNode.type === "module" && sourceNode.type !== "module") {
+                                    link.type = "part_of";
+                                } else {
+                                    // Assign a random type for concept-to-concept links to make it more interesting
+                                    const types = ["prerequisite", "related_to", "part_of"];
+                                    link.type = types[Math.floor(Math.random() * types.length)];
+                                }
+                            }
+                        }
+                    });
+                    
+                    updateDebugInfo(`Working with ${nodes.length} nodes and ${links.length} links`);
+                    
+                    // Convert string references to object references for D3
+                    links.forEach((link, index) => {
+                        // Find the source and target nodes
+                        const sourceNode = nodes.find(node => node.id === link.source);
+                        const targetNode = nodes.find(node => node.id === link.target);
+                        
+                        if (!sourceNode) {
+                            updateDebugInfo(`ERROR: Source node not found for link ${index}: ${JSON.stringify(link)}`);
+                        }
+                        if (!targetNode) {
+                            updateDebugInfo(`ERROR: Target node not found for link ${index}: ${JSON.stringify(link)}`);
+                        }
+                        
+                        // Update the link with object references
+                        if (sourceNode && targetNode) {
+                            link.source = sourceNode;
+                            link.target = targetNode;
+                        } else {
+                            updateDebugInfo(`WARNING: Skipping link ${index} due to missing nodes`);
+                        }
+                    });
+                    
+                    // Filter out links with missing nodes
+                    const validLinks = links.filter(link => 
+                        typeof link.source === 'object' && 
+                        typeof link.target === 'object');
+                    
+                    updateDebugInfo(`After processing: ${nodes.length} nodes and ${validLinks.length} valid links`);
+                    
+                    // Create the simulation
+                    updateDebugInfo("Setting up force simulation...");
+                    simulation = d3.forceSimulation(nodes)
+                        .force("link", d3.forceLink(validLinks)
+                            .id(d => d.id)
+                            .distance(d => d.source.type === "module" || d.target.type === "module" ? 150 : 100))
+                        .force("charge", d3.forceManyBody().strength(-400))
+                        .force("center", d3.forceCenter(500, 350))
+                        .force("collision", d3.forceCollide().radius(d => d.type === "module" ? 50 : 30));
+                    
+                    // Draw the links
+                    updateDebugInfo("Drawing links...");
+                    linkElements = g.append("g")
+                        .selectAll("line")
+                        .data(validLinks)
+                        .enter()
+                        .append("line")
+                        .attr("stroke", d => getLinkColor(d.type))
+                        .attr("stroke-opacity", 0.6)
+                        .attr("stroke-width", d => getLinkWidth(d.type))
+                        .attr("stroke-dasharray", d => d.type === "related_to" ? "5,5" : "none");
+                    
+                    // Draw the nodes
+                    updateDebugInfo("Drawing nodes...");
+                    nodeElements = g.append("g")
+                        .selectAll("circle")
+                        .data(nodes)
+                        .enter()
+                        .append("circle")
+                        .attr("r", d => d.type === "module" ? 30 : 15)
+                        .attr("fill", d => d.type === "module" ? "#3498db" : "#2ecc71")
+                        .attr("stroke", "#fff")
+                        .attr("stroke-width", 2)
+                        .call(d3.drag()
+                            .on("start", dragStarted)
+                            .on("drag", dragged)
+                            .on("end", dragEnded));
+                    
+                    // Add text labels
+                    updateDebugInfo("Adding text labels...");
+                    textElements = g.append("g")
+                        .selectAll("text")
+                        .data(nodes)
+                        .enter()
+                        .append("text")
+                        .text(d => d.id)
+                        .attr("font-size", d => d.type === "module" ? "14px" : "12px")
+                        .attr("font-weight", d => d.type === "module" ? "bold" : "normal")
+                        .attr("text-anchor", "middle")
+                        .attr("dy", d => d.type === "module" ? 40 : 30)
+                        .attr("fill", "#333")
+                        .style("pointer-events", "none");
+                    
+                    // Add node interactions
+                    nodeElements
+                        .on("mouseover", function(event, d) {
+                            // Show tooltip
+                            tooltip.transition()
+                                .duration(200)
+                                .style("opacity", 0.9);
+                                
+                            tooltip.html(`
+                                <strong>${d.id}</strong><br>
+                                Type: ${d.type}<br>
+                                Difficulty: ${d.difficulty}<br>
+                                ${d.description ? d.description : ""}
+                            `)
+                            .style("left", (event.pageX + 10) + "px")
+                            .style("top", (event.pageY - 10) + "px");
+                            
+                            // Highlight connected links and nodes
+                            const nodeId = d.id;
+                            
+                            linkElements
+                                .attr("stroke-opacity", l => 
+                                    l.source.id === nodeId || l.target.id === nodeId ? 1 : 0.1);
+                                
+                            nodeElements
+                                .attr("opacity", n => 
+                                    n.id === nodeId || 
+                                    validLinks.some(l => 
+                                        (l.source.id === nodeId && l.target.id === n.id) || 
+                                        (l.target.id === nodeId && l.source.id === n.id)
+                                    ) ? 1 : 0.3);
+                                    
+                            // Highlight connected text
+                            textElements
+                                .attr("opacity", n => 
+                                    n.id === nodeId || 
+                                    validLinks.some(l => 
+                                        (l.source.id === nodeId && l.target.id === n.id) || 
+                                        (l.target.id === nodeId && l.source.id === n.id)
+                                    ) ? 1 : 0.3);
+                        })
+                        .on("mouseout", function() {
+                            // Hide tooltip
+                            tooltip.transition()
+                                .duration(500)
+                                .style("opacity", 0);
+                                
+                            // Reset highlights
+                            linkElements.attr("stroke-opacity", 0.6);
+                            nodeElements.attr("opacity", 1);
+                            textElements.attr("opacity", 1);
+                        })
+                        .on("click", function(event, d) {
+                            // Show resources in sidebar
+                            if (d.resources) {
+                                showResources(d);
+                            }
+                        });
+                    
+                    // Update positions on each tick
+                    updateDebugInfo("Setting up simulation tick handler...");
+                    simulation.on("tick", () => {
+                        linkElements
+                            .attr("x1", d => d.source.x)
+                            .attr("y1", d => d.source.y)
+                            .attr("x2", d => d.target.x)
+                            .attr("y2", d => d.target.y);
+                            
+                        nodeElements
+                            .attr("cx", d => d.x)
+                            .attr("cy", d => d.y);
+                            
+                        textElements
+                            .attr("x", d => d.x)
+                            .attr("y", d => d.y);
+                    });
+                    
+                    updateDebugInfo("Graph visualization setup complete!");
+                } catch (error) {
+                    updateDebugInfo(`ERROR in graph setup: ${error.message}`);
+                    console.error('Error setting up graph:', error);
+                    document.getElementById('graph-container').innerHTML = 
+                        `<div style="padding: 20px; color: red;">Error setting up graph: ${error.message}</div>`;
+                }
             })
             .catch(error => {
+                updateDebugInfo(`ERROR: ${error.message}`);
                 console.error('Error loading graph data:', error);
+                document.getElementById('graph-container').innerHTML = 
+                    '<div style="padding: 20px; color: red;">Error loading graph data. Please check the console for details.</div>';
             });
+        
+        // Helper function to get link color based on type
+        function getLinkColor(type) {
+            switch(type) {
+                case "prerequisite": return "#e74c3c"; // Red
+                case "related_to": return "#9b59b6";   // Purple
+                case "part_of": return "#f39c12";      // Orange
+                default: return "#95a5a6";             // Gray
+            }
+        }
+        
+        // Helper function to get link width based on type
+        function getLinkWidth(type) {
+            switch(type) {
+                case "prerequisite": return 2;
+                case "related_to": return 1.5;
+                case "part_of": return 2;
+                default: return 1;
+            }
+        }
+        
+        // Generate fake resources for nodes that don't have them
+        function generateFakeResources(nodeId, nodeType) {
+            const resourceTypes = ["video", "article", "quiz", "interactive"];
+            const resources = [];
+            
+            // Generate 2-4 resources
+            const count = 2 + Math.floor(Math.random() * 3);
+            
+            for (let i = 0; i < count; i++) {
+                const type = resourceTypes[Math.floor(Math.random() * resourceTypes.length)];
+                resources.push({
+                    title: `${getResourceTitle(type)} for ${nodeId}`,
+                    type: type,
+                    description: `A comprehensive ${type} about ${nodeId} for business mathematics students.`,
+                    url: `/resources/${nodeId.toLowerCase().replace(/\s+/g, '-')}/${type}`
+                });
+            }
+            
+            return resources;
+        }
+        
+        // Helper function to get resource titles
+        function getResourceTitle(type) {
+            switch(type) {
+                case "video": 
+                    return ["Introduction Video", "Detailed Tutorial", "Visual Explanation", "Practical Examples"][Math.floor(Math.random() * 4)];
+                case "article": 
+                    return ["Comprehensive Guide", "In-depth Article", "Theoretical Overview", "Case Study"][Math.floor(Math.random() * 4)];
+                case "quiz": 
+                    return ["Practice Quiz", "Self-Assessment", "Knowledge Check", "Mastery Test"][Math.floor(Math.random() * 4)];
+                case "interactive": 
+                    return ["Interactive Exercise", "Simulation", "Hands-on Practice", "Interactive Tutorial"][Math.floor(Math.random() * 4)];
+                default:
+                    return "Learning Resource";
+            }
+        }
+        
+        // Drag functions
+        function dragStarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+        
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+        
+        function dragEnded(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+        
+        // Show resources in sidebar
+        function showResources(node) {
+            sidebar.style("display", "block");
+            
+            let resourceHtml = `
+                <h3>${node.id}</h3>
+                <p class="node-description">${node.description || ''}</p>
+                <div class="node-metadata">
+                    <p><strong>Type:</strong> ${node.type}</p>
+                    <p><strong>Difficulty:</strong> ${node.difficulty}/5</p>
+                    ${node.estimated_time ? `<p><strong>Estimated time:</strong> ${formatTime(node.estimated_time)}</p>` : ''}
+                </div>
+                <h4>Learning Resources</h4>
+            `;
+            
+            if (Array.isArray(node.resources) && node.resources.length > 0) {
+                node.resources.forEach(resource => {
+                    resourceHtml += `
+                        <div class="resource">
+                            <h4>${resource.title}</h4>
+                            <p>${resource.description}</p>
+                            <a href="${resource.url}" target="_blank">
+                                <span class="resource-icon ${resource.type}-icon"></span>
+                                View ${resource.type}
+                            </a>
+                        </div>
+                    `;
+                });
+            } else if (typeof node.resources === 'object') {
+                resourceHtml += `
+                    <div class="resource">
+                        <p><a href="${node.resources.explore}" target="_blank">Explore Resources</a></p>
+                        <p><a href="${node.resources.related}" target="_blank">Related Content</a></p>
+                    </div>
+                `;
+            } else {
+                resourceHtml += '<p>No resources available for this concept.</p>';
+            }
+            
+            resourceContent.html(resourceHtml);
+        }
+        
+        // Format time in minutes to hours and minutes
+        function formatTime(minutes) {
+            if (minutes < 60) {
+                return `${minutes} minutes`;
+            } else {
+                const hours = Math.floor(minutes / 60);
+                const mins = minutes % 60;
+                return mins > 0 ? `${hours} hour${hours > 1 ? 's' : ''} ${mins} minute${mins > 1 ? 's' : ''}` : `${hours} hour${hours > 1 ? 's' : ''}`;
+            }
+        }
+        
+        // Reset view
+        window.resetView = function() {
+            svg.transition()
+                .duration(750)
+                .call(zoom.transform, d3.zoomIdentity);
+        };
+        
+        // Toggle labels
+        window.toggleLabels = function() {
+            showLabels = !showLabels;
+            if (textElements) {
+                textElements.style("opacity", showLabels ? 1 : 0);
+            }
+        };
+        
+        // Close sidebar
+        window.closeSidebar = function() {
+            sidebar.style("display", "none");
+        };
+        
+        // Add a function to dump graph data for debugging
+        window.dumpGraphData = function() {
+            if (graphData) {
+                updateDebugInfo("Graph data dump:");
+                updateDebugInfo(`Nodes: ${graphData.nodes.length}`);
+                updateDebugInfo(`Links: ${graphData.links.length}`);
+                updateDebugInfo(`First 3 nodes: ${JSON.stringify(graphData.nodes.slice(0, 3))}`);
+                updateDebugInfo(`First 3 links: ${JSON.stringify(graphData.links.slice(0, 3))}`);
+            } else {
+                updateDebugInfo("No graph data available");
+            }
+        };
+        
+        // Show debug info by default
+        document.getElementById('debug-info').style.display = 'block';
     </script>
 </body>
 </html>

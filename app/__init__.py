@@ -1,12 +1,26 @@
 from flask import Flask, render_template, jsonify, request
-
+from flask_cors import CORS
 import json
 import os
 import re
+import sys
+from pathlib import Path
+
+# Add project root to Python path
+project_root = str(Path(__file__).parent.parent.absolute())
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
+from app.math_services.services.llm.openai_service import OpenAILLMService
+from app.knowledge_graph.api_adapter import KnowledgeGraphService
 
 def create_app():
     app = Flask(__name__)
     CORS(app)
+
+    # Initialize services
+    llm_service = OpenAILLMService()
+    kg_service = KnowledgeGraphService(llm_service)
 
     @app.route('/')
     def index():
@@ -15,107 +29,48 @@ def create_app():
     @app.route('/api/knowledge_graph')
     def get_knowledge_graph():
         try:
-            with open('app/knowledge_graph/microeconomics_graph.json', 'r') as f:
-                data = json.load(f)
+            # Try to get the graph from the service first
+            graph_data = kg_service.get_graph("test_user")
             
-            # Core concepts we want to focus on
-            core_concepts = [
-                "Supply and Demand",
-                "Market Equilibrium",
-                "Price Elasticity",
-                "Market Structure",
-                "Perfect Competition",
-                "Monopolistic Competition",
-                "Oligopoly",
-                "Monopoly",
-                "Consumer Behavior",
-                "Production Costs",
-                "Economic Efficiency",
-                "Market Failure"
-            ]
+            # If no graph exists, generate one from the sample syllabus
+            if "error" in graph_data:
+                try:
+                    # Read the sample graph data if available
+                    sample_path = os.path.join(app.static_folder, 'data', 'sample_graph_data.json')
+                    if os.path.exists(sample_path):
+                        with open(sample_path, 'r') as f:
+                            graph_data = json.load(f)
+                    else:
+                        # Generate a new graph from sample syllabus
+                        with open('app/static/data/sample_syllabus.txt', 'r') as f:
+                            sample_syllabus = f.read()
+                        result = kg_service.process_syllabus(sample_syllabus, user_id="test_user")
+                        if result.get('status') == 'success':
+                            graph_data = kg_service.get_graph(result.get('graph_id'))
+                        else:
+                            raise Exception(result.get('message', 'Unknown error processing syllabus'))
+                except Exception as e:
+                    return jsonify({"error": f"Failed to load sample graph: {str(e)}"}), 500
             
-            transformed_data = {
-                "nodes": [],
-                "links": []
-            }
-
-            # Create a mapping of original IDs to safe IDs
-            id_mapping = {}
-            for node in data["nodes"]:
-                if node["id"] in core_concepts:  # Only include core concepts
-                    safe_id = re.sub(r'[^a-zA-Z0-9]', '_', node["id"]).lower()
-                    id_mapping[node["id"]] = safe_id
-
-            # Transform nodes
-            learning_paths = {
-                "Fundamentals": ["Supply and Demand", "Market Equilibrium", "Price Elasticity"],
-                "Market Structures": ["Market Structure", "Perfect Competition", "Monopolistic Competition", "Oligopoly", "Monopoly"],
-                "Advanced Concepts": ["Consumer Behavior", "Production Costs", "Economic Efficiency", "Market Failure"]
-            }
-
-            # Add nodes with path information
-            for path_name, concepts in learning_paths.items():
-                for i, concept in enumerate(concepts):
-                    if concept in id_mapping:
-                        node = next((n for n in data["nodes"] if n["id"] == concept), None)
-                        if node:
-                            transformed_node = {
-                                "id": id_mapping[concept],
-                                "name": concept,
-                                "type": get_node_type(path_name, i),
-                                "description": node["description"],
-                                "difficulty": node["difficulty"],
-                                "learningState": "not-started",
-                                "pathName": path_name,
-                                "pathOrder": i,
-                                "resources": [
-                                    {
-                                        "type": "video",
-                                        "title": f"Understanding {concept}",
-                                        "url": "#"
-                                    },
-                                    {
-                                        "type": "article",
-                                        "title": f"Deep Dive into {concept}",
-                                        "url": "#"
-                                    }
-                                ]
-                            }
-                            transformed_data["nodes"].append(transformed_node)
-
-            # Create directed learning path links
-            for path_name, concepts in learning_paths.items():
-                # Connect concepts within each path
-                for i in range(len(concepts) - 1):
-                    if concepts[i] in id_mapping and concepts[i + 1] in id_mapping:
-                        transformed_data["links"].append({
-                            "source": id_mapping[concepts[i]],
-                            "target": id_mapping[concepts[i + 1]],
-                            "type": "path",
-                            "pathName": path_name
-                        })
-
-                # Connect paths to each other at key junction points
-                if path_name == "Fundamentals":
-                    # Connect Fundamentals to Market Structures
-                    transformed_data["links"].append({
-                        "source": id_mapping["Price Elasticity"],
-                        "target": id_mapping["Market Structure"],
-                        "type": "cross_path",
-                        "pathName": "cross_path"
-                    })
-                elif path_name == "Market Structures":
-                    # Connect Market Structures to Advanced Concepts
-                    transformed_data["links"].append({
-                        "source": id_mapping["Monopoly"],
-                        "target": id_mapping["Economic Efficiency"],
-                        "type": "cross_path",
-                        "pathName": "cross_path"
-                    })
-
-            return jsonify(transformed_data)
+            return jsonify(graph_data)
         except Exception as e:
             print("Error:", str(e))
+            return jsonify({"error": str(e)}), 500
+    
+    @app.route('/api/process_syllabus', methods=['POST'])
+    def process_syllabus():
+        try:
+            data = request.json
+            syllabus_text = data.get('syllabus', '')
+            user_id = data.get('user_id', 'anonymous')
+            
+            if not syllabus_text:
+                return jsonify({"error": "No syllabus text provided"}), 400
+            
+            result = kg_service.process_syllabus(syllabus_text, user_id=user_id)
+            return jsonify(result)
+        except Exception as e:
+            print("Error processing syllabus:", str(e))
             return jsonify({"error": str(e)}), 500
 
     return app

@@ -1,0 +1,461 @@
+{
+  "nodes": [
+    {
+      "id": "Module 1: Python Basics",
+      "type": "module",
+      "difficulty": 1,
+      "description": "Module 1: Python Basics",
+      "degree": 3,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Variables",
+      "type": "concept",
+      "module": "Module 1: Python Basics",
+      "difficulty": 1,
+      "description": "Concept: Variables",
+      "degree": 2,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Data Types",
+      "type": "concept",
+      "module": "Module 1: Python Basics",
+      "difficulty": 1,
+      "description": "Concept: Data Types",
+      "degree": 3,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Control Flow",
+      "type": "concept",
+      "module": "Module 1: Python Basics",
+      "difficulty": 1,
+      "description": "Concept: Control Flow",
+      "degree": 3,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Module 2: Functions",
+      "type": "module",
+      "difficulty": 2,
+      "description": "Module 2: Functions",
+      "degree": 3,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Function Definition",
+      "type": "concept",
+      "module": "Module 2: Functions",
+      "difficulty": 2,
+      "description": "Concept: Function Definition",
+      "degree": 3,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Parameters",
+      "type": "concept",
+      "module": "Module 2: Functions",
+      "difficulty": 2,
+      "description": "Concept: Parameters",
+      "degree": 3,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Return Values",
+      "type": "concept",
+      "module": "Module 2: Functions",
+      "difficulty": 2,
+      "description": "Concept: Return Values",
+      "degree": 3,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Module 3: Data Structures",
+      "type": "module",
+      "difficulty": 3,
+      "description": "Module 3: Data Structures",
+      "degree": 3,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Lists",
+      "type": "concept",
+      "module": "Module 3: Data Structures",
+      "difficulty": 3,
+      "description": "Concept: Lists",
+      "degree": 3,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Dictionaries",
+      "type": "concept",
+      "module": "Module 3: Data Structures",
+      "difficulty": 3,
+      "description": "Concept: Dictionaries",
+      "degree": 3,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    },
+    {
+      "id": "Tuples",
+      "type": "concept",
+      "module": "Module 3: Data Structures",
+      "difficulty": 3,
+      "description": "Concept: Tuples",
+      "degree": 2,
+      "metadata": {
+        "learning_resources": [],
+        "key_terms": [],
+        "applications": []
+      }
+    }
+  ],
+  "links": [
+    {
+      "source": "Module 1: Python Basics",
+      "target": "Variables",
+      "type": "module_concept",
+      "strength": 1,
+      "metadata": {
+        "semantic_type": "module_concept"
+      }
+    },
+    {
+      "source": "Module 1: Python Basics",
+      "target": "Data Types",
+      "type": "module_concept",
+      "strength": 1,
+      "metadata": {
+        "semantic_type": "module_concept"
+      }
+    },
+    {
+      "source": "Module 1: Python Basics",
+      "target": "Control Flow",
+      "type": "module_concept",
+      "strength": 1,
+      "metadata": {
+        "semantic_type": "module_concept"
+      }
+    },
+    {
+      "source": "Module 2: Functions",
+      "target": "Function Definition",
+      "type": "module_concept",
+      "strength": 1,
+      "metadata": {
+        "semantic_type": "module_concept"
+      }
+    },
+    {
+      "source": "Module 2: Functions",
+      "target": "Parameters",
+      "type": "module_concept",
+      "strength": 1,
+      "metadata": {
+        "semantic_type": "module_concept"
+      }
+    },
+    {
+      "source": "Module 2: Functions",
+      "target": "Return Values",
+      "type": "module_concept",
+      "strength": 1,
+      "metadata": {
+        "semantic_type": "module_concept"
+      }
+    },
+    {
+      "source": "Module 3: Data Structures",
+      "target": "Lists",
+      "type": "module_concept",
+      "strength": 1,
+      "metadata": {
+        "semantic_type": "module_concept"
+      }
+    },
+    {
+      "source": "Module 3: Data Structures",
+      "target": "Dictionaries",
+      "type": "module_concept",
+      "strength": 1,
+      "metadata": {
+        "semantic_type": "module_concept"
+      }
+    },
+    {
+      "source": "Module 3: Data Structures",
+      "target": "Tuples",
+      "type": "module_concept",
+      "strength": 1,
+      "metadata": {
+        "semantic_type": "module_concept"
+      }
+    },
+    {
+      "source": "Variables",
+      "target": "Data Types",
+      "type": "prerequisite",
+      "strength": 4.5,
+      "description": "Variables is a prerequisite for Data Types",
+      "metadata": {
+        "validated": true,
+        "confidence": 0.9,
+        "reasoning": "Understanding variables is fundamental to grasping data types, as variables hold values defined by their types.",
+        "evidence": [
+          "Programming language documentation",
+          "Educational resources on data types"
+        ],
+        "bidirectional": false,
+        "semantic_type": "prerequisite",
+        "common_misconceptions": [
+          "Variables are the same as data types",
+          "Data types can be used without understanding variables"
+        ],
+        "historical_context": ""
+      }
+    },
+    {
+      "source": "Data Types",
+      "target": "Control Flow",
+      "type": "prerequisite",
+      "strength": 4.25,
+      "description": "Data Types is a prerequisite for Control Flow",
+      "metadata": {
+        "validated": true,
+        "confidence": 0.85,
+        "reasoning": "Data types are essential for understanding control flow, as they determine how data is processed in conditional statements and loops.",
+        "evidence": [
+          "Programming tutorials on control structures",
+          "Books on programming fundamentals"
+        ],
+        "bidirectional": false,
+        "semantic_type": "prerequisite",
+        "common_misconceptions": [
+          "Control flow does not depend on data types",
+          "Any data type can be used interchangeably in control flow"
+        ],
+        "historical_context": ""
+      }
+    },
+    {
+      "source": "Function Definition",
+      "target": "Parameters",
+      "type": "prerequisite",
+      "strength": 4.5,
+      "description": "Function Definition is a prerequisite for Parameters",
+      "metadata": {
+        "validated": true,
+        "confidence": 0.9,
+        "reasoning": "Function definitions inherently require parameters, as they define the inputs required for the function to operate.",
+        "evidence": [
+          "Documentation on function syntax",
+          "Programming language specifications"
+        ],
+        "bidirectional": false,
+        "semantic_type": "prerequisite",
+        "common_misconceptions": [
+          "Functions can exist without parameters",
+          "Parameters are optional for every function"
+        ],
+        "historical_context": ""
+      }
+    },
+    {
+      "source": "Parameters",
+      "target": "Return Values",
+      "type": "prerequisite",
+      "strength": 4.0,
+      "description": "Parameters is a prerequisite for Return Values",
+      "metadata": {
+        "validated": true,
+        "confidence": 0.8,
+        "reasoning": "Parameters are inputs to functions, and return values are outputs; thus, understanding parameters is necessary to know what a function returns.",
+        "evidence": [
+          "Software development courses",
+          "Books on function design"
+        ],
+        "bidirectional": false,
+        "semantic_type": "prerequisite",
+        "common_misconceptions": [
+          "Return values can be understood without knowing parameters",
+          "All functions have return values regardless of parameters"
+        ],
+        "historical_context": ""
+      }
+    },
+    {
+      "source": "Lists",
+      "target": "Dictionaries",
+      "type": "prerequisite",
+      "strength": 3.75,
+      "description": "Lists is a prerequisite for Dictionaries",
+      "metadata": {
+        "validated": true,
+        "confidence": 0.75,
+        "reasoning": "Lists and dictionaries are both data structures; understanding lists provides a foundation for understanding dictionaries, but they serve different purposes.",
+        "evidence": [
+          "Data structure textbooks",
+          "Online programming courses on data types"
+        ],
+        "bidirectional": false,
+        "semantic_type": "prerequisite",
+        "common_misconceptions": [
+          "Lists and dictionaries are the same",
+          "You can understand dictionaries without knowing about lists"
+        ],
+        "historical_context": ""
+      }
+    },
+    {
+      "source": "Dictionaries",
+      "target": "Tuples",
+      "type": "prerequisite",
+      "strength": 3.5,
+      "description": "Dictionaries is a prerequisite for Tuples",
+      "metadata": {
+        "validated": true,
+        "confidence": 0.7,
+        "reasoning": "While dictionaries and tuples are both data structures in Python, dictionaries do not directly lead to an understanding of tuples; they serve different purposes.",
+        "evidence": [
+          "Both are data structures",
+          "Dictionaries store key-value pairs, while tuples are ordered collections"
+        ],
+        "bidirectional": false,
+        "semantic_type": "related",
+        "common_misconceptions": [
+          "Tuples are a type of dictionary",
+          "Dictionaries can only contain strings as keys"
+        ],
+        "historical_context": ""
+      }
+    },
+    {
+      "source": "Control Flow",
+      "target": "Function Definition",
+      "type": "builds_on",
+      "strength": 4.25,
+      "description": "Function Definition builds on knowledge from Control Flow",
+      "metadata": {
+        "validated": true,
+        "confidence": 0.85,
+        "reasoning": "Control flow statements are essential for understanding how functions operate, as they dictate the execution order within function definitions.",
+        "evidence": [
+          "Control flow includes if statements, loops, which are often used within functions"
+        ],
+        "bidirectional": false,
+        "semantic_type": "prerequisite",
+        "common_misconceptions": [
+          "Functions can exist without control flow",
+          "Control flow only applies to loops, not function definitions"
+        ],
+        "historical_context": ""
+      }
+    },
+    {
+      "source": "Return Values",
+      "target": "Lists",
+      "type": "builds_on",
+      "strength": 3.0,
+      "description": "Lists builds on knowledge from Return Values",
+      "metadata": {
+        "validated": true,
+        "confidence": 0.6,
+        "reasoning": "Return values can be of any type, including lists, but not all return values are lists, making this relationship less certain.",
+        "evidence": [
+          "Functions can return various data types, including integers, strings, and lists"
+        ],
+        "bidirectional": false,
+        "semantic_type": "example_of",
+        "common_misconceptions": [
+          "All functions return lists",
+          "Return values are always mutable"
+        ],
+        "historical_context": ""
+      }
+    }
+  ],
+  "metadata": {
+    "timestamp": "2025-03-14T17:08:18.100082",
+    "node_count": 12,
+    "link_count": 17,
+    "modules": [
+      "Module 1: Python Basics",
+      "Module 2: Functions",
+      "Module 3: Data Structures"
+    ],
+    "course_title": "Introduction to Python",
+    "generated_at": "2025-03-14T17:08:13.096781",
+    "validation_status": "completed",
+    "validated_link_count": 8,
+    "validation_percentage": 47.05882352941176,
+    "validated_at": "2025-03-14T17:08:18.099843",
+    "generator": "GraphGenerator",
+    "node_types": {
+      "module": 3,
+      "concept": 9
+    },
+    "link_types": {
+      "module_concept": 9,
+      "prerequisite": 6,
+      "builds_on": 2
+    },
+    "connectivity": {
+      "average_degree": 2.8333333333333335,
+      "density": 0.25757575757575757,
+      "max_degree": 3,
+      "isolated_nodes": 0
+    },
+    "stats": {
+      "total_nodes": 12,
+      "total_links": 17,
+      "average_degree": 2.8333333333333335,
+      "validated_links": 8,
+      "high_confidence_links": 5
+    }
+  }
+}
