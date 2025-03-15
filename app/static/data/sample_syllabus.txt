@@ -1,61 +1,63 @@
-Course Title: Principles of Microeconomics
+Course Title: Introduction to Computer Science
 
 Course Description:
-This course introduces students to the fundamental principles of microeconomics, 
-focusing on the behavior of individuals, firms, and markets. Students will learn about 
-supply and demand, consumer theory, production theory, market structures, and market failures.
+This introductory course covers the fundamental concepts of computer science and programming. Students will learn basic programming principles, algorithmic thinking, and problem-solving strategies through practical coding exercises and projects.
 
-Learning Outcomes:
-- Understand how markets operate and how prices are determined
-- Analyze consumer behavior and decision-making processes
-- Explain how firms make production decisions
-- Compare different market structures and their implications
-- Evaluate market failures and potential policy solutions
-
-Prerequisites:
-- Basic understanding of mathematics (algebra)
-- Introduction to Economics (recommended but not required)
+Instructor: Dr. Jane Smith
+Email: jane.smith@university.edu
+Office Hours: Monday and Wednesday, 2:00 PM - 4:00 PM
 
 Modules:
+1. Introduction to Computing
+   - History of Computing
+   - Computer Architecture
+   - Binary Number System
+   - Boolean Logic
 
-1. Fundamentals of Economics
-   - Scarcity and Choice
-   - Opportunity Cost
-   - Production Possibilities Frontier
-   - Comparative Advantage
-   - Economic Systems
+2. Programming Fundamentals
+   - Variables and Data Types
+   - Control Structures
+   - Functions and Procedures
+   - I/O Operations
 
-2. Supply and Demand
-   - Demand Curves
-   - Supply Curves
-   - Market Equilibrium
-   - Price Elasticity
-   - Consumer and Producer Surplus
+3. Data Structures
+   - Arrays and Lists
+   - Stacks and Queues
+   - Trees and Graphs
+   - Hash Tables
 
-3. Consumer Theory
-   - Utility Maximization
-   - Budget Constraints
-   - Indifference Curves
-   - Income and Substitution Effects
-   - Consumer Choice
+4. Algorithms
+   - Complexity Analysis
+   - Sorting Algorithms
+   - Searching Algorithms
+   - Recursion
 
-4. Production Theory
-   - Production Functions
-   - Cost Curves
-   - Profit Maximization
-   - Short-run vs. Long-run Decisions
-   - Economies of Scale
+5. Object-Oriented Programming
+   - Classes and Objects
+   - Inheritance
+   - Polymorphism
+   - Encapsulation
 
-5. Market Structures
-   - Perfect Competition
-   - Monopoly
-   - Monopolistic Competition
-   - Oligopoly
-   - Game Theory
+6. Software Development
+   - Software Development Life Cycle
+   - Agile Methodologies
+   - Version Control
+   - Testing and Debugging
 
-6. Market Failures
-   - Externalities
-   - Public Goods
-   - Common Resources
-   - Information Asymmetry
-   - Government Regulation 
+Assessment:
+- Programming Assignments (40%)
+- Midterm Exam (25%)
+- Final Project (25%)
+- Participation (10%)
+
+Required Materials:
+- "Python Programming: An Introduction to Computer Science" by John Zelle
+- Access to a computer with Python 3.x installed
+
+Learning Outcomes:
+By the end of this course, students will be able to:
+1. Understand fundamental programming concepts
+2. Write and debug programs in Python
+3. Apply algorithmic thinking to solve problems
+4. Implement basic data structures
+5. Understand object-oriented programming principles 

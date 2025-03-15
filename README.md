@@ -1,83 +1,55 @@
-# Educational Technology Knowledge Graph Generator
+# Educational Technology Platform
 
-This project generates interactive knowledge graphs from educational content, particularly syllabus text. It identifies concepts, their relationships, and validates these relationships using Large Language Models.
+This project provides an educational technology platform with two main features:
+1. Knowledge Graph Generation - Visualize learning material as an interactive knowledge graph
+2. Math Assessment Tool - Get instant feedback on math problem solutions
 
-## Project Structure
+## Getting Started
 
-```
-Edtech_project/
-├── app/
-│   ├── knowledge_graph/       # Core knowledge graph generation components
-│   │   ├── syllabus_parser.py # Parses syllabus text into structured data
-│   │   ├── graph_generator.py # Generates graph data from parsed content
-│   │   ├── meta_validator.py  # Validates relationships with LLM
-│   │   ├── api_adapter.py     # Connects components to Flask API
-│   │   └── test_knowledge_graph.py # Tests for knowledge graph components
-│   │
-│   ├── math_services/         # Services for mathematical operations
-│   │   └── services/
-│   │       └── llm/
-│   │           ├── base_service.py    # Base LLM service interface
-│   │           └── openai_service.py  # OpenAI implementation
-│   │
-│   ├── static/                # Static assets for the web app
-│   │   └── data/
-│   │       └── sample_syllabus.txt # Sample syllabus for testing
-│   │
-│   ├── templates/             # HTML templates for the web app
-│   │   └── knowledge_graph.html # Main UI template
-│   │
-│   └── __init__.py            # Flask app initialization
-│
-├── generate_knowledge_graph.py  # CLI script for generating graphs
-└── README.md                    # This file
-```
+### Prerequisites
 
-## Core Components
+- Python 3.8 or later
+- Required Python packages:
+  - streamlit
+  - openai
+  - python-dotenv
+  - flask (for the original web app)
 
-### Syllabus Parser
+### Installation
 
-The syllabus parser extracts structured information from raw syllabus text, including:
-- Course title and description
-- Module information
-- Concepts within each module
-- Initial relationships between concepts
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/Edtech_project_clean.git
+   cd Edtech_project_clean
+   ```
 
-### Graph Generator
+2. Install required packages:
+   ```bash
+   pip install streamlit openai python-dotenv flask
+   ```
 
-The graph generator builds a knowledge graph from parsed syllabus data:
-- Creates nodes for modules and concepts
-- Establishes links between related concepts
-- Enriches the graph with metadata and statistics
+3. Set up your environment variables by creating a `.env` file in the project root:
+   ```
+   OPENAI_API_KEY=your_openai_api_key_here
+   ```
 
-### Meta Validator
+## Running the Application
 
-The meta validator uses Large Language Models to validate and enrich relationships:
-- Validates relationships between concepts
-- Assigns confidence scores
-- Determines if relationships are bidirectional
-- Provides reasoning and evidence
-- Identifies semantic relationship types
+You can run either the Streamlit app or the original Flask app:
 
-## Usage
+### Streamlit App (Recommended)
 
-### Command-line Interface
-
-Generate a knowledge graph from a syllabus file:
+Run the Streamlit app with:
 
 ```bash
-python generate_knowledge_graph.py --input path/to/syllabus.txt --output output_graph.json
+python run_streamlit.py
 ```
 
-Options:
-- `--input`, `-i`: Input syllabus file path
-- `--output`, `-o`: Output JSON file path
-- `--model`, `-m`: LLM model to use (default: gpt-4o-mini)
-- `--no-validate`: Skip relationship validation
+The app should open in your browser automatically. If not, navigate to the URL shown in the terminal (typically http://localhost:8501).
 
-### API
+### Original Flask App
 
-Start the Flask web app:
+Run the Flask app with:
 
 ```bash
 export FLASK_APP=app
@@ -85,26 +57,32 @@ export FLASK_ENV=development
 flask run
 ```
 
-API endpoints:
-- `GET /api/knowledge_graph`: Get the current knowledge graph
-- `POST /api/process_syllabus`: Process a new syllabus
+Then navigate to http://localhost:5000 in your browser.
 
-## Development
+## Features
 
-### Requirements
+### Knowledge Graph Generation
 
-- Python 3.8+
-- OpenAI API key
-- Flask
+Upload a syllabus or educational material text to visualize it as an interactive knowledge graph. The system will:
+- Extract modules and concepts
+- Map relationships between concepts
+- Provide an interactive visualization
+- Generate metadata and statistics
 
-### Testing
+### Math Assessment Tool
 
-Run the knowledge graph component tests:
+Get instant feedback on math problems:
+- Enter your math question
+- Submit your answer
+- Receive instant correctness feedback
+- Get hints and guidance
+- Track your progress
 
-```bash
-python app/knowledge_graph/test_knowledge_graph.py
-```
+## Using Without OpenAI API Key
 
-## License
+The platform includes a fallback mock mode when an OpenAI API key isn't available:
+- Knowledge graph generation will use a simplified parsing algorithm
+- Math assessment will provide basic feedback without advanced analysis
+- Some features may have limited functionality
 
-MIT License
+To use the full capabilities, provide a valid OpenAI API key in the `.env` file.

@@ -8,7 +8,7 @@ for testing and fallback purposes.
 import logging
 from typing import Dict, Any
 
-from app.math.services.llm.base_service import BaseLLMService
+from app.math_services.services.llm.base_service import BaseLLMService
 
 logger = logging.getLogger(__name__)
 

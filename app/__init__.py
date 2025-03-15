@@ -14,13 +14,17 @@ if project_root not in sys.path:
 from app.math_services.services.llm.openai_service import OpenAILLMService
 from app.knowledge_graph.api_adapter import KnowledgeGraphService
 
+# Import the MathAgent for math assessments
+from app.math_services.agent.math_agent import MathAgent
+
 def create_app():
     app = Flask(__name__)
     CORS(app)
 
-    # Initialize services
-    llm_service = OpenAILLMService()
+    # Initialize services with mock mode for development
+    llm_service = OpenAILLMService(mock_mode=True)
     kg_service = KnowledgeGraphService(llm_service)
+    math_agent = MathAgent(model="gpt-4o-mini")  # It will use the LLM service in mock mode
 
     @app.route('/')
     def index():

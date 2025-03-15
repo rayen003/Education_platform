@@ -1,0 +1,462 @@
+{
+  "nodes": [
+    {
+      "id": "module_1",
+      "name": "Introduction to Computing",
+      "type": "module"
+    },
+    {
+      "id": "module_2",
+      "name": "Programming Fundamentals",
+      "type": "module"
+    },
+    {
+      "id": "module_3",
+      "name": "Data Structures",
+      "type": "module"
+    },
+    {
+      "id": "module_4",
+      "name": "Algorithms",
+      "type": "module"
+    },
+    {
+      "id": "module_5",
+      "name": "Object-Oriented Programming",
+      "type": "module"
+    },
+    {
+      "id": "module_6",
+      "name": "Software Development",
+      "type": "module"
+    },
+    {
+      "id": "outcome_1",
+      "name": "Understand fundamental programming concepts",
+      "type": "outcome"
+    },
+    {
+      "id": "outcome_2",
+      "name": "Write and debug programs in Python",
+      "type": "outcome"
+    },
+    {
+      "id": "outcome_3",
+      "name": "Apply algorithmic thinking to solve problems",
+      "type": "outcome"
+    },
+    {
+      "id": "outcome_4",
+      "name": "Implement basic data structures",
+      "type": "outcome"
+    },
+    {
+      "id": "outcome_5",
+      "name": "Understand object-oriented programming principles",
+      "type": "outcome"
+    },
+    {
+      "id": "concept_1",
+      "name": "History of Computing",
+      "type": "concept"
+    },
+    {
+      "id": "concept_2",
+      "name": "Computer Architecture",
+      "type": "concept"
+    },
+    {
+      "id": "concept_3",
+      "name": "Binary Number System",
+      "type": "concept"
+    },
+    {
+      "id": "concept_4",
+      "name": "Boolean Logic",
+      "type": "concept"
+    },
+    {
+      "id": "concept_5",
+      "name": "Variables and Data Types",
+      "type": "concept"
+    },
+    {
+      "id": "concept_6",
+      "name": "Control Structures",
+      "type": "concept"
+    },
+    {
+      "id": "concept_7",
+      "name": "Functions and Procedures",
+      "type": "concept"
+    },
+    {
+      "id": "concept_8",
+      "name": "I/O Operations",
+      "type": "concept"
+    },
+    {
+      "id": "concept_9",
+      "name": "Arrays and Lists",
+      "type": "concept"
+    },
+    {
+      "id": "concept_10",
+      "name": "Stacks and Queues",
+      "type": "concept"
+    },
+    {
+      "id": "concept_11",
+      "name": "Trees and Graphs",
+      "type": "concept"
+    },
+    {
+      "id": "concept_12",
+      "name": "Hash Tables",
+      "type": "concept"
+    },
+    {
+      "id": "concept_13",
+      "name": "Complexity Analysis",
+      "type": "concept"
+    },
+    {
+      "id": "concept_14",
+      "name": "Sorting Algorithms",
+      "type": "concept"
+    },
+    {
+      "id": "concept_15",
+      "name": "Searching Algorithms",
+      "type": "concept"
+    },
+    {
+      "id": "concept_16",
+      "name": "Recursion",
+      "type": "concept"
+    },
+    {
+      "id": "concept_17",
+      "name": "Classes and Objects",
+      "type": "concept"
+    },
+    {
+      "id": "concept_18",
+      "name": "Inheritance",
+      "type": "concept"
+    },
+    {
+      "id": "concept_19",
+      "name": "Polymorphism",
+      "type": "concept"
+    },
+    {
+      "id": "concept_20",
+      "name": "Encapsulation",
+      "type": "concept"
+    },
+    {
+      "id": "concept_21",
+      "name": "Software Development Life Cycle",
+      "type": "concept"
+    },
+    {
+      "id": "concept_22",
+      "name": "Agile Methodologies",
+      "type": "concept"
+    },
+    {
+      "id": "concept_23",
+      "name": "Version Control",
+      "type": "concept"
+    },
+    {
+      "id": "concept_24",
+      "name": "Testing and Debugging",
+      "type": "concept"
+    },
+    {
+      "id": "concept_25",
+      "name": "Programming Assignments (40%)",
+      "type": "concept"
+    },
+    {
+      "id": "concept_26",
+      "name": "Midterm Exam (25%)",
+      "type": "concept"
+    },
+    {
+      "id": "concept_27",
+      "name": "Final Project (25%)",
+      "type": "concept"
+    },
+    {
+      "id": "concept_28",
+      "name": "Participation (10%)",
+      "type": "concept"
+    },
+    {
+      "id": "concept_29",
+      "name": "\"Python Programming: An Introduction to Computer Science\" by John Zelle",
+      "type": "concept"
+    },
+    {
+      "id": "concept_30",
+      "name": "Access to a computer with Python 3.x installed",
+      "type": "concept"
+    }
+  ],
+  "links": [
+    {
+      "source": "module_1",
+      "target": "concept_1",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_1",
+      "target": "concept_2",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_1",
+      "target": "concept_3",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_1",
+      "target": "concept_4",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_2",
+      "target": "concept_5",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_2",
+      "target": "concept_6",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_2",
+      "target": "concept_7",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_2",
+      "target": "concept_8",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_3",
+      "target": "concept_9",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_3",
+      "target": "concept_10",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_3",
+      "target": "concept_11",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_3",
+      "target": "concept_12",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_4",
+      "target": "concept_13",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_4",
+      "target": "concept_14",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_4",
+      "target": "concept_15",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_4",
+      "target": "concept_16",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_5",
+      "target": "concept_17",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_5",
+      "target": "concept_18",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_5",
+      "target": "concept_19",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_5",
+      "target": "concept_20",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_6",
+      "target": "concept_21",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_6",
+      "target": "concept_22",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_6",
+      "target": "concept_23",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_6",
+      "target": "concept_24",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_6",
+      "target": "concept_25",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_6",
+      "target": "concept_26",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_6",
+      "target": "concept_27",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_6",
+      "target": "concept_28",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_6",
+      "target": "concept_29",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_6",
+      "target": "concept_30",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "concept_1",
+      "target": "concept_2",
+      "type": "related_to",
+      "strength": 0.7
+    },
+    {
+      "source": "concept_4",
+      "target": "concept_5",
+      "type": "related_to",
+      "strength": 0.7
+    },
+    {
+      "source": "concept_7",
+      "target": "concept_8",
+      "type": "related_to",
+      "strength": 0.7
+    },
+    {
+      "source": "concept_10",
+      "target": "concept_11",
+      "type": "related_to",
+      "strength": 0.7
+    },
+    {
+      "source": "concept_13",
+      "target": "concept_14",
+      "type": "related_to",
+      "strength": 0.7
+    },
+    {
+      "source": "concept_16",
+      "target": "concept_17",
+      "type": "related_to",
+      "strength": 0.7
+    },
+    {
+      "source": "concept_19",
+      "target": "concept_20",
+      "type": "related_to",
+      "strength": 0.7
+    },
+    {
+      "source": "concept_22",
+      "target": "concept_23",
+      "type": "related_to",
+      "strength": 0.7
+    },
+    {
+      "source": "concept_25",
+      "target": "concept_26",
+      "type": "related_to",
+      "strength": 0.7
+    },
+    {
+      "source": "concept_28",
+      "target": "concept_29",
+      "type": "related_to",
+      "strength": 0.7
+    }
+  ],
+  "metadata": {
+    "timestamp": "2025-03-15T16:33:31.779502",
+    "course_title": "Introduction to Computer Science",
+    "node_count": 41,
+    "link_count": 40,
+    "module_count": 11,
+    "concept_count": 30,
+    "generated_by": "KnowledgeGraphService (mock)",
+    "syllabus_length": 1702,
+    "graph_id": "8f56aef7-93a8-481d-82d1-ffe05350e447"
+  }
+}

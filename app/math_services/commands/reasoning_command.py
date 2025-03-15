@@ -2,7 +2,7 @@
 Math Reasoning Command.
 
 This module contains the command for generating step-by-step reasoning
-for math problems with verification of each step.
+for math problem solutions.
 """
 
 import logging
@@ -11,276 +11,312 @@ import traceback
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 
-from app.math.services.llm.base_service import BaseLLMService
+from app.math_services.commands.base_command import BaseCommand
+from app.math_services.models.state import MathState
+from app.math_services.services.service_container import ServiceContainer
 
 logger = logging.getLogger(__name__)
 
-class MathGenerateReasoningCommand:
-    """Command for generating verified step-by-step reasoning for math problems."""
+class MathGenerateReasoningCommand(BaseCommand):
+    """Command for generating step-by-step reasoning for math problem solutions."""
     
-    def __init__(self, agent):
+    def __init__(self, service_container: ServiceContainer):
         """
-        Initialize the reasoning command.
+        Initialize the command with services.
         
         Args:
-            agent: The agent instance that will use this command
+            service_container: Container with required services
         """
-        self.agent = agent
-        self.llm_service = agent.llm_service
-        self.meta_agent = agent.meta_agent
-        logger.info("Initialized MathGenerateReasoningCommand")
-
-    def _execute_core(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        super().__init__(service_container)
+        
+    def _init_services(self, service_container: ServiceContainer):
         """
-        Generate step-by-step reasoning for the problem.
+        Initialize services required by this command.
         
         Args:
-            state: Current state with problem and student answer
+            service_container: The service container
+        """
+        self.llm_service = service_container.get_llm_service()
+        self.meta_agent = service_container.get_meta_agent()
+        
+    def execute(self, state: MathState) -> MathState:
+        """
+        Generate step-by-step reasoning for a math problem.
+        
+        Args:
+            state: Current MathState
             
         Returns:
-            Updated state with reasoning steps
+            Updated MathState with reasoning steps
         """
-        logger.info("Generating step-by-step reasoning")
+        # Log the start of execution
+        logger.info("Beginning reasoning generation")
+        self.record_event(state, "reasoning_start", {
+            "question": state.question,
+            "student_answer": state.student_answer
+        })
         
-        # Get the problem and student answer from the state
-        problem = state.get("question", "")
-        student_answer = state.get("student_answer", "")
-        correct_answer = state.get("correct_answer", "")
-        
-        # Generate the reasoning steps
-        reasoning_steps = self._generate_reasoning_steps(problem, student_answer, correct_answer)
-        
-        # Add the reasoning steps to the state
-        state["reasoning_steps"] = reasoning_steps
-        
-        # Verify the reasoning steps using the meta-agent if available
-        if self.meta_agent:
-            logger.info("Verifying reasoning steps with meta-agent")
+        # Check if we have the required inputs
+        if not state.question:
+            logger.error("No question found in state")
+            return state
             
-            # Define a regeneration function for the meta-agent to use
-            def regenerate_step(current_state):
-                # Get the verification feedback and current step index
-                feedback = current_state.get("step_verification_feedback", [])
-                confidence = current_state.get("step_verification_confidence", 0)
-                step_index = current_state.get("current_step_index", 0)
-                
-                logger.info(f"Regenerating step {step_index} with feedback: {feedback}, confidence: {confidence}")
-                
-                # Get the current reasoning steps
-                steps = current_state.get("reasoning_steps", [])
-                
-                # Generate a new step with the feedback
-                new_step = self._regenerate_single_step(
-                    problem, 
-                    student_answer, 
-                    correct_answer,
-                    step_index,
-                    steps[:step_index],  # Previous steps
-                    steps[step_index+1:] if step_index < len(steps) - 1 else [],  # Subsequent steps
-                    verification_feedback=feedback,
-                    previous_confidence=confidence
-                )
-                
-                # Replace the problematic step
-                if step_index < len(steps):
-                    steps[step_index] = new_step
-                
-                # Update the state
-                current_state["reasoning_steps"] = steps
-                
-                return current_state
-            
-            # Verify with the ability to regenerate
-            state = self.meta_agent.verify_reasoning_steps(state, "reasoning_steps", regenerate_step)
+        if not state.student_answer:
+            logger.error("No student answer found in state")
+            return state
         
-        # Record success event
-        return self._record_event(state, {"status": "success"})
-
-    def _generate_reasoning_steps(self, problem: str, student_answer: str, correct_answer: str) -> List[str]:
+        try:
+            # Generate reasoning steps
+            steps = self._generate_reasoning_steps(
+                state.question, 
+                state.student_answer, 
+                state.correct_answer
+            )
+            
+            # Store the steps in the state
+            if "reasoning" not in state.context:
+                state.context["reasoning"] = {}
+                
+            state.context["reasoning"]["steps"] = steps
+            
+            # Also store directly as a top-level attribute for meta agent verification
+            # This is needed because the meta_agent expects steps at this location
+            state.steps = steps
+            
+            # Log successful completion
+            logger.info(f"Successfully generated {len(steps)} reasoning steps")
+            self.record_event(state, "reasoning_complete", {
+                "step_count": len(steps)
+            })
+            
+            # If meta agent is available, verify the reasoning steps
+            if self.meta_agent:
+                try:
+                    # Use a regenerate_step function that will be passed to the meta agent
+                    def regenerate_step(step_index, feedback):
+                        return self._regenerate_step(
+                            state.question,
+                            state.student_answer,
+                            state.correct_answer,
+                            step_index,
+                            steps[:step_index],
+                            steps[step_index+1:],
+                            verification_feedback=[feedback],
+                        )
+                    
+                    # Call the meta agent to verify the steps
+                    logger.info("Verifying reasoning steps with meta agent")
+                    verification_result = self.meta_agent.verify_reasoning_steps(
+                        state=state.to_dict() if hasattr(state, 'to_dict') else state,
+                        steps_key="steps",
+                        regenerate_step_func=regenerate_step
+                    )
+                    
+                    # Store the verification results
+                    state.context["reasoning"]["verification"] = verification_result
+                    
+                    # Log verification result
+                    logger.info(f"Reasoning verification complete: {len(verification_result.get('verified_steps', []))} steps verified")
+                    self.record_event(state, "reasoning_verification_complete", {
+                        "verified_count": len(verification_result.get("verified_steps", [])),
+                        "regenerated_count": len(verification_result.get("regenerated_steps", []))
+                    })
+                    
+                except Exception as verify_error:
+                    logger.error(f"Error verifying reasoning steps: {str(verify_error)}")
+                    state.context["reasoning"]["verification_error"] = str(verify_error)
+                    self.log_error(verify_error, state)
+            
+            return state
+            
+        except Exception as e:
+            logger.error(f"Error in reasoning generation: {str(e)}")
+            self.log_error(e, state)
+            
+            # Set a fallback message
+            if "reasoning" not in state.context:
+                state.context["reasoning"] = {}
+                
+            state.context["reasoning"]["error"] = str(e)
+            state.context["reasoning"]["steps"] = ["Error generating reasoning steps."]
+            
+            return state
+    
+    def _generate_reasoning_steps(self, question: str, student_answer: str, correct_answer: str = None) -> List[str]:
         """
-        Generate step-by-step reasoning for the problem.
+        Generate step-by-step reasoning for a math problem.
         
         Args:
-            problem: The math problem
+            question: The math question
             student_answer: The student's answer
-            correct_answer: The correct answer
+            correct_answer: The correct answer (if available)
             
         Returns:
             List of reasoning steps
         """
-        try:
-            # Use LLM to generate reasoning steps
-            if self.llm_service:
-                # Create the system prompt
-                system_prompt = """
-                You are an expert math tutor providing step-by-step reasoning for a math problem.
-                Break down the solution into clear, logical steps that a student can follow.
-                
-                Each step should:
-                1. Be mathematically correct and precise
-                2. Focus on a single logical operation or concept
-                3. Build on previous steps
-                4. Be clear and educational
-                
-                Format your response as a JSON array of strings, where each string is a single step in the solution.
-                """
-                
-                # Construct the user prompt
-                user_prompt = f"""
-                Problem: {problem}
-                Student answer: {student_answer}
-                Correct answer: {correct_answer}
-                
-                Generate a step-by-step solution showing the reasoning process:
-                """
-                
-                # Generate the reasoning steps
-                response = self.llm_service.generate_completion(system_prompt, user_prompt)
-                content = response.get("content", "")
-                
-                try:
-                    # Parse the JSON response
-                    reasoning_steps = json.loads(content)
-                    
-                    # Validate that we got a list of strings
-                    if isinstance(reasoning_steps, list) and all(isinstance(step, str) for step in reasoning_steps):
-                        return reasoning_steps
-                    else:
-                        logger.error(f"Invalid reasoning steps format: {content}")
-                        return ["Error: Unable to generate proper reasoning steps."]
-                        
-                except json.JSONDecodeError:
-                    logger.error(f"Failed to parse reasoning steps as JSON: {content}")
-                    # Extract steps from non-JSON response as fallback
-                    steps = [line.strip() for line in content.split('\n') if line.strip()]
-                    return steps
-                
-            else:
-                return ["I'm sorry, I can't provide reasoning steps at this time."]
-        except Exception as e:
-            logger.error(f"Error generating reasoning steps: {e}")
-            logger.error(traceback.format_exc())
-            return ["I'm sorry, I encountered an error generating reasoning steps."]
-
-    def _regenerate_single_step(self, problem: str, student_answer: str, correct_answer: str, 
-                               step_index: int, previous_steps: List[str], subsequent_steps: List[str],
-                               verification_feedback: List[str] = None, 
-                               previous_confidence: float = None) -> str:
+        logger.info("Generating reasoning steps")
+        
+        # Create the system prompt
+        system_prompt = """
+        You are an expert math tutor. Break down the solution to the math problem into 
+        clear, sequential steps that explain the reasoning. Focus on being educational
+        and showing the complete logical flow.
+        
+        For each step:
+        1. Be concise but complete
+        2. Show all work clearly
+        3. Explain the mathematical concepts being applied
+        
+        Return your reasoning as a JSON array of steps, where each step is a string.
+        Example: ["Step 1: Identify the equation type...", "Step 2: Isolate the variable..."]
         """
-        Regenerate a single reasoning step based on verification feedback.
+        
+        # Build the user prompt with the available information
+        user_prompt = f"""
+        Problem: {question}
+        Student's answer: {student_answer}
+        """
+        
+        # Add the correct answer if available
+        if correct_answer:
+            user_prompt += f"Correct answer: {correct_answer}\n"
+        
+        user_prompt += """
+        Please provide a step-by-step solution with clear reasoning.
+        Format your response as a JSON array of strings.
+        """
+        
+        # Call the LLM service to generate the reasoning
+        response = self.llm_service.generate_completion(
+            system_prompt,
+            user_prompt
+        )
+        
+        # Extract the steps from the response
+        content = response.get("content", "")
+        
+        try:
+            # Try to parse as JSON directly
+            steps = json.loads(content)
+            if not isinstance(steps, list):
+                raise ValueError("Response is not a list of steps")
+                
+            logger.info(f"Successfully parsed {len(steps)} reasoning steps")
+            return steps
+            
+        except json.JSONDecodeError:
+            # If JSON parsing fails, try to extract from text
+            logger.warning("Failed to parse response as JSON, attempting extraction")
+            
+            # Look for JSON array in the response
+            import re
+            match = re.search(r'\[.*\]', content, re.DOTALL)
+            
+            if match:
+                try:
+                    steps = json.loads(match.group(0))
+                    logger.info(f"Successfully extracted {len(steps)} reasoning steps from text")
+                    return steps
+                except:
+                    pass
+            
+            # If JSON extraction fails, split by numbered steps
+            logger.warning("JSON extraction failed, splitting by numbered steps")
+            lines = content.strip().split('\n')
+            steps = []
+            
+            current_step = ""
+            for line in lines:
+                if re.match(r'^Step\s+\d+:|^\d+\.', line):
+                    if current_step:
+                        steps.append(current_step.strip())
+                    current_step = line
+                else:
+                    current_step += " " + line
+            
+            if current_step:
+                steps.append(current_step.strip())
+            
+            # If no steps were found, use the entire content as a single step
+            if not steps:
+                logger.warning("No steps found, using entire content as a single step")
+                steps = [content.strip()]
+            
+            logger.info(f"Split response into {len(steps)} reasoning steps")
+            return steps
+    
+    def _regenerate_step(self, problem: str, student_answer: str, correct_answer: str,
+                        step_index: int, previous_steps: List[str], subsequent_steps: List[str],
+                        verification_feedback: List[str] = None, 
+                        previous_confidence: float = None) -> str:
+        """
+        Regenerate a specific reasoning step based on feedback.
         
         Args:
             problem: The math problem
             student_answer: The student's answer
             correct_answer: The correct answer
             step_index: Index of the step to regenerate
-            previous_steps: Steps that come before the current step
-            subsequent_steps: Steps that come after the current step
-            verification_feedback: Feedback from verification
-            previous_confidence: Confidence score from verification
+            previous_steps: Steps before the one being regenerated
+            subsequent_steps: Steps after the one being regenerated
+            verification_feedback: Feedback on why the step needs regeneration
+            previous_confidence: Confidence score from previous verification
             
         Returns:
             Regenerated step
         """
-        try:
-            # Use LLM to regenerate the step
-            if self.llm_service:
-                # Create the system prompt
-                system_prompt = """
-                You are an expert math tutor fixing a specific step in a mathematical solution.
-                Your task is to regenerate a single step that was identified as problematic.
-                
-                The new step should:
-                1. Be mathematically correct and precise
-                2. Address all the issues identified in the verification feedback
-                3. Maintain logical flow with previous and subsequent steps
-                4. Be clear and educational
-                
-                Provide ONLY the corrected step as plain text, not as JSON.
-                """
-                
-                # Add verification feedback if available
-                if verification_feedback:
-                    system_prompt += "\n\nThe previous step had these issues that need to be addressed:\n"
-                    for i, feedback in enumerate(verification_feedback, 1):
-                        system_prompt += f"{i}. {feedback}\n"
-                    
-                    if previous_confidence is not None:
-                        system_prompt += f"\nThe verification confidence was only {previous_confidence:.2f}. Please improve the quality and correctness of this step."
-                
-                # Construct the user prompt
-                user_prompt = f"""
-                Problem: {problem}
-                Student answer: {student_answer}
-                Correct answer: {correct_answer}
-                Step to regenerate: #{step_index + 1}
-                
-                Previous steps:
-                """
-                
-                for i, prev_step in enumerate(previous_steps, 1):
-                    user_prompt += f"Step {i}: {prev_step}\n"
-                
-                if subsequent_steps:
-                    user_prompt += "\nSubsequent steps:\n"
-                    for i, next_step in enumerate(subsequent_steps, len(previous_steps) + 2):
-                        user_prompt += f"Step {i}: {next_step}\n"
-                
-                user_prompt += "\nGenerate the corrected step:"
-                
-                # Generate the corrected step
-                response = self.llm_service.generate_completion(system_prompt, user_prompt)
-                corrected_step = response.get("content", "").strip()
-                
-                return corrected_step
-            else:
-                return "I'm sorry, I can't regenerate this step at this time."
-        except Exception as e:
-            logger.error(f"Error regenerating step: {e}")
-            logger.error(traceback.format_exc())
-            return "I'm sorry, I encountered an error regenerating this step."
-
-    def _regenerate_step_with_limit(self, step_index: int, step: str, verification_result: Dict[str, Any], confidence: float) -> str:
+        logger.info(f"Regenerating step {step_index} with feedback")
+        
+        # Create the system prompt for regeneration
+        system_prompt = """
+        You are an expert math tutor. Your task is to improve a specific step in a 
+        step-by-step solution based on the feedback provided.
+        
+        The step should:
+        1. Fix any errors identified in the feedback
+        2. Maintain logical flow with previous and subsequent steps
+        3. Be clear and educational
+        4. Retain the mathematical concepts of the original step
+        
+        Return only the corrected step as a string, without any additional explanation.
         """
-        Regenerate a reasoning step with confidence limit.
         
-        Args:
-            step_index: Index of the step
-            step: Current step content
-            verification_result: Verification result dictionary
-            confidence: Confidence score from verification
+        # Format feedback into a string
+        feedback_str = "None"
+        if verification_feedback and len(verification_feedback) > 0:
+            feedback_str = "\n".join(verification_feedback)
+        
+        # Build the prompt with context
+        user_prompt = f"""
+        Problem: {problem}
+        Student's answer: {student_answer}
+        Correct answer: {correct_answer if correct_answer else "Not provided"}
+        
+        Previous steps:
+        {"\n".join(previous_steps) if previous_steps else "None"}
+        
+        Current step to fix (Step {step_index + 1}):
+        {previous_steps[-1] if step_index > 0 and previous_steps else "Start from the beginning"}
+        
+        Subsequent steps:
+        {"\n".join(subsequent_steps) if subsequent_steps else "None"}
+        
+        Feedback on the current step:
+        {feedback_str}
+        
+        Previous confidence: {previous_confidence if previous_confidence is not None else "Not available"}
+        
+        Please provide a corrected version of Step {step_index + 1} that addresses the feedback.
         """
-        try:
-            if confidence < self.confidence_threshold:
-                return self._regenerate_single_step(step_index, step, verification_result, confidence)
-            return step
-        except Exception as e:
-            logger.error(f"Error regenerating step {step_index+1}: {e}")
-            raise
-
-    def _record_event(self, state: Dict[str, Any], event_data: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Record an event for the reasoning generation.
         
-        Args:
-            state: The current state
-            event_data: Data about the event
-            
-        Returns:
-            The updated state
-        """
-        logger.info(f"Reasoning command event: {event_data}")
+        # Call the LLM service to regenerate the step
+        response = self.llm_service.generate_completion(
+            system_prompt,
+            user_prompt
+        )
         
-        # Add event to state if tracking events
-        if "events" not in state:
-            state["events"] = []
+        # Extract the regenerated step
+        regenerated_step = response.get("content", "").strip()
         
-        event = {
-            "type": "reasoning_generated",
-            "timestamp": str(datetime.now()),
-            "data": event_data
-        }
-        
-        state["events"].append(event)
-        
-        return state
+        logger.info(f"Regenerated step {step_index}: {regenerated_step[:50]}...")
+        return regenerated_step

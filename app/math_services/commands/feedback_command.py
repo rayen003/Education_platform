@@ -1,76 +1,276 @@
 """
 Math Feedback Command.
 
-This module contains the command for generating feedback on student
-answers to math problems.
+This module contains the command for generating feedback for math problems.
 """
 
 import logging
 import json
 import traceback
+import random
 import re
-from typing import Dict, Any, List, Optional
-import sympy
-from sympy import symbols, sympify, simplify
+from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime
 
-from app.math.services.llm.base_service import BaseLLMService
+from app.math_services.commands.base_command import BaseCommand
+from app.math_services.models.state import MathState, MathFeedback
+from app.math_services.services.service_container import ServiceContainer
+from app.math_services.services.llm.base_service import BaseLLMService
 
 logger = logging.getLogger(__name__)
 
-class MathGenerateFeedbackCommand:
-    """Command for generating feedback on student answers to math problems."""
+class MathGenerateFeedbackCommand(BaseCommand):
+    """Command for generating feedback for math problems."""
     
-    def __init__(self, agent):
+    def __init__(self, service_container: ServiceContainer):
         """
-        Initialize the feedback command.
+        Initialize the command with services.
         
         Args:
-            agent: The agent instance that will use this command
+            service_container: Container with required services
         """
-        self.agent = agent
-        self.llm_service = agent.llm_service
-        self.meta_agent = agent.meta_agent
-        logger.info("Initialized MathGenerateFeedbackCommand")
+        super().__init__(service_container)
     
-    def _get_llm_service(self):
+    def _init_services(self, service_container: ServiceContainer) -> None:
         """
-        Get the LLM service from the agent if available.
+        Initialize specific services from the container.
         
-        Returns:
-            LLM service or None
+        Args:
+            service_container: The service container
         """
-        if hasattr(self, 'agent') and self.agent and hasattr(self.agent, 'llm_service'):
-            return self.agent.llm_service
-        return None
+        super()._init_services(service_container)
+        # Additional service initialization if needed
     
-    def _record_event(self, state: Dict[str, Any], event_data: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, state: MathState) -> MathState:
         """
-        Record an event for the feedback generation.
+        Generate feedback for a student's answer to a math problem.
+        
+        Args:
+            state: The current state with question and student answer
+            
+        Returns:
+            Updated state with feedback
+        """
+        logger.info("Generating feedback")
+        self.record_event(state, "feedback_generation_start", {
+            "question": state.question,
+            "student_answer": state.student_answer
+        })
+        
+        try:
+            # Handle missing information first
+            if not state.question or not state.student_answer:
+                return self._handle_missing_information(state)
+            
+            # Log problem details
+            logger.info(f"Problem: {state.question}")
+            logger.info(f"Student answer: {state.student_answer}")
+            logger.info(f"Correct answer: {state.correct_answer}")
+            
+            # Check if we already have analysis
+            is_correct = False
+            if hasattr(state, 'analysis') and state.analysis is not None:
+                is_correct = state.analysis.is_correct
+            
+            # Generate feedback
+            feedback = self._generate_feedback(
+                problem=state.question,
+                student_answer=state.student_answer,
+                correct_answer=state.correct_answer,
+                is_correct=is_correct,
+                attempts=1,
+                max_attempts=3
+            )
+            
+            # Calculate confidence in our feedback
+            confidence = self._assess_confidence(state)
+            
+            # Create feedback object
+            math_feedback = MathFeedback(
+                assessment=feedback,
+                is_correct=is_correct,
+                proximity_score=state.proximity_score or 0.0,
+                detail="Detailed feedback based on student's approach and answer",
+                confidence=confidence
+            )
+            
+            # Verify feedback with meta agent if available
+            if self.meta_agent:
+                # Define regeneration function for meta verification
+                def regenerate_feedback(current_state):
+                    # Get the verification feedback
+                    verification_feedback = current_state.context.get("verification_feedback", [])
+                    previous_confidence = current_state.context.get("verification_confidence", 0.1)
+                    
+                    # Regenerate with this information
+                    new_feedback = self._generate_feedback(
+                        problem=current_state.question,
+                        student_answer=current_state.student_answer,
+                        correct_answer=current_state.correct_answer,
+                        is_correct=is_correct,
+                        attempts=2,
+                        max_attempts=3,
+                        verification_feedback=verification_feedback,
+                        previous_confidence=previous_confidence
+                    )
+                    
+                    # Recalculate confidence with verification results
+                    updated_confidence = self._assess_confidence(
+                        current_state, 
+                        has_verification=True,
+                        verification_result=current_state.context.get("verification_result", {})
+                    )
+                    
+                    # Update feedback object
+                    new_math_feedback = MathFeedback(
+                        assessment=new_feedback,
+                        is_correct=is_correct,
+                        proximity_score=current_state.proximity_score or 0.0,
+                        detail="Detailed feedback based on student's approach and answer",
+                        confidence=updated_confidence
+                    )
+                    
+                    # Update state
+                    current_state.feedback = new_math_feedback
+                    return current_state
+                
+                # Prepare verification state
+                verification_state = MathState(
+                    question=state.question,
+                    student_answer=state.student_answer,
+                    correct_answer=state.correct_answer
+                )
+                verification_state.feedback = math_feedback
+                
+                # Verify the feedback
+                try:
+                    verification_result = self.meta_agent.verify_output(
+                        verification_state.to_dict(), 
+                        "feedback", 
+                        regenerate_feedback
+                    )
+                    
+                    # If verification changed the feedback, extract from verification_result
+                    if verification_result.get("feedback"):
+                        feedback_dict = verification_result.get("feedback", {})
+                        if isinstance(feedback_dict, dict):
+                            math_feedback = MathFeedback(
+                                assessment=feedback_dict.get("assessment", feedback),
+                                is_correct=feedback_dict.get("is_correct", is_correct),
+                                proximity_score=feedback_dict.get("proximity_score", state.proximity_score or 0.0),
+                                detail=feedback_dict.get("detail", "Verified feedback"),
+                                confidence=feedback_dict.get("confidence", confidence)
+                            )
+                        # Update confidence based on verification
+                        if verification_result.get("verified", False):
+                            math_feedback.confidence = max(math_feedback.confidence, 0.8)
+                        else:
+                            math_feedback.confidence = min(math_feedback.confidence, 0.5)
+                except Exception as e:
+                    logger.warning(f"Feedback verification failed: {str(e)}")
+            
+            # Update state with feedback
+            state.feedback = math_feedback
+            
+            # Log the generated feedback
+            logger.info(f"Generated feedback: {feedback[:100]}...")
+            
+            self.record_event(state, "feedback_generation_complete", {
+                "feedback_length": len(feedback),
+                "is_correct": is_correct,
+                "proximity_score": state.proximity_score or 0.0,
+                "confidence": math_feedback.confidence
+            })
+            
+            return state
+            
+        except Exception as e:
+            logger.error(f"Error generating feedback: {str(e)}")
+            self.log_error(e, state)
+            
+            # Create a fallback feedback
+            fallback_feedback = MathFeedback(
+                assessment="I'm sorry, but I encountered an issue while generating feedback. "
+                          "Please try again or check your answer format.",
+                is_correct=False,
+                proximity_score=0.0,
+                detail="Error generating feedback",
+                confidence=0.1  # Low confidence for fallback
+            )
+            state.feedback = fallback_feedback
+            return state
+
+    def _assess_confidence(self, state: MathState, has_verification: bool = False, 
+                          verification_result: Dict[str, Any] = None) -> float:
+        """
+        Assess the confidence level in our feedback assessment.
         
         Args:
             state: The current state
-            event_data: Data about the event
+            has_verification: Whether verification was performed
+            verification_result: Results from verification if available
             
         Returns:
-            The updated state
+            Confidence level from 0.0 to 1.0
         """
-        logger.info(f"Feedback command event: {event_data}")
+        # Start with a base confidence
+        confidence = 0.7  # Default moderate confidence
         
-        # Add event to state if tracking events
-        if "events" not in state:
-            state["events"] = []
+        # Factors that increase confidence
+        if state.correct_answer and state.student_answer:
+            # If there's a clear correct answer to compare against
+            confidence += 0.1
+            
+            # If answers are identical or very similar
+            if state._normalize_answer(state.student_answer) == state._normalize_answer(state.correct_answer):
+                confidence += 0.1
         
-        event = {
-            "type": "feedback_generated",
-            "timestamp": str(datetime.now()),
-            "data": event_data
-        }
+        # Analysis results can affect confidence
+        if state.analysis and hasattr(state.analysis, 'is_correct'):
+            # For completely correct answers
+            if state.analysis.is_correct:
+                confidence += 0.1
+            # For answers with specific error types (we're confident about the error)
+            elif state.analysis.error_type:
+                confidence += 0.05
         
-        state["events"].append(event)
+        # Verification results significantly impact confidence
+        if has_verification and verification_result:
+            # If feedback was verified
+            if verification_result.get("verified", False):
+                confidence = max(confidence, 0.85)
+            else:
+                # Confidence score from verification
+                verification_confidence = verification_result.get("confidence", 0.5)
+                # Weight the verification result more heavily
+                confidence = (confidence + (verification_confidence * 2)) / 3
+        
+        # Set upper and lower bounds
+        confidence = max(0.1, min(confidence, 0.95))
+        
+        return confidence
+
+    def _handle_missing_information(self, state: MathState) -> MathState:
+        """
+        Handle the case where problem or answer information is missing.
+        
+        Args:
+            state: The current state
+            
+        Returns:
+            Updated state with generic feedback
+        """
+        if not hasattr(state, "feedback") or not state.feedback:
+            state.feedback = MathFeedback()
+        
+        state.feedback.assessment = "I need both a problem and your answer to provide feedback. Please make sure both are provided."
+        state.feedback.is_correct = False
+        state.feedback.detail = "Missing information"
+        state.proximity_score = 0.0
+        state.feedback.proximity_score = 0.0
         
         return state
-        
+
     def _generate_solution_explanation(self, question: str, correct_answer: str) -> str:
         """
         Generate a detailed explanation of the solution for the final attempt.
@@ -119,85 +319,6 @@ class MathGenerateFeedbackCommand:
             and apply the appropriate mathematical techniques.</p>
             """
     
-    def _execute_core(self, state: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Generate feedback for the student's answer.
-        
-        Args:
-            state: Current state with problem and student answer
-            
-        Returns:
-            Updated state with feedback
-        """
-        logger.info("Generating feedback")
-        
-        # Get the problem and student answer from the state
-        problem = state.get("question", "")
-        student_answer = state.get("student_answer", "")
-        correct_answer = state.get("correct_answer", "")
-        
-        # Check if we have the necessary information
-        if not problem or not student_answer or not correct_answer:
-            logger.warning("Missing required information for feedback generation")
-            return self._record_event(state, {"status": "error", "message": "Missing required information"})
-        
-        # Check if the student has reached the maximum number of attempts
-        attempts = state.get("attempts", 1)
-        max_attempts = state.get("max_attempts", 3)
-        
-        # Check if the answer is correct with more flexibility
-        is_correct = self._check_answer_with_flexibility(student_answer, correct_answer)
-        state["is_correct"] = is_correct
-        
-        # Generate feedback
-        feedback = self._generate_feedback(problem, student_answer, correct_answer, is_correct, attempts, max_attempts)
-        
-        # Add the feedback to the state
-        if "feedback" not in state:
-            state["feedback"] = []
-        state["feedback"].append(feedback)
-        
-        # Verify the feedback using the meta-agent if available
-        if self.meta_agent:
-            logger.info("Verifying feedback with meta-agent")
-            
-            # Define a regeneration function for the meta-agent to use
-            def regenerate_feedback(current_state):
-                # Get the verification feedback
-                verification_feedback = current_state.get("verification_feedback", [])
-                confidence = current_state.get("verification_confidence", 0)
-                
-                logger.info(f"Regenerating feedback with verification: {verification_feedback}, confidence: {confidence}")
-                
-                # Remove the last feedback that failed verification
-                if current_state.get("feedback"):
-                    current_state["feedback"].pop()
-                
-                # Generate new feedback with the verification feedback
-                new_feedback = self._generate_feedback(
-                    problem, 
-                    student_answer, 
-                    correct_answer, 
-                    is_correct, 
-                    attempts, 
-                    max_attempts,
-                    verification_feedback=verification_feedback,
-                    previous_confidence=confidence
-                )
-                
-                # Add the new feedback to the state
-                if "feedback" not in current_state:
-                    current_state["feedback"] = []
-                current_state["feedback"].append(new_feedback)
-                
-                return current_state
-            
-            # Verify with the ability to regenerate
-            state = self.meta_agent.verify_output(state, "feedback", regenerate_feedback)
-        
-        # Record success event
-        return self._record_event(state, {"status": "success"})
-        
     def _generate_feedback(self, problem: str, student_answer: str, correct_answer: str, 
                           is_correct: bool, attempts: int, max_attempts: int,
                           verification_feedback: List[str] = None,

@@ -1,230 +1,169 @@
 """
-Math Solve Command.
-
-This module contains the command for solving math problems symbolically.
+Command for solving a math problem symbolically using the LLM.
 """
 
 import logging
 import json
-import traceback
-import re
-from typing import Dict, Any, List, Optional
-import sympy
-from sympy import symbols, sympify, solve, Eq, simplify
-from sympy.parsing.sympy_parser import parse_expr
+from datetime import datetime
+from typing import Dict, Any, Optional, List
 
-from app.math.services.llm.base_service import BaseLLMService
+from app.math_services.commands.base_command import BaseCommand
+from app.math_services.models.state import MathState
+from app.math_services.services.service_container import ServiceContainer
 
 logger = logging.getLogger(__name__)
 
-class MathSolveSymbolicallyCommand:
-    """Command for solving math problems symbolically."""
+class MathSolveSymbolicallyCommand(BaseCommand):
+    """Command for solving math problems symbolically using the LLM."""
     
-    def __init__(self, agent):
+    def __init__(self, service_container: ServiceContainer):
         """
-        Initialize the solve command.
+        Initialize the command with services.
         
         Args:
-            agent: The agent instance that will use this command
+            service_container: Container with required services
         """
-        self.agent = agent
-        self.llm_service = agent.llm_service
-        self.meta_agent = agent.meta_agent
-        logger.info("Initialized MathSolveSymbolicallyCommand")
-    
-    def _execute_core(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        super().__init__(service_container)
+        
+    def _init_services(self, service_container: ServiceContainer):
         """
-        Solve the problem symbolically.
+        Initialize services required by this command.
         
         Args:
-            state: Current state with parsed question
+            service_container: The service container
+        """
+        self.llm_service = service_container.get_llm_service()
+        self.meta_agent = service_container.get_meta_agent()
+        
+    def execute(self, state: MathState) -> MathState:
+        """
+        Solve the math problem symbolically.
+        
+        Args:
+            state: Current MathState
             
         Returns:
-            Updated state with solution
+            Updated MathState with the solution
         """
-        self.logger.info("Solving symbolic problem")
+        # Log the start of execution
+        logger.info("Beginning symbolic math solution")
+        self.record_event(state, "solve_start", {
+            "question": state.question,
+        })
         
-        # Get the parsed question from the state
-        parsed_question = state.get("analysis", {}).get("parsed_question", {})
-        
-        # Get the equations and variables
-        equations = parsed_question.get("equations", [])
-        variables = parsed_question.get("variables", [])
-        target_variable = parsed_question.get("target_variable")
-        
-        if not equations:
-            self.logger.warning("No equations found in parsed question")
-            state["correct_answer"] = "Unknown"
+        # Check if we have a question to solve
+        if not state.question:
+            logger.error("No question found in state")
+            state.correct_answer = "Error: No question provided"
             return state
-        
-        if not variables:
-            self.logger.warning("No variables found in parsed question")
-            state["correct_answer"] = "Unknown"
-            return state
-        
-        # Try to solve with SymPy first
-        try:
-            solution = self._solve_with_sympy(equations, variables, target_variable)
-            state["correct_answer"] = solution
-            return state
-        except Exception as e:
-            self.logger.error(f"Error in SymPy solving: {e}")
-        
-        # If SymPy fails, try with LLM
-        self.logger.warning("Failed to solve with SymPy, trying with LLM")
         
         try:
-            if hasattr(self.agent, 'llm_service') and self.agent.llm_service:
-                solution = self._solve_with_llm(equations, variables, target_variable)
-                state["correct_answer"] = solution
-                return state
-            else:
-                self.logger.warning("No LLM service available for solving")
-                state["correct_answer"] = "Unknown"
-                return state
+            # Create the prompt for the LLM
+            prompt = self._create_solve_prompt(state.question)
+            
+            # Call the LLM service to solve the problem
+            logger.info(f"Calling LLM service with prompt length: {len(prompt)}")
+            response = self.llm_service.complete(
+                system=self._get_system_message(),
+                user=prompt
+            )
+            
+            # Process the response
+            solution = self._extract_solution(response)
+            
+            # Store the solution in the state
+            state.correct_answer = solution
+            
+            # Log successful completion
+            logger.info(f"Successfully solved problem, answer: {solution[:100]}...")
+            self.record_event(state, "solve_complete", {
+                "answer_length": len(solution) if solution else 0,
+            })
+                        
+            # Verify the solution if meta agent is available
+            if self.meta_agent:
+                try:
+                    verification = self.meta_agent.verify_solution(
+                        question=state.question,
+                        solution=solution
+                    )
+                    logger.info(f"Solution verification result: {verification}")
+                    
+                    # Store verification results
+                    state.verification_results = verification
+                    
+                except Exception as verify_error:
+                    logger.error(f"Error verifying solution: {str(verify_error)}")
+                    state.verification_results = {
+                        "verified": False,
+                        "error": str(verify_error)
+                    }
+            
+            return state
+            
         except Exception as e:
-            self.logger.error(f"Error in LLM solving: {e}")
-            state["correct_answer"] = "Unknown"
+            logger.error(f"Error in symbolic solution: {str(e)}")
+            self.log_error(e, state)
+            
+            # Set a fallback message in case of error
+            state.correct_answer = "Error: Unable to solve this problem"
             return state
     
-    def _solve_with_sympy(self, equations: List[str], variables: List[str], target_variable: Optional[str] = None) -> str:
+    def _create_solve_prompt(self, question: str) -> str:
         """
-        Solve the equations using SymPy.
+        Create a prompt for solving the math problem.
         
         Args:
-            equations: List of equation strings
-            variables: List of variable names
-            target_variable: Variable to solve for
+            question: The math question
             
         Returns:
-            Solution as a string
+            A formatted prompt
         """
-        # If target_variable is not specified, use the first variable
-        if not target_variable and variables:
-            target_variable = variables[0]
-        
-        # Create SymPy symbols for variables
-        symbols = {}
-        for var in variables:
-            symbols[var] = sympy.Symbol(var)
-        
-        # Parse and solve each equation
-        solutions = []
-        
-        for eq_str in equations:
-            # Clean up the equation string
-            eq_str = eq_str.replace("Solve for", "").replace("solve for", "").strip()
-            
-            # Remove any variable specifications from the equation
-            eq_str = re.sub(r'^\s*[a-zA-Z]+\s*:', '', eq_str).strip()
-            
-            # Split the equation at the equals sign
-            if "=" in eq_str:
-                left_str, right_str = eq_str.split("=", 1)
-                
-                # Parse the left and right sides
-                left_expr = sympy.sympify(left_str.strip())
-                right_expr = sympy.sympify(right_str.strip())
-                
-                # Create the equation
-                equation = sympy.Eq(left_expr, right_expr)
-                
-                # Solve for the target variable
-                solution = sympy.solve(equation, symbols[target_variable])
-                
-                # Format the solution
-                solution_str = f"{target_variable} = {solution[0]}" if solution else "No solution found"
-                solutions.append(solution_str)
-        
-        # Return the solutions
-        return solutions[0] if solutions else "No solution found"
+        prompt = f"""
+Please solve the following math problem step by step:
+
+{question}
+
+Provide a detailed solution showing all work. Include:
+1. The key concepts and formulas needed
+2. Each step of the calculation
+3. The final answer (clearly marked)
+
+Format your answer as a clear, step-by-step solution that a student could follow.
+"""
+        return prompt.strip()
     
-    def _solve_with_llm(self, equations: List[str], variables: List[str], target_variable: Optional[str] = None) -> str:
+    def _get_system_message(self) -> str:
         """
-        Solve the equations using LLM.
+        Get the system message for the LLM.
+        
+        Returns:
+            The system message defining the role and rules
+        """
+        return """
+You are an expert mathematics tutor. Your task is to solve math problems step by step, 
+showing all work clearly. Provide complete solutions that demonstrate proper 
+mathematical reasoning and notation.
+
+When solving problems:
+- Identify the key concepts and formulas needed
+- Break down the solution into clear steps
+- Show all algebraic manipulations
+- Provide the final answer clearly marked
+
+Use proper mathematical notation and formatting.
+"""
+    
+    def _extract_solution(self, response: str) -> str:
+        """
+        Extract the solution from the LLM response.
         
         Args:
-            equations: List of equation strings
-            variables: List of variable names
-            target_variable: Variable to solve for
+            response: The raw LLM response
             
         Returns:
-            Solution as a string
+            The extracted solution
         """
-        # If target_variable is not specified, use the first variable
-        if not target_variable and variables:
-            target_variable = variables[0]
-        
-        # Create the system prompt
-        system_prompt = """
-        You are a mathematical solving assistant. Your task is to solve the given equations for the specified variable.
-        
-        Provide your solution in the following format:
-        {
-            "solution": "x = 2",
-            "steps": ["Step 1: ...", "Step 2: ...", ...],
-            "explanation": "Brief explanation of the solution"
-        }
-        """
-        
-        # Create the user prompt
-        user_prompt = f"Equations: {', '.join(equations)}\nVariables: {', '.join(variables)}\nSolve for: {target_variable}"
-        
-        # Get the response from the LLM
-        response = self.agent.llm_service.generate_completion(system_prompt, user_prompt)
-        
-        # Extract the solution from the response
-        try:
-            # If response is a string, try to parse it as JSON
-            if isinstance(response, str):
-                solution_data = json.loads(response)
-            # If response is already a dict, use it directly
-            elif isinstance(response, dict) and "content" in response:
-                content = response["content"]
-                # Extract JSON from the content if needed
-                if isinstance(content, str):
-                    # Try to find JSON in the string
-                    json_start = content.find('{')
-                    json_end = content.rfind('}') + 1
-                    if json_start >= 0 and json_end > json_start:
-                        json_str = content[json_start:json_end]
-                        solution_data = json.loads(json_str)
-                    else:
-                        # Try to extract the solution directly
-                        solution_match = re.search(r'([a-zA-Z]+\s*=\s*[^,\n]+)', content)
-                        if solution_match:
-                            return solution_match.group(1).strip()
-                        else:
-                            raise ValueError("No solution found in LLM response")
-                elif isinstance(content, dict):
-                    solution_data = content
-                else:
-                    raise ValueError(f"Unexpected LLM response format: {type(content)}")
-            else:
-                raise ValueError(f"Unexpected LLM response format: {type(response)}")
-            
-            # Extract the solution
-            if "solution" in solution_data:
-                return solution_data["solution"]
-            else:
-                # Try to find the solution in the response
-                for key, value in solution_data.items():
-                    if isinstance(value, str) and "=" in value:
-                        return value
-                
-                raise ValueError("No solution found in LLM response")
-            
-        except Exception as e:
-            self.logger.error(f"Error parsing LLM solution: {e}")
-            self.logger.error(f"LLM response: {response}")
-            
-            # Try to extract the solution directly from the response
-            if isinstance(response, dict) and "content" in response:
-                content = response["content"]
-                if isinstance(content, str):
-                    solution_match = re.search(r'([a-zA-Z]+\s*=\s*[^,\n]+)', content)
-                    if solution_match:
-                        return solution_match.group(1).strip()
-            
-            # If all else fails, return a default message
-            return f"Unable to solve for {target_variable}"
+        # For this simple implementation, we'll return the entire response
+        # In a real implementation, you might want to parse JSON or extract specific parts
+        return response.strip()

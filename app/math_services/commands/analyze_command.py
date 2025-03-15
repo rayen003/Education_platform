@@ -1,557 +1,294 @@
 """
-Math Analyze Command.
-
-This module contains the command for analyzing student calculations.
+Command for analyzing a student's mathematical calculation.
 """
 
 import logging
 import json
-import traceback
-import re
+from datetime import datetime
 from typing import Dict, Any, List, Optional
-import sympy
-from sympy import symbols, sympify, solve, Eq, simplify
-from sympy.parsing.sympy_parser import parse_expr
 
-from app.math.services.llm.base_service import BaseLLMService
+from app.math_services.commands.base_command import BaseCommand
+from app.math_services.models.state import MathState, MathAnalysis
+from app.math_services.services.service_container import ServiceContainer
 
 logger = logging.getLogger(__name__)
 
-# Utility functions (moved from utilities.math_utils)
-def normalize_answer(answer: str) -> str:
-    """
-    Normalize a mathematical answer for comparison.
+class MathAnalyzeCalculationCommand(BaseCommand):
+    """Command for analyzing a student's mathematical calculation."""
     
-    Args:
-        answer: The answer to normalize
-        
-    Returns:
-        Normalized answer string
-    """
-    # Convert to lowercase
-    normalized = answer.lower()
-    
-    # Remove whitespace
-    normalized = re.sub(r'\s+', '', normalized)
-    
-    # Remove dollar signs (LaTeX)
-    normalized = normalized.replace('$', '')
-    
-    # Replace common variations
-    normalized = normalized.replace('x=', '')
-    normalized = normalized.replace('y=', '')
-    normalized = normalized.replace('z=', '')
-    
-    return normalized
-
-def calculate_string_similarity(str1: str, str2: str) -> float:
-    """
-    Calculate similarity between two strings using SequenceMatcher.
-    
-    Args:
-        str1: First string
-        str2: Second string
-        
-    Returns:
-        Similarity score between 0 and 1
-    """
-    from difflib import SequenceMatcher
-    return SequenceMatcher(None, str1, str2).ratio()
-
-def is_answer_correct(student_answer: str, correct_answer: str, tolerance: float = 0.01) -> bool:
-    """
-    Check if a student's answer is correct.
-    
-    Args:
-        student_answer: The student's answer
-        correct_answer: The correct answer
-        tolerance: Tolerance for numerical comparison
-        
-    Returns:
-        True if the answer is correct, False otherwise
-    """
-    # Normalize both answers
-    norm_student = normalize_answer(student_answer)
-    norm_correct = normalize_answer(correct_answer)
-    
-    # Check for exact string match
-    if norm_student == norm_correct:
-        return True
-    
-    # Try symbolic comparison
-    try:
-        student_expr = parse_expr(norm_student)
-        correct_expr = parse_expr(norm_correct)
-        
-        # Check if they are symbolically equivalent
-        if sympy.simplify(student_expr - correct_expr) == 0:
-            return True
-    except Exception:
-        pass
-    
-    # Try numerical comparison for float values
-    try:
-        student_val = float(norm_student)
-        correct_val = float(norm_correct)
-        
-        # Check if they are close enough
-        if abs(student_val - correct_val) <= tolerance:
-            return True
-    except ValueError:
-        pass
-    
-    # Check string similarity as a last resort
-    similarity = calculate_string_similarity(norm_student, norm_correct)
-    if similarity > 0.9:  # 90% similarity threshold
-        return True
-    
-    return False
-
-class MathAnalyzeCalculationCommand:
-    """Command for analyzing a student's calculation."""
-    
-    def __init__(self, agent):
+    def __init__(self, service_container: ServiceContainer):
         """
-        Initialize the analyze command.
+        Initialize the command with services.
         
         Args:
-            agent: The agent instance that will use this command
+            service_container: Container with required services
         """
-        self.agent = agent
-        self.llm_service = agent.llm_service
-        self.meta_agent = agent.meta_agent
-        logger.info("Initialized MathAnalyzeCalculationCommand")
-    
-    def _execute_core(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        super().__init__(service_container)
+        
+    def _init_services(self, service_container: ServiceContainer):
         """
-        Analyze a student's calculation.
+        Initialize services required by this command.
         
         Args:
-            state: The current state dictionary
+            service_container: The service container
+        """
+        self.llm_service = service_container.get_llm_service()
+        
+    def execute(self, state: MathState) -> MathState:
+        """
+        Analyze a student's answer to determine correctness and identify errors.
+        
+        Args:
+            state: The current state with question and student answer
             
         Returns:
             Updated state with analysis
         """
-        # Get the required information from the state
-        question = state.get("question", "")
-        student_answer = state.get("student_answer", "")
-        parsed_question = state.get("analysis", {}).get("parsed_question", {})
-        solution = state.get("solution", {})
-        
-        if not question or not student_answer:
-            logger.error("Missing question or student answer")
-            return self._record_event(state, {
-                "status": "error",
-                "error": "Missing question or student answer"
-            })
-        
-        if not parsed_question:
-            logger.error("No parsed question information available")
-            return self._record_event(state, {
-                "status": "error",
-                "error": "No parsed question information available"
-            })
+        logger.info("Beginning calculation analysis")
+        self.record_event(state, "analyze_start", {
+            "question": state.question,
+            "student_answer": state.student_answer,
+            "correct_answer": state.correct_answer
+        })
         
         try:
-            # Determine the problem type
-            problem_type = parsed_question.get("type", "symbolic")
-            logger.info(f"Analyzing calculation for problem type: {problem_type}")
+            # Create the prompt for analysis
+            prompt = self._create_analysis_prompt(
+                state.question, 
+                state.student_answer, 
+                state.correct_answer
+            )
             
-            # Analyze based on problem type
-            if problem_type == "symbolic":
-                return self._analyze_symbolic_calculation(state, parsed_question, solution)
-            else:
-                return self._analyze_word_problem_calculation(state, parsed_question, solution)
+            # Call the LLM service
+            logger.info("Calling LLM service for calculation analysis")
+            response = self.llm_service.generate_completion(
+                self._get_system_message(), 
+                prompt
+            )
+            
+            # Parse the response
+            analysis_result = self._parse_analysis_response(response["content"])
+            
+            # Set confidence based on analysis factors
+            confidence = self._assess_confidence(
+                state.question,
+                state.student_answer,
+                state.correct_answer,
+                analysis_result
+            )
+            
+            # Create the analysis object
+            analysis = MathAnalysis(
+                is_correct=analysis_result.get("is_correct", False),
+                error_type=analysis_result.get("error_type"),
+                misconception=analysis_result.get("misconception"),
+                calculation_steps=analysis_result.get("steps", []),
+                verification_result=analysis_result.get("verification", {})
+            )
+            
+            # Add confidence to context for use by other commands
+            if not state.context:
+                state.context = {}
+            state.context["analysis_confidence"] = confidence
+            
+            # Log the result
+            logger.info(f"Successfully analyzed calculation, correct: {analysis.is_correct}")
+            
+            if analysis.error_type:
+                logger.info(f"Identified error type: {analysis.error_type}")
                 
+            if analysis.misconception:
+                logger.info(f"Identified misconception: {analysis.misconception}")
+            
+            # Update the state
+            state.analysis = analysis
+            
+            self.record_event(state, "analyze_complete", {
+                "is_correct": analysis.is_correct,
+                "error_type": analysis.error_type,
+                "confidence": confidence
+            })
+            
+            return state
+            
         except Exception as e:
-            logger.error(f"Error analyzing calculation: {e}")
-            logger.debug(traceback.format_exc())
+            logger.error(f"Error analyzing calculation: {str(e)}")
+            self.log_error(e, state)
             
-            # Record error event
-            return self._record_event(state, {
-                "status": "error",
-                "error": f"Failed to analyze calculation: {str(e)}"
-            })
+            # Create a default analysis
+            default_analysis = MathAnalysis(
+                is_correct=False,
+                error_type="unknown",
+                misconception=None
+            )
+            state.analysis = default_analysis
+            
+            # Add low confidence to context
+            if not state.context:
+                state.context = {}
+            state.context["analysis_confidence"] = 0.3
+            
+            return state
     
-    def _analyze_symbolic_calculation(self, state: Dict[str, Any], parsed_question: Dict[str, Any], solution: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_analysis_prompt(self, question: str, student_answer: str, correct_answer: Optional[str] = None) -> str:
         """
-        Analyze a symbolic calculation.
+        Create a prompt for analyzing the calculation.
         
         Args:
-            state: The current state dictionary
-            parsed_question: The parsed question information
-            solution: The solution information
+            question: The math question
+            student_answer: The student's answer
+            correct_answer: The correct answer (if available)
             
         Returns:
-            Updated state with analysis
+            A formatted prompt
         """
-        # Get the required information
-        student_answer = state.get("student_answer", "")
-        correct_answer = state.get("correct_answer", "")
-        equations = parsed_question.get("equations", [])
-        variables = parsed_question.get("variables", [])
+        # Build the prompt with the available information
+        prompt = f"""
+Please analyze the following math problem and student's answer:
+
+PROBLEM:
+{question}
+
+STUDENT'S ANSWER:
+{student_answer}
+"""
+
+        # Add the correct answer if available
+        if correct_answer:
+            prompt += f"""
+CORRECT ANSWER:
+{correct_answer}
+"""
+
+        # Add instructions for the analysis
+        prompt += """
+Analyze the student's work and provide a detailed assessment in JSON format with the following structure:
+{
+  "is_correct": true/false,
+  "error_type": null or ["calculation", "conceptual", "procedural", "algebraic", "arithmetic"],
+  "misconception": null or "description of the student's misconception",
+  "calculation_steps": [
+    {"step": "description of step 1", "is_correct": true/false, "error": null or "description of error"},
+    ...
+  ],
+  "verification": {
+    "matches_correct_answer": true/false,
+    "notes": "any additional verification notes"
+  }
+}
+
+If the student's answer is correct, set is_correct to true, error_type to null, and misconception to null.
+If the student's answer is incorrect, identify the type of error and any misconceptions.
+"""
+        return prompt.strip()
+    
+    def _get_system_message(self) -> str:
+        """
+        Get the system message for the LLM.
         
+        Returns:
+            The system message defining the role and rules
+        """
+        return """
+You are an expert mathematics tutor specializing in analyzing student work.
+Your task is to carefully analyze a student's mathematical calculation and identify
+any errors or misconceptions. Your analysis should be detailed, accurate, and helpful.
+
+Carefully examine each step of the student's work and identify:
+1. Whether the final answer is correct
+2. What type of error was made (if any)
+3. What misconception might be present (if any)
+4. A breakdown of each calculation step and whether it's correct
+
+Provide your analysis in valid JSON format as specified in the prompt.
+"""
+    
+    def _parse_analysis_response(self, response: str) -> Dict[str, Any]:
+        """
+        Parse the analysis response from the LLM.
+        
+        Args:
+            response: The raw LLM response
+            
+        Returns:
+            The parsed analysis data
+        """
         try:
-            # Use LLM to analyze the calculation if available
-            if self.agent and self.agent.llm_service:
-                # Prepare the prompt
-                system_prompt = """Analyze the student's answer to the symbolic math problem.
-                
-                Compare the student's answer with the correct answer and identify:
-                - Whether the answer is correct
-                - Any errors or misconceptions
-                - The approach used by the student
-                
-                Return the analysis as a JSON object with the following structure:
-                {
-                    "is_correct": true/false,
-                    "errors": ["Error 1", "Error 2", ...],
-                    "approach": "Description of the student's approach",
-                    "misconceptions": ["Misconception 1", "Misconception 2", ...],
-                    "observations": ["Observation 1", "Observation 2", ...]
-                }
-                """
-                
-                user_prompt = f"""Problem: {', '.join(equations)}
-                Variables: {', '.join(variables)}
-                Correct answer: {correct_answer}
-                Student answer: {student_answer}
-                """
-                
-                # Generate completion
-                response = self.agent.llm_service.generate_completion(
-                    system_prompt=system_prompt,
-                    user_prompt=user_prompt
-                )
-                
-                # Extract the analysis
-                content = response.get("content", "")
-                
+            # Try to parse the response as JSON
+            analysis_data = json.loads(response)
+            return analysis_data
+        except json.JSONDecodeError:
+            # If JSON parsing fails, try to extract JSON from the text
+            logger.warning("Failed to parse LLM response as JSON, attempting extraction")
+            
+            # Look for JSON-like content within the response
+            json_start = response.find('{')
+            json_end = response.rfind('}') + 1
+            
+            if json_start >= 0 and json_end > json_start:
                 try:
-                    # Try to parse as JSON
-                    try:
-                        analysis_data = json.loads(content)
-                    except json.JSONDecodeError:
-                        # If JSON parsing fails, try to extract JSON from markdown code blocks
-                        if "```json" in content:
-                            json_str = content.split("```json")[1].split("```")[0].strip()
-                            analysis_data = json.loads(json_str)
-                        elif "```" in content:
-                            json_str = content.split("```")[1].split("```")[0].strip()
-                            analysis_data = json.loads(json_str)
-                        else:
-                            # For mock service, create default analysis
-                            is_correct = is_answer_correct(student_answer, correct_answer)
-                            analysis_data = {
-                                "is_correct": is_correct,
-                                "errors": [] if is_correct else ["Incorrect answer"],
-                                "approach": "Unable to determine from the answer",
-                                "misconceptions": [],
-                                "observations": ["Student answer differs from correct answer"] if not is_correct else []
-                            }
-                    
-                    # Store the analysis in the state
-                    if "analysis" not in state:
-                        state["analysis"] = {}
-                    
-                    state["analysis"]["calculation"] = analysis_data
-                    
-                    # Update state with analysis results
-                    state["is_correct"] = analysis_data.get("is_correct", False)
-                    state["errors"] = analysis_data.get("errors", [])
-                    state["observations"] = analysis_data.get("observations", [])
-                    
-                    # Determine if the student needs a hint
-                    state["needs_hint"] = not analysis_data.get("is_correct", False)
-                    
-                    # Calculate a score based on correctness
-                    score = 10.0 if analysis_data.get("is_correct", False) else 5.0
-                    
-                    # Store the score in the state
-                    if "scores" not in state:
-                        state["scores"] = {}
-                    
-                    state["scores"]["accuracy"] = score
-                    
-                    # Record success event
-                    return self._record_event(state, {"status": "success"})
-                    
-                except Exception as e:
-                    logger.error(f"Error parsing analysis: {e}")
-                    logger.debug(traceback.format_exc())
-                    
-                    # Create default analysis
-                    is_correct = is_answer_correct(student_answer, correct_answer)
-                    analysis_data = {
-                        "is_correct": is_correct,
-                        "errors": [] if is_correct else ["Incorrect answer"],
-                        "approach": "Unable to determine from the answer",
-                        "misconceptions": [],
-                        "observations": ["Student answer differs from correct answer"] if not is_correct else []
-                    }
-                    
-                    # Store the analysis in the state
-                    if "analysis" not in state:
-                        state["analysis"] = {}
-                    
-                    state["analysis"]["calculation"] = analysis_data
-                    
-                    # Update state with analysis results
-                    state["is_correct"] = analysis_data.get("is_correct", False)
-                    state["errors"] = analysis_data.get("errors", [])
-                    state["observations"] = analysis_data.get("observations", [])
-                    
-                    # Determine if the student needs a hint
-                    state["needs_hint"] = not analysis_data.get("is_correct", False)
-                    
-                    # Calculate a score based on correctness
-                    score = 10.0 if analysis_data.get("is_correct", False) else 5.0
-                    
-                    # Store the score in the state
-                    if "scores" not in state:
-                        state["scores"] = {}
-                    
-                    state["scores"]["accuracy"] = score
-                    
-                    # Record partial success
-                    return self._record_event(state, {
-                        "status": "partial_success",
-                        "error": str(e)
-                    })
-            else:
-                # Simple analysis without LLM
-                is_correct = is_answer_correct(student_answer, correct_answer)
-                analysis_data = {
-                    "is_correct": is_correct,
-                    "errors": [] if is_correct else ["Incorrect answer"],
-                    "approach": "Unable to determine from the answer",
-                    "misconceptions": [],
-                    "observations": ["Student answer differs from correct answer"] if not is_correct else []
-                }
-                
-                # Store the analysis in the state
-                if "analysis" not in state:
-                    state["analysis"] = {}
-                
-                state["analysis"]["calculation"] = analysis_data
-                
-                # Update state with analysis results
-                state["is_correct"] = analysis_data.get("is_correct", False)
-                state["errors"] = analysis_data.get("errors", [])
-                state["observations"] = analysis_data.get("observations", [])
-                
-                # Determine if the student needs a hint
-                state["needs_hint"] = not analysis_data.get("is_correct", False)
-                
-                # Calculate a score based on correctness
-                score = 10.0 if analysis_data.get("is_correct", False) else 5.0
-                
-                # Store the score in the state
-                if "scores" not in state:
-                    state["scores"] = {}
-                
-                state["scores"]["accuracy"] = score
-                
-                # Record success event
-                return self._record_event(state, {"status": "success"})
-                
-        except Exception as e:
-            logger.error(f"Error in symbolic calculation analysis: {e}")
-            logger.debug(traceback.format_exc())
+                    json_str = response[json_start:json_end]
+                    analysis_data = json.loads(json_str)
+                    return analysis_data
+                except json.JSONDecodeError:
+                    logger.error("Failed to extract JSON from LLM response")
             
-            # Record error event
-            return self._record_event(state, {
-                "status": "error",
-                "error": f"Failed to analyze symbolic calculation: {str(e)}"
-            })
+            # If extraction fails, return a default structure
+            return {
+                "is_correct": False,
+                "error_type": "unknown",
+                "misconception": "Failed to parse analysis from LLM response",
+                "calculation_steps": [],
+                "verification": {
+                    "matches_correct_answer": False,
+                    "notes": "Error in analysis response parsing"
+                }
+            }
     
-    def _analyze_word_problem_calculation(self, state: Dict[str, Any], parsed_question: Dict[str, Any], solution: Dict[str, Any]) -> Dict[str, Any]:
+    def _assess_confidence(self, question: str, student_answer: str, 
+                         correct_answer: Optional[str], analysis_result: Dict[str, Any]) -> float:
         """
-        Analyze a word problem calculation.
+        Assess the confidence in our analysis.
         
         Args:
-            state: The current state dictionary
-            parsed_question: The parsed question information
-            solution: The solution information
+            question: The math problem
+            student_answer: Student's submitted answer
+            correct_answer: The correct answer (if available)
+            analysis_result: The analysis results
             
         Returns:
-            Updated state with analysis
+            Confidence score from 0.0 to 1.0
         """
-        # Get the required information
-        student_answer = state.get("student_answer", "")
-        correct_answer = state.get("correct_answer", "")
-        solution_steps = parsed_question.get("solution_steps", [])
+        # Start with a base confidence
+        confidence = 0.7
         
-        try:
-            # Use LLM to analyze the calculation if available
-            if self.agent and self.agent.llm_service:
-                # Prepare the prompt
-                system_prompt = """Analyze the student's answer to the word problem.
-                
-                Compare the student's answer with the correct answer and identify:
-                - Whether the answer is correct
-                - Any errors or misconceptions
-                - The approach used by the student
-                
-                Return the analysis as a JSON object with the following structure:
-                {
-                    "is_correct": true/false,
-                    "errors": ["Error 1", "Error 2", ...],
-                    "approach": "Description of the student's approach",
-                    "misconceptions": ["Misconception 1", "Misconception 2", ...],
-                    "observations": ["Observation 1", "Observation 2", ...]
-                }
-                """
-                
-                user_prompt = f"""Problem: {state.get('question', '')}
-                Solution steps: {solution_steps}
-                Correct answer: {correct_answer}
-                Student answer: {student_answer}
-                """
-                
-                # Generate completion
-                response = self.agent.llm_service.generate_completion(
-                    system_prompt=system_prompt,
-                    user_prompt=user_prompt
-                )
-                
-                # Extract the analysis
-                content = response.get("content", "")
-                
-                try:
-                    # Try to parse as JSON
-                    try:
-                        analysis_data = json.loads(content)
-                    except json.JSONDecodeError:
-                        # If JSON parsing fails, try to extract JSON from markdown code blocks
-                        if "```json" in content:
-                            json_str = content.split("```json")[1].split("```")[0].strip()
-                            analysis_data = json.loads(json_str)
-                        elif "```" in content:
-                            json_str = content.split("```")[1].split("```")[0].strip()
-                            analysis_data = json.loads(json_str)
-                        else:
-                            # For mock service, create default analysis
-                            is_correct = is_answer_correct(student_answer, correct_answer)
-                            analysis_data = {
-                                "is_correct": is_correct,
-                                "errors": [] if is_correct else ["Incorrect answer"],
-                                "approach": "Unable to determine from the answer",
-                                "misconceptions": [],
-                                "observations": ["Student answer differs from correct answer"] if not is_correct else []
-                            }
-                    
-                    # Store the analysis in the state
-                    if "analysis" not in state:
-                        state["analysis"] = {}
-                    
-                    state["analysis"]["calculation"] = analysis_data
-                    
-                    # Update state with analysis results
-                    state["is_correct"] = analysis_data.get("is_correct", False)
-                    state["errors"] = analysis_data.get("errors", [])
-                    state["observations"] = analysis_data.get("observations", [])
-                    
-                    # Determine if the student needs a hint
-                    state["needs_hint"] = not analysis_data.get("is_correct", False)
-                    
-                    # Calculate a score based on correctness
-                    score = 10.0 if analysis_data.get("is_correct", False) else 5.0
-                    
-                    # Store the score in the state
-                    if "scores" not in state:
-                        state["scores"] = {}
-                    
-                    state["scores"]["accuracy"] = score
-                    
-                    # Record success event
-                    return self._record_event(state, {"status": "success"})
-                    
-                except Exception as e:
-                    logger.error(f"Error parsing analysis: {e}")
-                    logger.debug(traceback.format_exc())
-                    
-                    # Create default analysis
-                    is_correct = is_answer_correct(student_answer, correct_answer)
-                    analysis_data = {
-                        "is_correct": is_correct,
-                        "errors": [] if is_correct else ["Incorrect answer"],
-                        "approach": "Unable to determine from the answer",
-                        "misconceptions": [],
-                        "observations": ["Student answer differs from correct answer"] if not is_correct else []
-                    }
-                    
-                    # Store the analysis in the state
-                    if "analysis" not in state:
-                        state["analysis"] = {}
-                    
-                    state["analysis"]["calculation"] = analysis_data
-                    
-                    # Update state with analysis results
-                    state["is_correct"] = analysis_data.get("is_correct", False)
-                    state["errors"] = analysis_data.get("errors", [])
-                    state["observations"] = analysis_data.get("observations", [])
-                    
-                    # Determine if the student needs a hint
-                    state["needs_hint"] = not analysis_data.get("is_correct", False)
-                    
-                    # Calculate a score based on correctness
-                    score = 10.0 if analysis_data.get("is_correct", False) else 5.0
-                    
-                    # Store the score in the state
-                    if "scores" not in state:
-                        state["scores"] = {}
-                    
-                    state["scores"]["accuracy"] = score
-                    
-                    # Record partial success
-                    return self._record_event(state, {
-                        "status": "partial_success",
-                        "error": str(e)
-                    })
-            else:
-                # Simple analysis without LLM
-                is_correct = is_answer_correct(student_answer, correct_answer)
-                analysis_data = {
-                    "is_correct": is_correct,
-                    "errors": [] if is_correct else ["Incorrect answer"],
-                    "approach": "Unable to determine from the answer",
-                    "misconceptions": [],
-                    "observations": ["Student answer differs from correct answer"] if not is_correct else []
-                }
-                
-                # Store the analysis in the state
-                if "analysis" not in state:
-                    state["analysis"] = {}
-                
-                state["analysis"]["calculation"] = analysis_data
-                
-                # Update state with analysis results
-                state["is_correct"] = analysis_data.get("is_correct", False)
-                state["errors"] = analysis_data.get("errors", [])
-                state["observations"] = analysis_data.get("observations", [])
-                
-                # Determine if the student needs a hint
-                state["needs_hint"] = not analysis_data.get("is_correct", False)
-                
-                # Calculate a score based on correctness
-                score = 10.0 if analysis_data.get("is_correct", False) else 5.0
-                
-                # Store the score in the state
-                if "scores" not in state:
-                    state["scores"] = {}
-                
-                state["scores"]["accuracy"] = score
-                
-                # Record success event
-                return self._record_event(state, {"status": "success"})
-                
-        except Exception as e:
-            logger.error(f"Error in word problem calculation analysis: {e}")
-            logger.debug(traceback.format_exc())
+        # Problem complexity affects confidence
+        word_count = len(question.split())
+        if word_count > 50:  # Complex problem
+            confidence -= 0.1
+        elif word_count < 15:  # Simple problem
+            confidence += 0.1
             
-            # Record error event
-            return self._record_event(state, {
-                "status": "error",
-                "error": f"Failed to analyze word problem calculation: {str(e)}"
-            })
+        # Clear correct answer increases confidence
+        if correct_answer:
+            confidence += 0.1
+            
+        # Answer format affects confidence
+        if len(student_answer) < 3:  # Very short answer
+            confidence -= 0.05
+        
+        # Definite analysis results increase confidence
+        if analysis_result.get("is_correct") is not None:
+            confidence += 0.05
+            
+        if analysis_result.get("error_type"):
+            confidence += 0.05
+            
+        # Add randomness for very high confidence to avoid appearing too certain
+        if confidence > 0.9:
+            confidence = min(0.95, confidence)
+            
+        # Set bounds
+        confidence = max(0.3, min(confidence, 0.95))
+        
+        return confidence

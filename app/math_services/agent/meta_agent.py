@@ -8,18 +8,47 @@ outputs from other agents to enhance robustness through iterative verification.
 import logging
 import json
 import re
-from typing import Dict, Any, List, Optional, Tuple, Callable
+import time
+import signal
+from typing import Dict, Any, List, Optional, Tuple, Callable, Union
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
-import time
 import queue
 import threading
+from contextlib import contextmanager
+from app.math_services.models.state import MathState
+from app.math_services.services.llm.base_service import BaseLLMService
 
 # Load environment variables
 load_dotenv()
 
 logger = logging.getLogger(__name__)
+
+# Define the timeout context manager
+@contextmanager
+def timeout(seconds):
+    """
+    Context manager for timing out operations.
+    
+    Args:
+        seconds: Number of seconds to wait before timing out
+        
+    Raises:
+        TimeoutError: If the operation times out
+    """
+    def handle_timeout(signum, frame):
+        raise TimeoutError(f"Operation timed out after {seconds} seconds")
+    
+    # Set the timeout handler
+    signal.signal(signal.SIGALRM, handle_timeout)
+    signal.alarm(seconds)
+    
+    try:
+        yield
+    finally:
+        # Cancel the alarm
+        signal.alarm(0)
 
 class MetaAgent:
     """
@@ -33,19 +62,31 @@ class MetaAgent:
     
     def __init__(self, model="gpt-4o-mini", confidence_threshold=0.8, max_iterations=3, llm_service=None):
         """
-        Initialize the meta-agent.
+        Initialize the meta agent.
         
         Args:
             model: The OpenAI model to use
-            confidence_threshold: Minimum confidence score (0-1) required for verification
-            max_iterations: Maximum number of regeneration attempts
-            llm_service: LLM service abstraction
+            confidence_threshold: Minimum confidence for verification
+            max_iterations: Maximum regeneration iterations
+            llm_service: Optional LLM service to use (will create one if None)
         """
+        # Store parameters
         self.model = model
-        self.llm_service = llm_service
         self.confidence_threshold = confidence_threshold
         self.max_iterations = max_iterations
-        logger.info(f"Initialized MetaAgent with model {model}, confidence threshold {confidence_threshold}")
+        
+        # Initialize OpenAI client
+        api_key = os.getenv("OPENAI_API_KEY") or "mock-key"
+        self.client = OpenAI(api_key=api_key)
+        
+        # Use provided LLM service or create a new one
+        if llm_service:
+            self.llm_service = llm_service
+        else:
+            from app.math_services.services.llm.openai_service import OpenAILLMService
+            self.llm_service = OpenAILLMService(model=model)
+        
+        logger.info(f"Initialized MetaAgent with model {model}")
     
     def verify_output(self, state: Dict[str, Any], output_type: str, regenerate_func: Optional[Callable] = None) -> Dict[str, Any]:
         """
@@ -230,168 +271,148 @@ class MetaAgent:
                 }
             }, 0.0
     
-    def verify_reasoning_steps(self, state: Dict[str, Any], steps_key: str, regenerate_step_func: Optional[Callable] = None) -> Dict[str, Any]:
+    def verify_reasoning_steps(self, state: Union[Dict[str, Any], MathState], steps_key: str, regenerate_step_func: Optional[Callable] = None) -> Dict[str, Any]:
         """
-        Verify each step of reasoning independently.
+        Verify a list of reasoning steps and regenerate problematic ones.
         
         Args:
-            state: The current state
-            steps_key: The key in the state that contains the steps to verify
-            regenerate_step_func: A function to regenerate a step if it fails verification
+            state: State object (MathState or dict) containing the steps
+            steps_key: Key to access the steps (dot notation for nested access)
+            regenerate_step_func: Function to call to regenerate a step
             
         Returns:
-            Updated state with verified steps
+            Verification results dictionary
         """
-        # Check if we need to verify steps
-        if steps_key not in state or not state[steps_key]:
-            logger.warning(f"No steps to verify in {steps_key}")
-            return state
+        logger.info(f"Verifying reasoning steps with key: {steps_key}")
         
-        # Initialize verification tracking
-        verification_start_time = time.time()
-        max_total_verification_time = 30  # Maximum time for the entire verification process
-        max_step_verification_time = 8    # Maximum time for a single step verification
-        max_regeneration_attempts = 2     # Maximum number of regeneration attempts per step
+        # Handle MathState objects
+        if isinstance(state, MathState):
+            # Try to get steps from context
+            if "reasoning" in state.context and "steps" in state.context["reasoning"]:
+                steps = state.context["reasoning"]["steps"]
+            # Then try direct access using dot notation
+            elif "." in steps_key:
+                steps = self._get_nested_value(state.context, steps_key)
+            # Then try direct attribute
+            elif hasattr(state, steps_key):
+                steps = getattr(state, steps_key)
+            else:
+                # Finally try state.context directly
+                steps = state.context.get(steps_key)
+                
+            # Convert to dict for later use if needed
+            state_dict = state.to_dict()
+        else:
+            # For dict states, try the key directly
+            state_dict = state
+            steps = state_dict.get(steps_key)
+            
+            # If not found, try nested using dot notation
+            if steps is None and "." in steps_key:
+                steps = self._get_nested_value(state_dict, steps_key)
+                
+            # If still not found, try reasoning.steps as fallback
+            if steps is None and "reasoning" in state_dict and "steps" in state_dict["reasoning"]:
+                steps = state_dict["reasoning"]["steps"]
         
-        # Track verification attempts for each step
-        verification_attempts = {}
+        # If steps not found, return early
+        if not steps:
+            logger.warning(f"No steps found at {steps_key}")
+            return {"verified": False, "error": f"No steps found at {steps_key}"}
         
-        # Initialize the verified steps
+        # Initialize variables for verification
         verified_steps = []
-        verification_results = []
-        
-        # Get the steps to verify
-        steps = state[steps_key]
+        problematic_steps = []
+        regenerated_steps = []
+        all_verified = True
         
         # Verify each step
         for i, step in enumerate(steps):
-            # Check if we've exceeded the total verification time
-            if time.time() - verification_start_time > max_total_verification_time:
-                logger.warning(f"Total verification time exceeded {max_total_verification_time} seconds, skipping remaining steps")
-                # Add remaining steps without verification
-                verified_steps.extend(steps[i:])
-                verification_results.extend([{"verified": False, "reason": "Verification timeout"}] * (len(steps) - i))
-                break
+            logger.info(f"Verifying step {i+1}/{len(steps)}")
             
-            # Initialize verification attempt counter for this step
-            if i not in verification_attempts:
-                verification_attempts[i] = 0
-            
-            # Try to verify the step with timeout
-            step_verified = False
-            verification_error = None
-            verification_result = {"verified": False, "reason": "Unknown error"}
-            
-            # Verify the step with timeout
             try:
-                # Use a queue to get the result from the thread
-                result_queue = queue.Queue()
+                # Use a timeout to prevent hanging on verification
+                with timeout(20):  # 20 second timeout per step
+                    verification_result = self._verify_step(step)
                 
-                def verify_step_with_timeout():
-                    try:
-                        # Verify the step
-                        result = self._verify_step(step)
-                        result_queue.put({"success": True, "result": result})
-                    except Exception as e:
-                        logger.error(f"Error verifying step {i+1}: {e}")
-                        result_queue.put({"success": False, "error": str(e)})
+                verified = verification_result.get("verified", False)
+                confidence = verification_result.get("confidence", 0)
                 
-                # Create and start a thread for verification
-                verification_thread = threading.Thread(target=verify_step_with_timeout)
-                verification_thread.daemon = True
-                verification_thread.start()
+                # Store verification information
+                step_result = {
+                    "index": i,
+                    "step": step,
+                    "verified": verified,
+                    "confidence": confidence,
+                    "issues": verification_result.get("issues", [])
+                }
                 
-                # Wait for the thread to complete with a timeout
-                try:
-                    thread_result = result_queue.get(timeout=max_step_verification_time)
-                    if thread_result["success"]:
-                        verification_result = thread_result["result"]
-                        step_verified = verification_result.get("verified", False)
-                    else:
-                        verification_error = thread_result["error"]
-                        verification_result = {"verified": False, "reason": f"Verification error: {verification_error}"}
-                except queue.Empty:
-                    logger.warning(f"Step {i+1} verification timed out after {max_step_verification_time} seconds")
-                    verification_result = {"verified": False, "reason": f"Verification timed out after {max_step_verification_time} seconds"}
-            
-            except Exception as e:
-                logger.error(f"Error in verification process for step {i+1}: {e}")
-                verification_result = {"verified": False, "reason": f"Verification process error: {str(e)}"}
-            
-            # If the step is not verified and we have a regeneration function, try to regenerate it
-            if not step_verified and regenerate_step_func and verification_attempts[i] < max_regeneration_attempts:
-                try:
-                    # Increment the verification attempt counter
-                    verification_attempts[i] += 1
+                if verified and confidence >= self.confidence_threshold:
+                    verified_steps.append(step_result)
+                else:
+                    all_verified = False
+                    problematic_steps.append(step_result)
                     
-                    # Log the regeneration attempt
-                    logger.info(f"Regenerating step {i+1} (attempt {verification_attempts[i]})")
-                    
-                    # Use a queue to get the result from the thread
-                    regen_queue = queue.Queue()
-                    
-                    def regenerate_step_with_timeout():
+                    # Regenerate the step if function provided
+                    if regenerate_step_func:
+                        logger.info(f"Regenerating step {i+1}")
+                        
+                        # Extract feedback for regeneration
+                        feedback = verification_result.get("issues", ["Unclear or incorrect step"])
+                        feedback_str = feedback[0] if feedback else "Unclear or incorrect step"
+                        
+                        # Call the regeneration function
                         try:
-                            # Regenerate the step
-                            verification_result_dict = {
-                                "verified": verification_result.get("verified", False),
-                                "confidence": verification_result.get("confidence", 0.0),
-                                "reason": verification_result.get("reason", "Unknown reason")
-                            }
-                            new_step = regenerate_step_func(i, step, verification_result_dict)
-                            regen_queue.put({"success": True, "step": new_step})
-                        except Exception as e:
-                            logger.error(f"Error regenerating step {i+1}: {e}")
-                            regen_queue.put({"success": False, "error": str(e)})
-                    
-                    # Create and start a thread for regeneration
-                    regeneration_thread = threading.Thread(target=regenerate_step_with_timeout)
-                    regeneration_thread.daemon = True
-                    regeneration_thread.start()
-                    
-                    # Wait for the thread to complete with a timeout
-                    try:
-                        thread_result = regen_queue.get(timeout=max_step_verification_time)
-                        if thread_result["success"]:
-                            # Update the step
-                            step = thread_result["step"]
+                            new_step = regenerate_step_func(i, feedback_str)
                             
-                            # Try to verify the regenerated step
-                            verification_result = self._verify_step(step)
-                            step_verified = verification_result.get("verified", False)
-                        else:
-                            logger.warning(f"Failed to regenerate step {i+1}: {thread_result['error']}")
-                    except queue.Empty:
-                        logger.warning(f"Step {i+1} regeneration timed out after {max_step_verification_time} seconds")
-                        verification_result = {"verified": False, "reason": "Regeneration timed out"}
-                
-                except Exception as e:
-                    logger.error(f"Error in regeneration process for step {i+1}: {e}")
-                    verification_result = {"verified": False, "reason": f"Regeneration error: {str(e)}"}
-            
-            # Add the step to the verified steps
-            verified_steps.append(step)
-            verification_results.append(verification_result)
-            
-            # Log the verification result
-            if step_verified:
-                logger.info(f"Step {i+1} verified successfully")
+                            # Update the step in the original list
+                            steps[i] = new_step
+                            
+                            # Record the regeneration
+                            regenerated_steps.append({
+                                "index": i,
+                                "original": step,
+                                "regenerated": new_step,
+                                "feedback": feedback
+                            })
+                            
+                            logger.info(f"Successfully regenerated step {i+1}")
+                        except Exception as regen_error:
+                            logger.error(f"Error regenerating step {i+1}: {str(regen_error)}")
+            except Exception as e:
+                logger.error(f"Error verifying step {i+1}: {str(e)}")
+                all_verified = False
+                problematic_steps.append({
+                    "index": i,
+                    "step": step,
+                    "verified": False,
+                    "confidence": 0,
+                    "issues": [f"Verification error: {str(e)}"]
+                })
+        
+        # Prepare the verification summary
+        verification_summary = {
+            "verified": all_verified,
+            "verified_steps": verified_steps,
+            "problematic_steps": problematic_steps,
+            "regenerated_steps": regenerated_steps,
+            "all_steps": steps
+        }
+        
+        # Update the state with verification results
+        if isinstance(state, MathState):
+            if "." in steps_key:
+                parent_key, child_key = steps_key.rsplit(".", 1)
+                parent = self._get_nested_value(state.context, parent_key)
+                if parent and isinstance(parent, dict):
+                    parent[child_key] = steps
+                    parent["verification_results"] = verification_summary
             else:
-                logger.warning(f"Step {i+1} verification failed: {verification_result.get('reason', 'Unknown reason')}")
+                state.context[steps_key] = steps
+                state.context["verification_results"] = verification_summary
         
-        # Update the state with the verified steps
-        state[steps_key] = verified_steps
-        state["verification_results"] = verification_results
-        
-        # Calculate the overall verification score
-        verified_count = sum(1 for result in verification_results if result.get("verified", False))
-        verification_score = verified_count / len(verification_results) if verification_results else 0
-        state["verification_score"] = verification_score
-        
-        # Log the verification score
-        logger.info(f"Verification score: {verification_score:.2f} ({verified_count}/{len(verification_results)})")
-        
-        return state
+        logger.info(f"Verification complete: {len(verified_steps)} verified, {len(problematic_steps)} problematic, {len(regenerated_steps)} regenerated")
+        return verification_summary
     
     def _verify_step(self, step: str) -> Dict[str, Any]:
         """
@@ -777,3 +798,38 @@ class MetaAgent:
             logger.error(f"Error generating fallback reasoning: {e}")
         
         return state
+
+    def _get_nested_value(self, data: Dict[str, Any], key_path: str) -> Any:
+        """
+        Get a value from a nested dictionary using dot notation.
+        
+        Args:
+            data: Dictionary to extract value from
+            key_path: Path to the value using dot notation (e.g., "a.b.c")
+            
+        Returns:
+            The value at the specified path, or None if not found
+        """
+        keys = key_path.split(".")
+        current = data
+        
+        for key in keys:
+            if isinstance(current, dict) and key in current:
+                current = current[key]
+            else:
+                return None
+                
+        return current
+
+    def verify_solution(self, question: str, solution: str) -> Dict[str, Any]:
+        """
+        Verify a math solution and provide feedback.
+        
+        Args:
+            question: The math question
+            solution: The solution to verify
+            
+        Returns:
+            Verification result
+        """
+        return self.verify_math_solution(question, solution)

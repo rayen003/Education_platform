@@ -12,10 +12,10 @@ from unittest.mock import MagicMock, patch
 from dotenv import load_dotenv
 
 # Import the components to test
-from app.math.agent.meta_agent import MetaAgent
-from app.math.commands.hint_command import MathGenerateHintCommand
-from app.math.commands.feedback_command import MathGenerateFeedbackCommand
-from app.math.tests.mock_agent import MockAgent
+from app.math_services.agent.meta_agent import MetaAgent
+from app.math_services.commands.hint_command import MathGenerateHintCommand
+from app.math_services.commands.feedback_command import MathGenerateFeedbackCommand
+from app.math_services.tests.mock_agent import MockAgent
 
 # Load environment variables
 load_dotenv()

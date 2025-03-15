@@ -20,11 +20,11 @@ import sys
 # Add project root to Python path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
-from app.math.agent.meta_agent import MetaAgent
-from app.math.commands.reasoning_command import MathGenerateReasoningCommand
-from app.math.commands.hint_command import MathGenerateHintCommand
-from app.math.commands.openai_llm_service import OpenAILLMService
-from app.math.tests.mock_agent import MockAgent
+from app.math_services.agent.meta_agent import MetaAgent
+from app.math_services.commands.reasoning_command import MathGenerateReasoningCommand
+from app.math_services.commands.hint_command import MathGenerateHintCommand
+from app.math_services.commands.openai_llm_service import OpenAILLMService
+from app.math_services.tests.mock_agent import MockAgent
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, 

@@ -12,7 +12,7 @@ import sympy
 from sympy import symbols, sympify, solve, Eq, simplify
 from sympy.parsing.sympy_parser import parse_expr
 
-from app.math.services.llm.base_service import BaseLLMService
+from app.math_services.services.llm.base_service import BaseLLMService
 
 logger = logging.getLogger(__name__)
 
