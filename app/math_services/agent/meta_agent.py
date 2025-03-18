@@ -19,6 +19,7 @@ import threading
 from contextlib import contextmanager
 from app.math_services.models.state import MathState
 from app.math_services.services.llm.base_service import BaseLLMService
+import concurrent.futures
 
 # Load environment variables
 load_dotenv()
@@ -833,3 +834,26 @@ class MetaAgent:
             Verification result
         """
         return self.verify_math_solution(question, solution)
+
+    def verify_reasoning_steps_parallel(self, state, steps_key, max_workers=4):
+        steps = self._get_steps_from_state(state, steps_key)
+        results = []
+        
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all verification tasks and store futures
+            future_to_step = {executor.submit(self._verify_step, step): (i, step) 
+                             for i, step in enumerate(steps)}
+            
+            # Process results as they complete
+            for future in concurrent.futures.as_completed(future_to_step):
+                i, step = future_to_step[future]
+                try:
+                    result = future.result()
+                    results.append((i, result))
+                except Exception as e:
+                    logger.error(f"Error verifying step {i}: {str(e)}")
+                    results.append((i, self._create_default_verification_result(f"Verification error: {str(e)}")))
+        
+        # Sort results back into original order
+        results.sort(key=lambda x: x[0])
+        return [r[1] for r in results]

@@ -8,6 +8,8 @@ import datetime
 from openai import OpenAI
 import time
 import logging
+import traceback
+import re
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -24,6 +26,488 @@ st.set_page_config(
         'About': 'Educational Technology Platform with Knowledge Graph and Math Assessment capabilities.'
     }
 )
+
+# Add required JavaScript libraries for the knowledge graph and consolidate all CSS styles
+st.markdown("""
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js" integrity="sha512-XzMD7bQ/70XsQvjsUxXAOOD1qzLWgW4iAoEbsRGlbIOZXgWxogujXYOaI8xFLpcGDzfZbMc1EvnWN8J9tDXIjg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" integrity="sha512-8dHWqQTVmYQzEWDgVGUxM4p0QraNZZKQrlDQCWIpjJY2OBtiCh2qk9/jffV+GfZGCk7oLVVxHBJYWR1FFLOIQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<style>
+/* Additional styles for knowledge graph */
+#knowledge-graph {
+    height: 100%;
+    width: 100%;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+}
+
+/* Chat interface styles */
+.message {
+    margin-bottom: 15px;
+    padding: 12px;
+    border-radius: 18px;
+    animation: fadeIn 0.3s ease-in-out;
+    max-width: 85%;
+    line-height: 1.4;
+}
+
+.tutor-message {
+    background-color: #f0f0f0;
+    margin-right: auto;
+    border-bottom-left-radius: 5px;
+}
+
+.student-message {
+    background-color: #1e88e5;
+    color: white;
+    margin-left: auto;
+    text-align: right;
+    border-bottom-right-radius: 5px;
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.message-content {
+    line-height: 1.5;
+    color: #0A1626 !important;
+    font-weight: 500;
+}
+
+.student-message .message-content {
+    color: white !important;
+}
+
+.timestamp {
+    color: #666;
+    font-size: 0.8rem;
+    margin-top: 5px;
+    opacity: 0.7;
+    text-align: right;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.hint-button, .reason-button, .potential-question-button {
+    background-color: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 18px;
+    padding: 8px 16px;
+    margin: 5px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-block;
+    font-weight: 500;
+}
+
+.hint-button {
+    background-color: #4caf5022;
+    border-color: #4caf50;
+    color: #4caf50;
+}
+
+.hint-button:hover {
+    background-color: #4caf5044;
+}
+
+.reason-button {
+    background-color: #ff980022;
+    border-color: #ff9800;
+    color: #ff9800;
+}
+
+.reason-button:hover {
+    background-color: #ff980044;
+}
+
+.potential-question-button {
+    background-color: #2196f322;
+    border-color: #2196f3;
+    color: #2196f3;
+}
+
+.potential-question-button:hover {
+    background-color: #2196f344;
+}
+
+.reasoning-container {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    border-left: 4px solid #ff9800;
+}
+
+.reasoning-step {
+    margin-bottom: 12px;
+    padding: 10px;
+    position: relative;
+    border-left: 3px solid #ff9800;
+    background-color: #fff8e1;
+    border-radius: 4px;
+}
+
+.reasoning-step:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #ff9800;
+    font-weight: bold;
+}
+
+/* Expander styling for reasoning */
+.streamlit-expanderHeader {
+    background-color: #fff8e1 !important;
+    border: 1px solid #ff9800 !important;
+    border-radius: 8px !important;
+    color: #e65100 !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease;
+    margin-bottom: 10px !important;
+}
+
+.streamlit-expanderHeader:hover {
+    background-color: #fff4d3 !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+}
+
+/* Chat message styling improvements */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+    max-height: 500px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+}
+
+.chat-message {
+    padding: 12px 18px;
+    border-radius: 18px;
+    position: relative;
+    max-width: 85%;
+    font-size: 15px;
+    line-height: 1.5;
+    margin: 4px 0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    animation: fadeIn 0.3s;
+}
+
+.user-message {
+    background-color: #1e88e5;
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+    margin-left: auto;
+}
+
+.tutor-message {
+    background-color: #f1f1f1;
+    color: #212121;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+    margin-right: auto;
+}
+
+.chat-input-container {
+    margin-top: 20px;
+    background-color: white;
+    border-radius: 24px;
+    padding: 5px;
+    display: flex;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.chat-input {
+    flex-grow: 1;
+    border: none !important;
+    padding: 10px 15px !important;
+    border-radius: 20px !important;
+    font-size: 1rem !important;
+}
+
+.chat-submit {
+    background-color: #1e88e5 !important;
+    color: white !important;
+    border-radius: 50% !important;
+    width: 40px !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    margin: 5px !important;
+    border: none !important;
+}
+
+/* Make send button more visible */
+[data-testid="baseButton-secondary"]:has(div:contains("Send")) {
+    background-color: #1e88e5 !important;
+    color: white !important;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Main container for the entire chat UI */
+.chat-interface {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 150px);
+    background-color: #111111;
+    border-radius: 12px;
+    overflow: hidden;
+    max-width: 1000px;
+    margin: 0 auto;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+}
+
+/* Message display area with scrolling */
+.message-area {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Input area - fixed at bottom */
+.input-area {
+    position: sticky;
+    bottom: 0;
+    padding: 16px;
+    background-color: #1e1e1e;
+    border-top: 1px solid #333;
+    z-index: 10;
+}
+
+/* Chat messages with improved styling */
+.chat-message {
+    padding: 12px 16px;
+    border-radius: 18px;
+    margin-bottom: 15px;
+    font-size: 16px;
+    line-height: 1.5;
+    max-width: 85%;
+    animation: fadeIn 0.3s ease;
+    word-wrap: break-word;
+}
+
+/* Student/user messages - enhanced style */
+.user-message {
+    background-color: #0D8BF0;
+    color: white;
+    margin-left: auto;
+    margin-right: 0;
+    border-bottom-right-radius: 4px;
+}
+
+/* Tutor/assistant messages - enhanced style */
+.tutor-message {
+    background-color: #2D2D2D;
+    color: #f0f0f0;
+    margin-right: auto;
+    margin-left: 0;
+    border-bottom-left-radius: 4px;
+}
+
+/* Timestamp - subtle styling */
+.timestamp {
+    font-size: 12px;
+    opacity: 0.6;
+    margin-top: 5px;
+    text-align: right;
+    color: #aaa;
+}
+
+/* Button styles - smaller and more icon-centric */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    justify-content: flex-end;
+}
+
+/* Input styling */
+.input-container {
+    display: flex;
+    border-radius: 8px;
+    background: #333333;
+    margin-bottom: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Custom styling for the textarea */
+textarea {
+    border: none !important;
+    background-color: transparent !important;
+    color: white !important;
+    resize: none !important;
+    padding: 12px 16px !important;
+    font-size: 16px !important;
+    caret-color: white;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 70px !important;
+    min-height: 70px !important;
+    line-height: 1.5 !important;
+}
+
+textarea:focus {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Fix for Streamlit containers */
+.stTextArea {
+    background-color: transparent !important;
+}
+
+.stTextArea > div {
+    background-color: transparent !important;
+    border: none !important;
+}
+
+/* Hide Streamlit's default elements for textarea */
+[data-testid="stTextAreaContainer"] {
+    background-color: transparent !important;
+    border: none !important;
+}
+
+.stTextArea [data-baseweb="base-input"] {
+    background-color: transparent !important;
+    border: none !important;
+}
+
+.css-1eqtdef {
+    opacity: 0 !important;
+}
+
+/* Mobile responsiveness improvements */
+@media screen and (max-width: 768px) {
+    .chat-interface {
+        height: calc(100vh - 120px);
+    }
+    
+    .input-container {
+        flex-direction: column;
+    }
+    
+    textarea {
+        min-height: 70px !important;
+    }
+    
+    .action-buttons {
+        justify-content: space-around;
+    }
+}
+
+/* Make scrollbar more subtle */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 10px;
+}
+
+/* Math formatting */
+.math-equation {
+    margin: 10px 0;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow-x: auto;
+}
+
+/* Solution styles */
+.key-concepts {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: rgba(13, 139, 240, 0.1);
+    border-radius: 6px;
+}
+
+.key-concepts ul {
+    margin-top: 8px;
+    padding-left: 20px;
+}
+
+.step-solution {
+    margin: 15px 0;
+}
+
+.final-answer {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: rgba(40, 167, 69, 0.1);
+    border-radius: 6px;
+}
+
+/* Fix button styles for Streamlit */
+[data-testid="baseButton-secondary"] {
+    border-radius: 50% !important;
+    min-width: 40px !important;
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Specific button styling */
+.hint-btn [data-testid="baseButton-secondary"] {
+    background-color: #1d6f30 !important;
+    color: white !important;
+}
+
+.feedback-btn [data-testid="baseButton-secondary"] {
+    background-color: #0d47a1 !important;
+    color: white !important;
+}
+
+.solution-btn [data-testid="baseButton-secondary"] {
+    background-color: #880e4f !important;
+    color: white !important;
+}
+
+.cot-btn [data-testid="baseButton-secondary"] {
+    background-color: #5d4037 !important;
+    color: white !important;
+}
+
+.send-btn [data-testid="baseButton-secondary"] {
+    background-color: #007bff !important;
+    color: white !important;
+    width: 48px !important;
+    height: 48px !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # Add the project directory to the Python path
 project_root = str(Path(__file__).parent.parent.parent.absolute())
@@ -112,833 +596,217 @@ except Exception as e:
     math_agent = MathAgent(model="gpt-4o-mini")
     kg_service = KnowledgeGraphService(llm_service, mock_mode=True)  # Fallback to mock mode
 
-# Helper functions for displaying math content with confidence indicators
-def display_math_feedback(feedback, confidence=None):
-    """Display math feedback with confidence indicator if available."""
-    st.write(feedback)
+# Set color scheme and theme variables
+accent_color = "#3174ad"
+module_color = "#5a9bd5"
+concept_color = "#7cb9e8"
+text_color = "#333333"  # Darker text color for better contrast
+
+def generate_graph_html(graph_data, show_labels=True, enable_physics=False, height=700, spacing=200, focus_script=""):
+    """Generate HTML for the knowledge graph visualization."""
     
-    if confidence is not None:
-        # Add a visual confidence indicator
-        display_confidence_bar(confidence, "Feedback Confidence")
+    # Set default colors
+    node_color = "#5D8BF4"
+    edge_color = "#9DB2BF"
+    resource_color = "#2E7D32"  # Define resource_color here for Learning Resources heading
+    
+    if not graph_data or not graph_data.get('nodes'):
+        # Return empty div if no graph data
+        return f"""
+        <div id="knowledge-graph" style="height: {height}px; width: 100%; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center;">
+            <p style="color: #666;">No knowledge graph data available</p>
+        </div>
+        """
+    
+    # Ensure nodes and links exist
+    nodes = graph_data.get('nodes', [])
+    links = graph_data.get('links', [])
+    
+    # Prepare data for vis.js
+    vis_nodes = []
+    for node in nodes:
+        node_type = node.get('type', 'concept')
         
-        # Add an explanation of what the confidence means
-        with st.expander("What does this confidence level mean?"):
-            st.write(confidence_explanation(confidence))
-
-def display_math_hints(hints, confidence=None):
-    """Display math hints with confidence indicators if available."""
-    for i, hint in enumerate(hints, 1):
-        st.markdown(f'<div class="hint"><strong>Hint #{i}:</strong> {hint}</div>', 
-                   unsafe_allow_html=True)
+        # Set node appearance based on type
+        shape = "circle"
+        if node_type == "module":
+            shape = "box"
         
-        # If we have confidence for this hint
-        if confidence is not None:
-            display_confidence_badge(confidence)
-
-def display_math_analysis(analysis, confidence=None):
-    """Display math problem analysis with confidence indicator if available."""
-    if analysis.get("is_correct", False):
-        st.success("Your answer is correct!")
-    else:
-        st.error("Your answer needs some work.")
-    
-    if "error_type" in analysis and analysis["error_type"]:
-        st.write(f"**Error Type:** {analysis['error_type']}")
-    
-    if "misconception" in analysis and analysis["misconception"]:
-        st.write(f"**Misconception:** {analysis['misconception']}")
-    
-    if "calculation_steps" in analysis and analysis["calculation_steps"]:
-        with st.expander("Calculation Steps"):
-            for i, step in enumerate(analysis["calculation_steps"], 1):
-                st.write(f"{i}. {step}")
-    
-    if confidence is not None:
-        display_confidence_bar(confidence, "Analysis Confidence")
-
-# Create sidebar for settings
-with st.sidebar:
-    st.image("https://img.icons8.com/fluency/96/000000/knowledge-sharing.png", width=80)
-    st.title("EdTech Platform")
-    st.markdown("---")
-    
-    # Theme selection
-    theme = st.selectbox(
-        "Theme",
-        ["Light", "Dark", "Blue", "Green"],
-        index=0
-    )
-    
-    # Settings
-    st.subheader("Settings")
-    show_labels = st.checkbox("Show node labels", value=True)
-    enable_physics = st.checkbox("Enable physics simulation", value=True)
-    
-    st.markdown("---")
-    st.info("Drag nodes to rearrange the graph. Zoom with scroll wheel.")
-
-# Custom CSS with dynamic theming based on selection
-if theme == "Dark":
-    bg_color = "#121212"
-    text_color = "#f0f0f0"
-    card_bg = "#1e1e1e"
-    accent_color = "#BB86FC"
-    correct_color = "#28a745"  # Green for high confidence
-    incorrect_color = "#dc3545"  # Red for low confidence
-    warning_color = "#ff9800"  # Orange for medium confidence
-    module_color = "#3498db"  # Blue for modules
-    concept_color = "#2ecc71"  # Green for concepts
-    graph_bg_color = "#1A1A1A"  # Lighter background for graph
-    node_label_color = "#FFFFFF"  # Bright white for dark backgrounds
-elif theme == "Blue":
-    bg_color = "#E8F0F8"
-    text_color = "#333333"
-    card_bg = "#FFFFFF"
-    accent_color = "#1976D2"
-    correct_color = "#28a745"  # Green for high confidence
-    incorrect_color = "#dc3545"  # Red for low confidence
-    warning_color = "#ff9800"  # Orange for medium confidence
-    module_color = "#3498db"  # Blue for modules
-    concept_color = "#2ecc71"  # Green for concepts
-    graph_bg_color = "#F5F9FF"  # Light blue tint for graph
-    node_label_color = "#333333"
-elif theme == "Green":
-    bg_color = "#F1F8E9"
-    text_color = "#333333"
-    card_bg = "#FFFFFF"
-    accent_color = "#388E3C"
-    correct_color = "#28a745"  # Green for high confidence
-    incorrect_color = "#dc3545"  # Red for low confidence
-    warning_color = "#ff9800"  # Orange for medium confidence
-    module_color = "#3498db"  # Blue for modules
-    concept_color = "#2ecc71"  # Green for concepts
-    graph_bg_color = "#F5FFF5"  # Light green tint for graph
-    node_label_color = "#333333"
-else:  # Light
-    bg_color = "#FFFFFF"
-    text_color = "#333333"
-    card_bg = "#F8F9FA"
-    accent_color = "#2C3E50"
-    correct_color = "#28a745"  # Green for high confidence
-    incorrect_color = "#dc3545"  # Red for low confidence
-    warning_color = "#ff9800"  # Orange for medium confidence
-    module_color = "#3498db"  # Blue for modules
-    concept_color = "#2ecc71"  # Green for concepts
-    graph_bg_color = "#FFFFFF"  # White background for graph
-    node_label_color = "#333333"
-
-# Custom CSS to enhance aesthetics
-st.markdown(f"""
-<style>
-    /* Main container styling */
-    .main .block-container {{
-        background-color: {bg_color};
-        color: {text_color};
-        padding: 1rem;
-        border-radius: 20px;
-        max-width: 100% !important;
-        margin: 0 auto;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-    }}
-    
-    /* Common content padding */
-    .st-emotion-cache-16txtl3 {{
-        padding: 1.2rem;
-    }}
-    
-    /* Typography */
-    h1, h2, h3, h4, h5, h6 {{
-        color: {accent_color};
-        font-weight: 700;
-        margin-bottom: 1.2rem;
-        letter-spacing: -0.02em;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    }}
-    
-    h1 {{
-        font-size: 3rem;
-        text-align: center;
-        margin-bottom: 2.5rem;
-        background: linear-gradient(135deg, {accent_color}, #8BC34A);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        padding: 0.5rem 0;
-    }}
-    
-    h2 {{
-        font-size: 2.2rem;
-        margin-top: 1.5rem;
-        margin-bottom: 1.2rem;
-        position: relative;
-        padding-bottom: 0.5rem;
-    }}
-    
-    h2::after {{
-        content: '';
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        height: 3px;
-        width: 80px;
-        background: linear-gradient(90deg, {accent_color}, {accent_color}33);
-        border-radius: 3px;
-    }}
-    
-    p {{
-        font-size: 1.05rem;
-        line-height: 1.6;
-        margin-bottom: 1.2rem;
-    }}
-    
-    /* Tab navigation */
-    .stTabs [data-baseweb="tab-list"] {{
-        gap: 24px;
-        background-color: {bg_color};
-        padding: 1.2rem;
-        border-radius: 15px;
-        margin-bottom: 1.5rem;
-        display: flex;
-        justify-content: center;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
-    }}
-    
-    .stTabs [data-baseweb="tab"] {{
-        height: 60px;
-        white-space: pre-wrap;
-        background-color: transparent;
-        border-radius: 15px;
-        gap: 1px;
-        padding: 10px 32px;
-        font-weight: 600;
-        color: {text_color};
-        transition: all 0.3s ease;
-        border: 1px solid {accent_color}33;
-        font-size: 1.05rem;
-    }}
-    
-    .stTabs [aria-selected="true"] {{
-        background-color: {accent_color}22;
-        color: {accent_color};
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-        transform: translateY(-3px);
-    }}
-    
-    /* Card styling */
-    .card {{
-        padding: 28px;
-        border-radius: 20px;
-        background-color: {card_bg};
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        margin-bottom: 25px;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        border: 1px solid {accent_color}15;
-    }}
-    
-    .card:hover {{
-        transform: translateY(-6px);
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.18);
-    }}
-    
-    /* Button styling */
-    .stButton button {{
-        border-radius: 12px;
-        font-weight: 600;
-        background-color: {accent_color};
-        color: white;
-        border: none;
-        padding: 0.8rem 1.5rem;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-size: 0.95rem;
-    }}
-    
-    .stButton button:hover {{
-        background-color: {accent_color}ee;
-        transform: translateY(-3px);
-        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
-    }}
-    
-    .stButton button:active {{
-        transform: translateY(-1px);
-    }}
-    
-    /* Form elements */
-    .stTextInput input, .stTextArea textarea {{
-        border-radius: 12px;
-        border: 1px solid #ddd;
-        padding: 15px;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-        transition: all 0.25s ease;
-        font-size: 1rem;
-    }}
-    
-    .stTextInput input:focus, .stTextArea textarea:focus {{
-        border-color: {accent_color};
-        box-shadow: 0 0 0 3px {accent_color}33;
-    }}
-    
-    /* Progress bar */
-    .stProgress .st-emotion-cache-1943zmx {{
-        background-color: {accent_color}33;
-        border-radius: 15px;
-        height: 12px;
-    }}
-    
-    .stProgress .st-emotion-cache-1lpbw6j {{
-        background-color: {accent_color};
-        border-radius: 15px;
-        height: 12px;
-    }}
-    
-    /* Slider */
-    .stSlider [data-baseweb="slider"] {{
-        margin-top: 1rem;
-    }}
-    
-    .stSlider [data-testid="stThumbValue"] {{
-        background-color: {accent_color} !important;
-        color: white !important;
-        font-weight: 600;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }}
-    
-    /* Selectbox */
-    .stSelectbox [data-baseweb="select"] {{
-        border-radius: 12px;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-    }}
-    
-    .stSelectbox [data-baseweb="select"]:focus-within {{
-        border-color: {accent_color};
-        box-shadow: 0 0 0 3px {accent_color}33;
-    }}
-    
-    /* Footer */
-    footer {{
-        text-align: center;
-        margin-top: 4rem;
-        padding: 2rem;
-        border-top: 1px solid {accent_color}22;
-        font-size: 0.9rem;
-        background: linear-gradient(180deg, {bg_color} 0%, {bg_color}dd 100%);
-        position: relative;
-    }}
-    
-    footer:before {{
-        content: "";
-        position: absolute;
-        top: 1px;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, {accent_color}55, transparent);
-    }}
-    
-    /* Feedback status */
-    .correct-answer {{
-        color: {correct_color};
-        font-weight: bold;
-        padding: 1rem;
-        border-radius: 12px;
-        background-color: {correct_color}15;
-        display: inline-block;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-        border-left: 4px solid {correct_color};
-    }}
-    
-    .incorrect-answer {{
-        color: {incorrect_color};
-        font-weight: bold;
-        padding: 1rem;
-        border-radius: 12px;
-        background-color: {incorrect_color}15;
-        display: inline-block;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-        border-left: 4px solid {incorrect_color};
-    }}
-    
-    .warning-message {{
-        color: {warning_color};
-        font-weight: bold;
-        padding: 1rem;
-        border-radius: 12px;
-        background-color: {warning_color}15;
-        display: inline-block;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-        border-left: 4px solid {warning_color};
-    }}
-    
-    .hint {{
-        padding: 20px;
-        margin-top: 20px;
-        background-color: {accent_color}11;
-        border-left: 4px solid {accent_color};
-        border-radius: 12px;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-    }}
-    
-    /* Graph container */
-    .graph-container {{
-        height: 1200px;
-        width: 100%;
-        border: 1px solid {accent_color}33;
-        border-radius: 20px;
-        overflow: hidden;
-        background-color: #FFFFFF; /* Set explicit white background */
-        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.18);
-        position: relative;
-        transition: all 0.5s ease;
-    }}
-    
-    /* Improved layout for side-by-side display with even larger graph area */
-    .graph-resources-container {{
-        display: flex;
-        width: 100%;
-        position: relative;
-        gap: 25px;
-        margin-top: 20px;
-        max-width: 100%;
-    }}
-    
-    .graph-area {{
-        flex: 7; /* Increased from 5 to 7 for much larger graph area */
-        position: relative;
-    }}
-    
-    .right-sidebar {{
-        flex: 2;
-        max-width: 350px;
-        display: flex;
-        flex-direction: column;
-        gap: 25px;
-        height: 1200px;
-        overflow-y: auto;
-        position: sticky;
-        top: 20px;
-    }}
-    
-    /* Resources panel with better visibility */
-    .resources-panel {{
-        background-color: #FFFFFF; /* Explicit white background */
-        border-radius: 20px;
-        padding: 25px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-        border: 1px solid {accent_color}22;
-        overflow-y: auto;
-        max-height: 400px;
-    }}
-    
-    /* Node details panel with better visibility */
-    .node-details-panel {{
-        background-color: #FFFFFF; /* Explicit white background */
-        border-radius: 20px;
-        padding: 25px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-        z-index: 100;
-        overflow-y: auto;
-        max-height: 500px;
-        opacity: 0.97;
-        transition: transform 0.3s ease, opacity 0.3s ease;
-        border: 1px solid {accent_color}22;
-    }}
-    
-    /* Navigation panel with better visibility */
-    .navigation-panel {{
-        background-color: #FFFFFF; /* Explicit white background */
-        border-radius: 20px;
-        padding: 25px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-        border: 1px solid {accent_color}22;
-    }}
-    
-    /* Resource text styles with enhanced visibility */
-    .resource-link {{
-        display: block;
-        margin-bottom: 15px;
-        color: #1E2A38; /* Darker text color for better contrast */
-        text-decoration: none;
-        padding: 16px 20px;
-        background-color: #F8F9FA; /* Light gray background instead of transparent */
-        border-radius: 15px;
-        transition: all 0.3s ease;
-        font-weight: 600; /* Increased weight for better visibility */
-        border-left: 4px solid {accent_color};
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-        display: flex;
-        align-items: center;
-    }}
-    
-    .module-resource {{
-        border-left: 4px solid {module_color};
-        background-color: #F0F8FF; /* Light blue background for module resources */
-    }}
-    
-    .concept-resource {{
-        border-left: 4px solid {concept_color};
-        background-color: #F0FFF0; /* Light green background for concept resources */
-    }}
-    
-    /* Node details content with enhanced visibility */
-    .node-details-item .value {{
-        background-color: #F8F9FA; /* Light gray background */
-        padding: 15px;
-        border-radius: 12px;
-        word-break: break-word;
-        border-left: 3px solid {accent_color}44;
-        line-height: 1.5;
-        color: #1E2A38; /* Ensure text is dark for visibility */
-    }}
-    
-    .node-details-item.type .value {{
-        display: inline-block;
-        padding: 8px 15px;
-        border-radius: 25px;
-        background-color: #F0F8FF; /* Light blue background */
-        color: #0A4B7D; /* Darker blue text for contrast */
-        font-weight: 600;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-        border: none;
-    }}
-    
-    .node-details-item.type .value.concept {{
-        background-color: #F0FFF0; /* Light green background */
-        color: #0A7D4B; /* Darker green text for contrast */
-    }}
-    
-    /* Resources section */
-    .node-details-resources {{
-        margin-top: 30px;
-        border-top: 2px solid {accent_color}33;
-        padding-top: 25px;
-        animation: fadeIn 0.8s ease;
-    }}
-    
-    .node-details-resources h4 {{
-        font-size: 1.5rem;
-        margin-bottom: 20px;
-        color: {accent_color};
-        font-weight: 600;
-        letter-spacing: -0.01em;
-    }}
-    
-    .resource-link {{
-        display: block;
-        margin-bottom: 15px;
-        color: {text_color};
-        text-decoration: none;
-        padding: 16px 20px;
-        background-color: {accent_color}11;
-        border-radius: 15px;
-        transition: all 0.3s ease;
-        font-weight: 500;
-        border-left: 4px solid {accent_color};
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-    }}
-    
-    .module-resource {{
-        border-left: 4px solid {module_color};
-        background-color: {module_color}11;
-    }}
-    
-    .concept-resource {{
-        border-left: 4px solid {concept_color};
-        background-color: {concept_color}11;
-    }}
-    
-    .resource-link:hover {{
-        background-color: {accent_color}22;
-        transform: translateX(8px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }}
-    
-    /* Graph controls */
-    .graph-controls {{
-        position: absolute;
-        bottom: 20px;
-        left: 20px;
-        z-index: 100;
-        display: flex;
-        gap: 12px;
-        background-color: {card_bg}dd;
-        padding: 12px;
-        border-radius: 30px;
-        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
-        backdrop-filter: blur(5px);
-        -webkit-backdrop-filter: blur(5px);
-    }}
-    
-    .graph-controls button {{
-        width: 45px;
-        height: 45px;
-        border-radius: 50%;
-        background-color: {accent_color}cc;
-        color: white;
-        border: none;
-        font-size: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }}
-    
-    .graph-controls button:hover {{
-        background-color: {accent_color};
-        transform: translateY(-3px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
-    }}
-    
-    /* Graph legend */
-    .graph-legend {{
-        position: absolute;
-        bottom: 20px;
-        right: 20px;
-        background: {card_bg}dd;
-        padding: 15px;
-        border-radius: 15px;
-        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
-        backdrop-filter: blur(5px);
-        -webkit-backdrop-filter: blur(5px);
-    }}
-    
-    /* Stats cards */
-    .stats-card {{
-        padding: 20px;
-        background-color: {card_bg};
-        border-radius: 15px;
-        text-align: center;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-        margin-bottom: 20px;
-        border: 1px solid {accent_color}22;
-        position: relative;
-        overflow: hidden;
-    }}
-    
-    .stats-card:before {{
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, {accent_color}, {accent_color}55);
-        border-radius: 4px 4px 0 0;
-    }}
-    
-    .stats-card:hover {{
-        transform: translateY(-5px);
-        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
-        border-color: {accent_color}55;
-    }}
-    
-    .stats-card h3 {{
-        font-size: 2.5rem;
-        margin: 0;
-        color: {accent_color};
-        font-weight: 700;
-        background: linear-gradient(135deg, {accent_color}, {accent_color}77);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }}
-    
-    .stats-card p {{
-        margin: 5px 0 0 0;
-        opacity: 0.8;
-        font-weight: 500;
-        font-size: 1rem;
-    }}
-    
-    /* Search input */
-    #nodeSearch {{
-        width: 100%;
-        padding: 12px 15px;
-        border-radius: 12px;
-        border: 1px solid {accent_color}33;
-        background-color: {bg_color};
-        color: {text_color};
-        font-size: 1rem;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-        transition: all 0.25s ease;
-    }}
-    
-    #nodeSearch:focus {{
-        border-color: {accent_color};
-        box-shadow: 0 0 0 3px {accent_color}33;
-        outline: none;
-    }}
-    
-    /* Module navigation buttons */
-    .module-nav-button {{
-        display: block;
-        width: 100%;
-        padding: 12px 15px;
-        margin: 8px 0;
-        background-color: {module_color}15;
-        color: {text_color};
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: all 0.25s ease;
-        text-align: left;
-        font-weight: 500;
-        font-size: 0.95rem;
-        position: relative;
-        padding-left: 15px;
-    }}
-    
-    .module-nav-button:before {{
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 4px;
-        background-color: {module_color};
-        border-radius: 4px 0 0 4px;
-        opacity: 0.7;
-    }}
-    
-    .module-nav-button:hover {{
-        background-color: {module_color}25;
-        transform: translateX(5px);
-    }}
-    
-    /* Tooltips */
-    .tooltip {{
-        padding: 10px 15px;
-        background-color: {card_bg}ee;
-        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
-        border-radius: 10px;
-        font-size: 0.9rem;
-        pointer-events: none;
-        z-index: 1000;
-        border: 1px solid {accent_color}22;
-        max-width: 250px;
-        backdrop-filter: blur(5px);
-        -webkit-backdrop-filter: blur(5px);
-    }}
-    
-    /* Fullscreen mode */
-    .graph-container:fullscreen {{
-        padding: 20px;
-        background-color: {graph_bg_color};
-    }}
-    
-    .graph-container:fullscreen .graph-controls {{
-        bottom: 30px;
-        left: 30px;
-    }}
-    
-    .graph-container:fullscreen .graph-legend {{
-        bottom: 30px;
-        right: 30px;
-    }}
-    
-    /* Math assessment enhancement */
-    .math-topics-container {{
-        display: flex;
-        flex-wrap: wrap;
-        gap: 15px;
-        margin-top: 25px;
-    }}
-    
-    .math-topic {{
-        flex: 1;
-        min-width: 120px;
-        padding: 15px;
-        background-color: {accent_color}15;
-        border-radius: 12px;
-        text-align: center;
-        transition: all 0.25s ease;
-        cursor: pointer;
-        font-weight: 500;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-    }}
-    
-    .math-topic:hover {{
-        background-color: {accent_color}25;
-        transform: translateY(-3px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-    }}
-    
-    /* Sample problem cards */
-    .sample-problem {{
-        padding: 15px;
-        background-color: {accent_color}10;
-        border-radius: 12px;
-        border-left: 4px solid {accent_color};
-        transition: all 0.25s ease;
-        cursor: pointer;
-    }}
-    
-    .sample-problem:hover {{
-        background-color: {accent_color}20;
-        transform: translateX(5px);
-    }}
-    
-    /* Loading animations */
-    @keyframes pulse {{
-        0% {{ opacity: 0.6; }}
-        50% {{ opacity: 0.8; }}
-        100% {{ opacity: 0.6; }}
-    }}
-    
-    .loading-pulse {{
-        animation: pulse 1.5s infinite;
-    }}
-    
-    /* Responsive adjustments */
-    @media (max-width: 992px) {{
-        .graph-resources-container {{
-            flex-direction: column;
-        }}
+        # Add to nodes array
+        vis_nodes.append({
+            'id': node.get('id'),
+            'label': node.get('label', ''),
+            'title': node.get('title', node.get('label', '')),
+            'shape': shape,
+            'color': "#5B8AF0" if node_type == "concept" else "#FFA500",
+            'font': {'size': 14, 'face': 'Arial', 'color': 'white' if node_type == "concept" else "black"},
+            'data': {
+                'description': node.get('description', ''),
+                'module': node.get('module', ''),
+                'connections': node.get('connections', 0),
+                'centrality': node.get('centrality', 0),
+                'resources': node.get('resources', [])
+            }
+        })
+    
+    # Prepare edges
+    vis_edges = []
+    for link in links:
+        confidence = link.get('metadata', {}).get('confidence', 0.7)
+        relation_type = link.get('type', 'related')
         
-        .right-sidebar {{
-            max-width: 100%;
-            height: auto;
-        }}
+        # Format edges based on relationship type and confidence
+        vis_edges.append({
+            'from': link.get('source'),
+            'to': link.get('target'),
+            'width': 1 + confidence * 3,  # Width based on confidence
+            'arrows': 'to' if not link.get('bidirectional', False) else 'to;from',
+            'color': {'color': edge_color, 'opacity': 0.7 + confidence * 0.3},
+            'title': relation_type.capitalize(),
+            'data': {
+                'reasoning': link.get('metadata', {}).get('reasoning', ''),
+                'evidence': link.get('metadata', {}).get('evidence', [])
+            }
+        })
+    
+    # Convert to JSON for JavaScript
+    nodes_json = json.dumps(vis_nodes)
+    edges_json = json.dumps(vis_edges)
+    
+    # Include the focus script if provided
+    focus_code = focus_script if focus_script else ""
+    
+    # Create HTML with vis.js
+    return f"""
+    <div id="knowledge-graph" style="height: {height}px; width: 100%;"></div>
+    
+    <!-- Add required libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/vis-network/standalone/umd/vis-network.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/dist/dist/vis-network.min.css" rel="stylesheet" type="text/css" />
+    
+    <script>
+    (function() {{
+        // Create a container
+        var container = document.getElementById('knowledge-graph');
         
-        .graph-container {{
-            height: 800px;
-        }}
-    }}
-    
-    /* Confidence badges */
-    .confidence-high {{
-        color: {correct_color};
-        font-weight: bold;
-        padding: 0.5rem;
-        border-radius: 12px;
-        background-color: {correct_color}15;
-        display: inline-block;
-        border: 1px solid {correct_color};
-    }}
-    
-    .confidence-medium {{
-        color: {warning_color};
-        font-weight: bold;
-        padding: 0.5rem;
-        border-radius: 12px;
-        background-color: {warning_color}15;
-        display: inline-block;
-        border: 1px solid {warning_color};
-    }}
-    
-    .confidence-low {{
-        color: {incorrect_color};
-        font-weight: bold;
-        padding: 0.5rem;
-        border-radius: 12px;
-        background-color: {incorrect_color}15;
-        display: inline-block;
-        border: 1px solid {incorrect_color};
-    }}
-</style>
-""", unsafe_allow_html=True)
+        // Parse the data
+        var nodes = new vis.DataSet({nodes_json});
+        var edges = new vis.DataSet({edges_json});
+        
+        // Create the network data
+        var data = {{
+            nodes: nodes,
+            edges: edges
+        }};
+        
+        // Set options
+        var options = {{
+            nodes: {{
+                shape: 'dot',
+                size: 25,
+                font: {{
+                    size: 14,
+                    face: 'Arial'
+                }},
+                borderWidth: 2,
+                shadow: true
+            }},
+            edges: {{
+                width: 2,
+                smooth: {{'type': 'continuous'}},
+                shadow: true,
+                font: {{
+                    size: 12,
+                    face: 'Arial',
+                    align: 'middle'
+                }},
+                color: {{
+                    inherit: false,
+                    color: '{edge_color}',
+                    opacity: 0.8
+                }}
+            }},
+            physics: {{
+                enabled: {str(enable_physics).lower()},
+                solver: 'forceAtlas2Based',
+                forceAtlas2Based: {{
+                    gravitationalConstant: -100,
+                    centralGravity: 0.1,
+                    springLength: {spacing},
+                    springConstant: 0.08,
+                    damping: 0.4
+                }},
+                stabilization: {{
+                    enabled: true,
+                    iterations: 1000,
+                    fit: true
+                }}
+            }},
+            interaction: {{
+                navigationButtons: true,
+                keyboard: true,
+                hover: true,
+                multiselect: false,
+                tooltipDelay: 100
+            }}
+        }};
+        
+        // Create the network
+        setTimeout(function() {{
+            // Wait for DOM to be ready
+            var network = new vis.Network(container, data, options);
+            
+            // Set up node click event
+            network.on("click", function(params) {{
+                if (params.nodes.length > 0) {{
+                    var nodeId = params.nodes[0];
+                    var node = nodes.get(nodeId);
+                    
+                    // Update node details in the sidebar
+                    var detailsContainer = document.getElementById('node-details-container');
+                    var resourcesContainer = document.getElementById('node-resources-container');
+                    
+                    if (detailsContainer) {{
+                        // Update node details
+                        var detailsHtml = `
+                            <h3>${{node.label}}</h3>
+                            <p>${{node.data.description || 'No description available'}}</p>
+                            <p><strong>Module:</strong> ${{node.data.module || 'N/A'}}</p>
+                            <p><strong>Connections:</strong> ${{node.data.connections}}</p>
+                        `;
+                        detailsContainer.innerHTML = detailsHtml;
+                    }}
+                    
+                    if (resourcesContainer) {{
+                        // Update resources
+                        var resources = node.data.resources || [];
+                        var resourcesHtml = `<h4 style="margin-top: 0; color: {resource_color}; font-weight: 600;">Learning Resources</h4>`;
+                        
+                        if (resources.length > 0) {{
+                            resourcesHtml += '<ul style="list-style-type: none; padding: 0;">';
+                            resources.forEach(function(resource) {{
+                                resourcesHtml += `
+                                <li style="margin-bottom: 12px; padding: 10px; background-color: #f7f7f7; border-radius: 5px;">
+                                    <strong>${{resource.title || 'Untitled Resource'}}</strong>
+                                    <p style="margin: 5px 0; font-size: 0.9em;">${{resource.description || 'No description'}}</p>
+                                    <a href="${{resource.url || '#'}}" target="_blank" style="color: {resource_color}; text-decoration: none; font-size: 0.9em; font-weight: 500;">Access Resource →</a>
+                                </li>`;
+                            }});
+                            resourcesHtml += '</ul>';
+                        }} else {{
+                            resourcesHtml += '<p>No resources available for this concept.</p>';
+                        }}
+                        
+                        resourcesContainer.innerHTML = resourcesHtml;
+                    }}
+                }}
+            }});
+            
+            {focus_code}
+        }}, 100);
+    }})();
+    </script>
+    """
 
 # App header with animation
 st.markdown("""
@@ -954,31 +822,170 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Create tabs
+# Main page content
+st.markdown(f"""
+<div style="text-align: center; padding: 20px 0 40px;">
+    <h1>Educational Technology Platform</h1>
+    <p style="font-size: 1.2rem; max-width: 800px; margin: 0 auto;">
+        An intelligent learning platform with knowledge graph visualization and math assessment capabilities.
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+# Replace the grid with just 2 main components
+st.markdown("""
+<div style="margin-bottom: 30px;">
+    <h2 style="margin-bottom: 25px;">Available Services</h2>
+</div>
+""", unsafe_allow_html=True)
+
+# Initialize app navigation in session state if not already there
+if 'current_mode' not in st.session_state:
+    st.session_state['current_mode'] = 'home'
+
+# Create 2 columns for our main services
+col1, col2 = st.columns(2)
+
+with col1:
+    knowledge_graph_card = st.container()
+    with knowledge_graph_card:
+        st.markdown("""
+        <div style="background-color: #e6f0fa; border-radius: 20px; padding: 30px; text-align: center; height: 200px; 
+                   display: flex; flex-direction: column; justify-content: center; align-items: center; margin-bottom: 20px;
+                   box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer;">
+            <div style="width: 80px; height: 80px; background-color: #b9d8f6; border-radius: 50%; 
+                       display: flex; justify-content: center; align-items: center; margin-bottom: 15px;">
+                <span style="font-size: 40px;">📊</span>
+            </div>
+            <h3 style="font-size: 1.8rem; margin: 0; color: #3174ad;">Knowledge Graph</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button("Open Knowledge Graph", key="kg_button"):
+            st.session_state['current_mode'] = 'knowledge_graph'
+            st.rerun()
+
+with col2:
+    math_assessment_card = st.container()
+    with math_assessment_card:
+        st.markdown("""
+        <div style="background-color: #faf6e6; border-radius: 20px; padding: 30px; text-align: center; height: 200px; 
+                   display: flex; flex-direction: column; justify-content: center; align-items: center; margin-bottom: 20px;
+                   box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer;">
+            <div style="width: 80px; height: 80px; background-color: #f6e9b9; border-radius: 50%; 
+                       display: flex; justify-content: center; align-items: center; margin-bottom: 15px;">
+                <span style="font-size: 40px;">🔢</span>
+            </div>
+            <h3 style="font-size: 1.8rem; margin: 0; color: #c49c16;">Math Assessment</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button("Open Math Assessment", key="math_button"):
+            st.session_state['current_mode'] = 'math_assessment'
+            st.rerun()
+
+# Show home page instructions when no service is selected
+if st.session_state['current_mode'] == 'home':
+    st.markdown("""
+    <div style="text-align: center; padding: 50px 0; color: #666;">
+        <h3>👆 Select a service above to get started</h3>
+        <p>Choose Knowledge Graph to visualize educational content or Math Assessment for interactive problem solving.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Hide tabs by default - we'll show content based on current_mode
 tab_knowledge_graph, tab_math_assessment = st.tabs(["📊 Knowledge Graph", "🔢 Math Assessment"])
 
-# Knowledge Graph Tab
-with tab_knowledge_graph:
+# Hide tabs completely when using our new navigation
+st.markdown("""
+<style>
+    [data-testid="stTabs"] {display: none !important;}
+</style>
+""", unsafe_allow_html=True)
+
+# Knowledge Graph mode
+if st.session_state['current_mode'] == 'knowledge_graph':
     st.header("Knowledge Graph Visualization")
     
-    if kg_service is None:
-        st.error("Knowledge Graph service is not available. Please check your configuration.")
-    else:
-        # Input section
-        with st.expander("Upload Syllabus", expanded=True):
+    # Back button
+    if st.button("← Back to Home", key="kg_back_btn"):
+        st.session_state['current_mode'] = 'home'
+        st.rerun()
+    
+    # Create a three-column layout with a wider middle column for the graph
+    # and narrower columns for controls and resources
+    control_col, graph_col, resources_col = st.columns([1, 4, 1.5])
+    
+    # Control panel on the left side
+    with control_col:
+        st.markdown(f"""
+        <div style="background-color: {accent_color}22; padding: 15px; border-radius: 10px; 
+                  margin-bottom: 15px; color: {text_color}; border-left: 4px solid {accent_color};">
+            <h3 style="margin-top: 0; margin-bottom: 15px; color: {accent_color}; 
+                    font-size: 1.3rem; font-weight: 600;">Graph Controls</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Visualization controls
+        enable_physics = st.checkbox("Enable Physics", value=True, 
+                                    help="Turn physics simulation on/off. When on, nodes will move dynamically.")
+        
+        show_labels = st.checkbox("Show Labels", value=True,
+                                help="Show or hide node labels")
+        
+        # Layout adjustments
+        st.markdown("#### Layout")
+        layout_spacing = st.slider("Node Spacing", 100, 300, 200, 10,
+                                 help="Adjust spacing between nodes")
+        
+        # Search functionality
+        st.markdown("#### Search")
+        search_term = st.text_input("Search Nodes", 
+                                  placeholder="Enter concept or module name")
+        
+        if search_term and 'current_graph' in st.session_state:
+            graph_data = st.session_state['current_graph']
+            nodes = graph_data.get('nodes', [])
+            matching_nodes = [n for n in nodes if search_term.lower() in n.get('label', '').lower()]
+            
+            if matching_nodes:
+                st.success(f"Found {len(matching_nodes)} matching nodes")
+                for node in matching_nodes[:5]:  # Show top 5 matches
+                    if st.button(f"🔍 {node.get('label')}", key=f"search_{node.get('id')}"):
+                        # Create and store JavaScript code to focus on this node
+                        st.session_state['focus_node_id'] = node.get('id')
+                        st.rerun()
+            else:
+                st.warning("No matching nodes found")
+        
+        # Filter by module
+        if 'current_graph' in st.session_state:
+            graph_data = st.session_state['current_graph']
+            modules = [n.get('label') for n in graph_data.get('nodes', []) 
+                     if n.get('type') == 'module']
+            
+            st.markdown("#### Filter by Module")
+            selected_module = st.selectbox("Select Module", 
+                                         ["All Modules"] + modules,
+                                         index=0)
+    
+    with graph_col:
+        # Input section - make it more compact
+        with st.expander("Upload Syllabus", expanded=False):
             syllabus_text = st.text_area(
                 "Paste your syllabus text below:",
-                height=200,
+                height=150,
                 placeholder="Course Title: Introduction to Mathematics...",
                 value=st.session_state.get('syllabus_text', '')
             )
             
-            col1, col2 = st.columns([2, 1])
-            with col1:
                 if st.button("🔍 Generate Knowledge Graph", key="generate_graph_btn"):
                     if syllabus_text:
                         with st.spinner("Generating knowledge graph... This may take a minute."):
                             try:
+                            # Store syllabus text in session state
+                            st.session_state['syllabus_text'] = syllabus_text
+                            
                                 # Create a container to show the progress
                                 status_container = st.empty()
                                 status_container.info("Step 1/4: Processing syllabus text...")
@@ -986,34 +993,19 @@ with tab_knowledge_graph:
                                 # Process the syllabus and generate a graph
                                 result = kg_service.process_syllabus(syllabus_text, user_id="streamlit_user")
                                 
+                            # Check if the graph was generated successfully
                                 if result.get('status') == 'success':
-                                    status_container.info("Step 2/4: Graph generated, retrieving data...")
-                                    st.success("Knowledge graph generated successfully!")
+                                graph_id = result.get('graph_id')
+                                status_container.info(f"Step 2/4: Graph generated with ID: {graph_id}")
+                                
+                                # Get the graph data
+                                status_container.info("Step 3/4: Retrieving graph data...")
+                                graph_data = kg_service.get_graph(graph_id)
+                                
+                                if 'error' not in graph_data:
+                                    status_container.info("Step 4/4: Graph data retrieved successfully!")
                                     
-                                    try:
-                                        # Get the generated graph data
-                                        graph_data = kg_service.get_graph(result.get('graph_id'))
-                                        status_container.info("Step 3/4: Graph data retrieved...")
-                                        
-                                        if not graph_data or not isinstance(graph_data, dict) or not graph_data.get('nodes'):
-                                            status_container.warning("Generated graph is empty or invalid. Using demo graph...")
-                                            # Log the actual data for debugging
-                                            print(f"DEBUG: Retrieved graph data: {type(graph_data)}")
-                                            if isinstance(graph_data, dict):
-                                                print(f"DEBUG: Keys: {graph_data.keys()}")
-                                            
-                                            # Create a demo graph if the generated one is empty
-                                            from app.knowledge_graph.api_adapter import KnowledgeGraphService
-                                            temp_service = KnowledgeGraphService(mock_mode=True)
-                                            graph_data = temp_service._generate_mock_graph(syllabus_text)
-                                        
-                                        # Ensure we have required fields
-                                        if 'nodes' not in graph_data:
-                                            graph_data['nodes'] = []
-                                        if 'links' not in graph_data:
-                                            graph_data['links'] = []
-                                        
-                                        # Add basic metadata if missing
+                                    # Add metadata if not present
                                         if 'metadata' not in graph_data:
                                             graph_data['metadata'] = {
                                                 'course_title': 'Untitled Course',
@@ -1029,8 +1021,8 @@ with tab_knowledge_graph:
                                         # Force a rerun to ensure the graph is displayed
                                         st.rerun()
                                         
-                                    except Exception as e:
-                                        st.error(f"Error processing graph data: {str(e)}")
+                                else:
+                                    st.error(f"Error retrieving graph data: {graph_data.get('error')}")
                                         # Create a demo graph in case of error
                                         status_container.warning("Error occurred. Using demo graph instead...")
                                         from app.knowledge_graph.api_adapter import KnowledgeGraphService
@@ -1055,1343 +1047,1157 @@ with tab_knowledge_graph:
                     else:
                         st.warning("Please enter a syllabus text")
             
-            with col2:
-                # Sample syllabus button
-                if st.button("📋 Load Sample Syllabus", key="load_sample_btn"):
-                    sample_path = os.path.join(project_root, 'app', 'static', 'data', 'sample_syllabus.txt')
-                    if os.path.exists(sample_path):
-                        with open(sample_path, 'r') as f:
-                            sample_syllabus = f.read()
-                        st.session_state['syllabus_text'] = sample_syllabus
-                        st.rerun()
-        
-        # Display graph if available in session state
+        # Display the graph with more vertical space - give it much more height
         if 'current_graph' in st.session_state:
             graph_data = st.session_state['current_graph']
             
-            # Display statistics
-            stat1, stat2, stat3, stat4 = st.columns(4)
-            with stat1:
-                st.markdown(f"""
-                <div class="stats-card">
-                    <h3>{len(graph_data.get('nodes', []))}</h3>
-                    <p>Total Nodes</p>
-                </div>
-                """, unsafe_allow_html=True)
-            with stat2:
-                st.markdown(f"""
-                <div class="stats-card">
-                    <h3>{len(graph_data.get('links', []))}</h3>
-                    <p>Connections</p>
-                </div>
-                """, unsafe_allow_html=True)
-            with stat3:
-                module_count = len([n for n in graph_data.get('nodes', []) if n.get('type') == 'module'])
-                st.markdown(f"""
-                <div class="stats-card">
-                    <h3>{module_count}</h3>
-                    <p>Modules</p>
-                </div>
-                """, unsafe_allow_html=True)
-            with stat4:
-                concept_count = len([n for n in graph_data.get('nodes', []) if n.get('type') == 'concept'])
-                st.markdown(f"""
-                <div class="stats-card">
-                    <h3>{concept_count}</h3>
-                    <p>Concepts</p>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            # Save graph data to JSON for visualization
-            graph_json = json.dumps(graph_data)
-            
-            # Create a more dynamic visualization with D3.js
-            st.subheader("Interactive Knowledge Graph")
-            
-            # Add debug information for troubleshooting
-            if st.checkbox("Show debug info", key="show_debug", value=False):
-                st.write("Graph data structure:")
-                st.write(f"- Type: {type(graph_data)}")
-                st.write(f"- Has nodes: {'nodes' in graph_data}")
-                st.write(f"- Node count: {len(graph_data.get('nodes', []))}")
-                st.write(f"- Has links: {'links' in graph_data}")
-                st.write(f"- Link count: {len(graph_data.get('links', []))}")
+            # Apply module filter if selected
+            if 'selected_module' in locals() and selected_module != "All Modules":
+                # Filter nodes to only show the selected module and its related concepts
+                module_node = next((n for n in graph_data.get('nodes', []) 
+                                  if n.get('label') == selected_module), None)
                 
-                with st.expander("View raw graph data"):
-                    st.json(graph_data)
-            
-            # Add debug mode to help troubleshoot JavaScript issues
-            debug_mode = "false"
-            if st.checkbox("Enable JavaScript debug mode", value=False):
-                debug_mode = "true"
-            
-            # Generate resources JS function
-            resources_js = """
-            function getNodeResources(nodeId, nodeType) {
-                // More realistic resources based on node type
-                if (nodeType === "module") {
-                    return [
-                        { title: "Practice Quiz", url: "#" },
-                        { title: "Recommended Reading", url: "#" },
-                        { title: "Video Lecture Series", url: "#" }
-                    ];
-                } else {
-                    return [
-                        { title: `Introduction Video for ${nodeId}`, url: "#" },
-                        { title: `Practice Quiz for ${nodeId}`, url: "#" },
-                        { title: `Further Reading on ${nodeId}`, url: "#" }
-                    ];
-                }
-            }
-            """
-            
-            # Create HTML content with integrated resources panel
-            html_content = f"""
-            <div class="graph-resources-container">
-                <!-- Left side: Graph visualization (much larger) -->
-                <div class="graph-area">
-                    <div class="graph-container">
-                        <script src="https://d3js.org/d3.v7.min.js"></script>
-                        <div id="graph-message" style="display:none; padding: 20px; text-align:center; color:#1E2A38; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 100;">
-                            <h3>Loading graph visualization...</h3>
-                            <p>If the graph doesn't appear, please check the console for errors.</p>
-                        </div>
-                        <svg id="graph" width="100%" height="100%"></svg>
-                        
-                        <div class="graph-controls">
-                            <button onclick="zoomIn()" title="Zoom In">+</button>
-                            <button onclick="zoomOut()" title="Zoom Out">-</button>
-                            <button onclick="resetZoom()" title="Reset View">⟳</button>
-                            <button onclick="toggleFullscreen()" title="Fullscreen Toggle">⛶</button>
-                        </div>
-                        
-                        <div class="graph-legend" style="position: absolute; bottom: 15px; right: 15px; background: #FFFFFFEE; padding: 10px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.15);">
-                            <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                                <div style="width: 12px; height: 12px; border-radius: 50%; background-color: {module_color}; margin-right: 8px;"></div>
-                                <span style="color: #1E2A38; font-size: 0.9rem; font-weight: 500;">Module</span>
-                            </div>
-                            <div style="display: flex; align-items: center;">
-                                <div style="width: 12px; height: 12px; border-radius: 50%; background-color: {concept_color}; margin-right: 8px;"></div>
-                                <span style="color: #1E2A38; font-size: 0.9rem; font-weight: 500;">Concept</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Right side: Sidebar with details and resources -->
-                <div class="right-sidebar">
-                    <!-- Node Details Panel -->
-                    <div class="panel node-details-panel" id="nodeDetailsPanel" style="display: none; background-color: #FFFFFF;">
-                        <button class="close-btn" onclick="hideNodeDetails()">&times;</button>
-                        <h3 id="nodeDetailsTitle" style="color: #1E2A38;">Node Details</h3>
-                        <div id="nodeDetailsContent">
-                            <p style="color: #1E2A38;">Click on a node in the graph to view its details.</p>
-                        </div>
-                    </div>
+                if module_node:
+                    module_id = module_node.get('id')
+                    # Get all links involving this module
+                    related_links = [l for l in graph_data.get('links', []) 
+                                   if l.get('source') == module_id or l.get('target') == module_id]
+                    # Get IDs of all related nodes
+                    related_node_ids = set()
+                    related_node_ids.add(module_id)
+                    for link in related_links:
+                        related_node_ids.add(link.get('source'))
+                        related_node_ids.add(link.get('target'))
                     
-                    <!-- Resources Panel -->
-                    <div class="panel resources-panel" id="resourcesPanel" style="background-color: #FFFFFF;">
-                        <h3 style="color: {accent_color}; margin-bottom: 15px; border-bottom: 2px solid {accent_color}33; padding-bottom: 10px; font-size: 1.3rem;">📚 Learning Resources</h3>
-                        <div id="resourcesContent">
-                            <div style="text-align: center; padding: 20px 0;">
-                                <div style="width: 60px; height: 60px; margin: 0 auto; background-color: #F0F8FF; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                    <span style="font-size: 24px;">📚</span>
-                                </div>
-                                <p style="margin-top: 15px; color: #1E2A38; font-weight: 500;">Click on a node to view related learning resources</p>
-                            </div>
-                        </div>
-                    </div>
+                    # Filter nodes and links
+                    filtered_nodes = [n for n in graph_data.get('nodes', []) 
+                                    if n.get('id') in related_node_ids]
+                    filtered_links = related_links
                     
-                    <!-- Graph Navigation -->
-                    <div class="panel navigation-panel" style="background-color: #FFFFFF;">
-                        <h3 style="color: {accent_color}; margin-bottom: 15px; border-bottom: 2px solid {accent_color}33; padding-bottom: 10px; font-size: 1.3rem;">🧭 Graph Navigation</h3>
-                        <div id="navigationContent">
-                            <div style="margin-bottom: 15px;">
-                                <input type="text" id="nodeSearch" placeholder="Search for a node..." style="background-color: #F8F9FA; color: #1E2A38;">
-                            </div>
-                            <div id="moduleList" style="margin-top: 15px;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- D3.js graph implementation -->
-            <script>
-                // Parse the graph data from Python
-                const graphData = {graph_json};
-                const showLabels = {str(show_labels).lower()};
-                const enablePhysics = {str(enable_physics).lower()};
-                const debugMode = {debug_mode};
-                
-                // Colors from Streamlit themes
-                const moduleColor = "{module_color}";
-                const conceptColor = "{concept_color}";
-                const accentColor = "{accent_color}";
-                const textColor = "{text_color}";
-                const bgColor = "{graph_bg_color}";
-                const nodeLabelColor = "{node_label_color}";
-                
-                // Debug helper function
-                function debug(message) {{
-                    if (debugMode) {{
-                        console.log(`DEBUG: ${{message}}`);
-                    }}
-                }}
-                
-                // Initialize the graph visualization
-                function initGraph() {{
-                    try {{
-                        debug("Initializing graph visualization");
-                        debug(`Graph data: ${{graphData.nodes.length}} nodes, ${{graphData.links.length}} links`);
-                        
-                        // Select the SVG element
-                        const svg = d3.select("#graph");
-                        const width = svg.node().parentNode.clientWidth;
-                        const height = svg.node().parentNode.clientHeight;
-                        
-                        debug(`SVG dimensions: ${{width}}x${{height}}`);
-                        
-                        // Clear any existing content
-                        svg.selectAll("*").remove();
-                        
-                        // Set explicit white background for the SVG
-                        svg.append("rect")
-                           .attr("width", "100%")
-                           .attr("height", "100%")
-                           .attr("fill", "#FFFFFF");
-                        
-                        // Create a group for the graph
-                        const g = svg.append("g");
-                        
-                        // Create zoom behavior
-                        const zoom = d3.zoom()
-                            .scaleExtent([0.1, 4])
-                            .on("zoom", (event) => {{
-                                g.attr("transform", event.transform);
-                            }});
-                        
-                        svg.call(zoom);
-                        
-                        // Define arrow markers for links
-                        svg.append("defs").selectAll("marker")
-                            .data(["arrow"])
-                            .enter().append("marker")
-                            .attr("id", d => d)
-                            .attr("viewBox", "0 -5 10 10")
-                            .attr("refX", 25)
-                            .attr("refY", 0)
-                            .attr("markerWidth", 6)
-                            .attr("markerHeight", 6)
-                            .attr("orient", "auto")
-                            .append("path")
-                            .attr("fill", `${{accentColor}}99`)
-                            .attr("d", "M0,-5L10,0L0,5");
-                        
-                        // Process the graph data
-                        const nodes = graphData.nodes;
-                        const links = graphData.links.map(link => {{
-                            // Ensure source and target references are correct
-                            const source = nodes.find(node => node.id === link.source) || link.source;
-                            const target = nodes.find(node => node.id === link.target) || link.target;
-                            return {{...link, source, target}};
-                        }});
-                        
-                        debug(`Processed ${{nodes.length}} nodes and ${{links.length}} links`);
-                        
-                        // Create force simulation
-                        const simulation = d3.forceSimulation(nodes)
-                            .force("link", d3.forceLink(links).id(d => d.id).distance(100))
-                            .force("charge", d3.forceManyBody().strength(-400))
-                            .force("center", d3.forceCenter(width / 2, height / 2))
-                            .force("collide", d3.forceCollide().radius(60));
-                        
-                        if (!enablePhysics) {{
-                            debug("Physics simulation disabled by user");
-                            simulation.stop();
-                        }}
-                        
-                        // Create links
-                        const link = g.append("g")
-                            .attr("class", "links")
-                            .selectAll("line")
-                            .data(links)
-                            .enter().append("line")
-                            .attr("stroke", d => `${{accentColor}}55`)
-                            .attr("stroke-width", d => Math.max(1, d.strength * 3 || 1))
-                            .attr("marker-end", "url(#arrow)")
-                            .attr("stroke-dasharray", d => d.type === "prerequisite" ? "5,5" : null)
-                            .on("mouseover", function(event, d) {{
-                                try {{
-                                    d3.select(this)
-                                        .attr("stroke", accentColor)
-                                        .attr("stroke-width", Math.max(2, d.strength * 4 || 2));
-                                        
-                                    // Show tooltip with link type
-                                    const tooltip = d3.select("body").append("div")
-                                        .attr("class", "tooltip")
-                                        .style("position", "absolute")
-                                        .style("padding", "8px")
-                                        .style("background", `${{bgColor}}EE`)
-                                        .style("color", textColor)
-                                        .style("border-radius", "4px")
-                                        .style("font-size", "12px")
-                                        .style("box-shadow", "0 4px 8px rgba(0,0,0,0.2)")
-                                        .style("pointer-events", "none")
-                                        .style("opacity", 0)
-                                        .style("z-index", 1000);
-                                        
-                                    tooltip.html(`<strong>Relationship:</strong> ${{d.type || "connected"}}`)
-                                        .style("left", (event.pageX + 10) + "px")
-                                        .style("top", (event.pageY - 28) + "px")
-                                        .transition()
-                                        .duration(200)
-                                        .style("opacity", 0.9);
-                                        
-                                    // Store the tooltip reference
-                                    this._tooltip = tooltip;
-                                }} catch (e) {{
-                                    console.error("Error in link mouseover:", e);
-                                }}
-                            }})
-                            .on("mouseout", function() {{
-                                try {{
-                                    const d = d3.select(this).datum();
-                                    d3.select(this)
-                                        .attr("stroke", `${{accentColor}}55`)
-                                        .attr("stroke-width", Math.max(1, d.strength * 3 || 1));
-                                        
-                                    // Remove tooltip
-                                    if (this._tooltip) {{
-                                        this._tooltip.transition()
-                                            .duration(200)
-                                            .style("opacity", 0)
-                                            .remove();
-                                    }}
-                                }} catch (e) {{
-                                    console.error("Error in link mouseout:", e);
-                                }}
-                            }});
-                        
-                        // Create nodes
-                        const node = g.append("g")
-                            .attr("class", "nodes")
-                            .selectAll(".node")
-                            .data(nodes)
-                            .enter().append("g")
-                            .attr("class", "node")
-                            .attr("data-id", d => d.id)
-                            .call(d3.drag()
-                                .on("start", dragstarted)
-                                .on("drag", dragged)
-                                .on("end", dragended));
-                        
-                        // Add circles for nodes with different colors based on type
-                        node.append("circle")
-                            .attr("r", d => d.type === "module" ? 25 : 18)
-                            .attr("fill", d => d.type === "module" ? moduleColor : conceptColor)
-                            .attr("stroke", accentColor)
-                            .attr("stroke-width", 2)
-                            .attr("stroke-opacity", 0.6)
-                            .attr("filter", "drop-shadow(0px 2px 3px rgba(0,0,0,0.2))"); // Add drop shadow for better visibility
-                        
-                        // Add text labels to nodes
-                        if (showLabels) {{
-                            node.append("text")
-                                .attr("dy", d => d.type === "module" ? 40 : 30)
-                                .attr("text-anchor", "middle")
-                                .text(d => d.name || d.id)
-                                .style("fill", "#1a1a1a") // Darker label color
-                                .style("font-weight", d => d.type === "module" ? "bold" : "normal")
-                                .style("font-size", d => d.type === "module" ? "14px" : "12px")
-                                .style("pointer-events", "none")
-                                .style("text-shadow", "0 0 4px #FFFFFF, 0 0 4px #FFFFFF, 0 0 4px #FFFFFF, 0 0 4px #FFFFFF"); // Enhanced white outline for visibility
-                        }}
-                        
-                        // Populate the module list for navigation
-                        const moduleList = document.getElementById("moduleList");
-                        moduleList.innerHTML = '';
-                        
-                        const moduleNodes = nodes.filter(n => n.type === "module");
-                        moduleNodes.forEach(module => {{
-                            const button = document.createElement("button");
-                            button.className = "module-nav-button";
-                            button.innerHTML = module.name || module.id;
-                            
-                            button.addEventListener("click", () => {{
-                                // Find the node in the visualization and focus on it
-                                const moduleNode = d3.select(`[data-id="${{module.id}}"]`).datum();
-                                if (moduleNode) {{
-                                    // Center on the module
-                                    centerOnNode(moduleNode);
-                                    // Trigger the node details display
-                                    showNodeDetails(moduleNode);
-                                }}
-                            }});
-                            
-                            moduleList.appendChild(button);
-                        }});
-                        
-                        // Add search functionality
-                        const nodeSearch = document.getElementById("nodeSearch");
-                        nodeSearch.addEventListener("input", function() {{
-                            const searchText = this.value.toLowerCase();
-                            
-                            // Filter nodes that match the search text
-                            const matchingNodes = nodes.filter(node => 
-                                (node.name && node.name.toLowerCase().includes(searchText)) || 
-                                node.id.toLowerCase().includes(searchText)
-                            );
-                            
-                            // Highlight matching nodes
-                            node.selectAll("circle")
-                                .attr("stroke-width", d => matchingNodes.includes(d) ? 4 : 2)
-                                .attr("stroke", d => matchingNodes.includes(d) ? "#FF5733" : accentColor)
-                                .attr("stroke-opacity", d => matchingNodes.includes(d) ? 1 : 0.6);
-                                
-                            // If only one node matches and search is non-empty, center on it
-                            if (matchingNodes.length === 1 && searchText !== "") {{
-                                centerOnNode(matchingNodes[0]);
-                            }}
-                        }});
-                        
-                        // Handle node click to show details
-                        node.on("click", function(event, d) {{
-                            showNodeDetails(d);
-                            event.stopPropagation();
-                        }});
-                        
-                        // Handle node mouseover to highlight connections
-                        node.on("mouseover", function(event, d) {{
-                            try {{
-                                // Highlight the current node
-                                d3.select(this).select("circle")
-                                    .attr("stroke-width", 4)
-                                    .attr("stroke-opacity", 1);
-                                
-                                // Find connected nodes
-                                const connectedNodeIds = new Set();
-                                links.forEach(link => {{
-                                    if (link.source.id === d.id || link.source === d.id) {{
-                                        connectedNodeIds.add(typeof link.target === 'object' ? link.target.id : link.target);
-                                    }} else if (link.target.id === d.id || link.target === d.id) {{
-                                        connectedNodeIds.add(typeof link.source === 'object' ? link.source.id : link.source);
-                                    }}
-                                }});
-                                
-                                // Highlight connected links
-                                link.attr("stroke", linkData => {{
-                                    if ((linkData.source.id === d.id || linkData.target.id === d.id)) {{
-                                        return accentColor;
-                                    }} else {{
-                                        return `${{accentColor}}55`;
-                                    }}
-                                }})
-                                .attr("stroke-width", linkData => {{
-                                    if ((linkData.source.id === d.id || linkData.target.id === d.id)) {{
-                                        return Math.max(2, linkData.strength * 4 || 2);
-                                    }} else {{
-                                        return Math.max(1, linkData.strength * 3 || 1);
-                                    }}
-                                }});
-                                
-                                // Highlight connected nodes
-                                node.select("circle")
-                                    .attr("stroke", nodeData => {{
-                                        if (nodeData.id === d.id) {{
-                                            return "#FF5733"; // Current node
-                                        }} else if (connectedNodeIds.has(nodeData.id)) {{
-                                            return accentColor; // Connected node
-                                        }} else {{
-                                            return accentColor; // Other nodes
-                                        }}
-                                    }})
-                                    .attr("stroke-width", nodeData => {{
-                                        if (nodeData.id === d.id) {{
-                                            return 4; // Current node
-                                        }} else if (connectedNodeIds.has(nodeData.id)) {{
-                                            return 3; // Connected node
-                                        }} else {{
-                                            return 2; // Other nodes
-                                        }}
-                                    }})
-                                    .attr("stroke-opacity", nodeData => {{
-                                        if (nodeData.id === d.id || connectedNodeIds.has(nodeData.id)) {{
-                                            return 1; // Current or connected nodes
-                                        }} else {{
-                                            return 0.2; // Other nodes
-                                        }}
-                                    }});
-                                    
-                                // Show tooltip with node name
-                                const tooltip = d3.select("body").append("div")
-                                    .attr("class", "tooltip")
-                                    .style("position", "absolute")
-                                    .style("padding", "8px")
-                                    .style("background", `${{bgColor}}EE`)
-                                    .style("color", textColor)
-                                    .style("border-radius", "4px")
-                                    .style("font-size", "12px")
-                                    .style("box-shadow", "0 4px 8px rgba(0,0,0,0.2)")
-                                    .style("pointer-events", "none")
-                                    .style("opacity", 0)
-                                    .style("z-index", 1000);
-                                
-                                tooltip.html(`<strong>${{d.name || d.id}}</strong><br>${{d.type}}`)
-                                    .style("left", (event.pageX + 10) + "px")
-                                    .style("top", (event.pageY - 28) + "px")
-                                    .transition()
-                                    .duration(200)
-                                    .style("opacity", 0.9);
-                                
-                                // Store the tooltip reference
-                                this._tooltip = tooltip;
-                            }} catch (e) {{
-                                console.error("Error in node mouseover:", e);
-                            }}
-                        }});
-                        
-                        // Handle node mouseout to reset highlights
-                        node.on("mouseout", function() {{
-                            try {{
-                                // Reset all node colors
-                                node.select("circle")
-                                    .attr("stroke", accentColor)
-                                    .attr("stroke-width", 2)
-                                    .attr("stroke-opacity", 0.6);
-                                
-                                // Reset all link colors
-                                link.attr("stroke", `${{accentColor}}55`)
-                                    .attr("stroke-width", d => Math.max(1, d.strength * 3 || 1));
-                                
-                                // Remove tooltip
-                                if (this._tooltip) {{
-                                    this._tooltip.transition()
-                                        .duration(200)
-                                        .style("opacity", 0)
-                                        .remove();
-                                }}
-                            }} catch (e) {{
-                                console.error("Error in node mouseout:", e);
-                            }}
-                        }});
-                        
-                        // Start with one module expanded if graph just loaded
-                        if (moduleNodes.length > 0) {{
-                            setTimeout(() => {{
-                                const firstModule = moduleNodes[0];
-                                showNodeDetails(firstModule);
-                                centerOnNode(firstModule);
-                            }}, 500);
-                        }}
-                        
-                        // Update function for simulation
-                        simulation.on("tick", () => {{
-                            link
-                                .attr("x1", d => d.source.x)
-                                .attr("y1", d => d.source.y)
-                                .attr("x2", d => d.target.x)
-                                .attr("y2", d => d.target.y);
-                            
-                            node.attr("transform", d => `translate(${{d.x}},${{d.y}})`);
-                        }});
-                        
-                        // Force simulation drag functions
-                        function dragstarted(event, d) {{
-                            try {{
-                                if (!event.active) simulation.alphaTarget(0.3).restart();
-                                d.fx = d.x;
-                                d.fy = d.y;
-                            }} catch (e) {{
-                                console.error("Error in dragstarted:", e);
-                            }}
-                        }}
-                        
-                        function dragged(event, d) {{
-                            try {{
-                                d.fx = event.x;
-                                d.fy = event.y;
-                            }} catch (e) {{
-                                console.error("Error in dragged:", e);
-                            }}
-                        }}
-                        
-                        function dragended(event, d) {{
-                            try {{
-                                if (!event.active) simulation.alphaTarget(0);
-                                d.fx = null;
-                                d.fy = null;
-                            }} catch (e) {{
-                                console.error("Error in dragended:", e);
-                            }}
-                        }}
-                        
-                        // Auto-center and zoom to fit the graph
-                        resetZoom();
-                        
-                        debug("Graph visualization initialized successfully");
-                    }} catch (e) {{
-                        console.error("Error initializing graph:", e);
-                        document.getElementById("graph-message").style.display = "block";
-                        document.getElementById("graph-message").innerHTML = `
-                            <h3>Error Loading Graph</h3>
-                            <p>${{e.message}}</p>
-                            <p>Please try refreshing the page or contact support.</p>
-                        `;
-                    }}
-                }}
-                
-                // Center on a specific node
-                function centerOnNode(d) {{
-                    try {{
-                        const svg = d3.select("#graph");
-                        const width = svg.node().parentNode.clientWidth;
-                        const height = svg.node().parentNode.clientHeight;
-                        
-                        const transform = d3.zoomIdentity
-                            .translate(width / 2, height / 2)
-                            .scale(1.2)
-                            .translate(-d.x, -d.y);
-                        
-                        svg.transition()
-                            .duration(750)
-                            .call(d3.zoom().transform, transform);
-                    }} catch (e) {{
-                        console.error("Error centering on node:", e);
-                    }}
-                }}
-                
-                // Show node details and resources
-                function showNodeDetails(d) {{
-                    try {{
-                        const nodeDetailsPanel = document.getElementById("nodeDetailsPanel");
-                        const nodeDetailsTitle = document.getElementById("nodeDetailsTitle");
-                        const nodeDetailsContent = document.getElementById("nodeDetailsContent");
-                        const resourcesContent = document.getElementById("resourcesContent");
-                        
-                        // Set display to block (make it visible)
-                        nodeDetailsPanel.style.display = "block";
-                        
-                        // Update the title with better visibility
-                        nodeDetailsTitle.innerText = d.name || d.id;
-                        nodeDetailsTitle.style.color = "#1E2A38";
-                        
-                        // Update the content with better visibility
-                        let detailsHtml = `
-                            <div class="node-details-item type">
-                                <div class="label" style="color: #1E2A38;">Type:</div>
-                                <div class="value ${{d.type}}" style="background-color: ${{d.type === 'module' ? '#F0F8FF' : '#F0FFF0'}}; color: #1E2A38;">
-                                    ${{d.type.charAt(0).toUpperCase() + d.type.slice(1)}}
-                                </div>
-                            </div>
-                            <div class="node-details-item">
-                                <div class="label" style="color: #1E2A38;">ID:</div>
-                                <div class="value" style="background-color: #F8F9FA; color: #1E2A38;">${{d.id}}</div>
-                            </div>
-                        `;
-                        
-                        // Find connected nodes
-                        const connectedNodes = [];
-                        graphData.links.forEach(link => {{
-                            if (link.source === d.id || (typeof link.source === 'object' && link.source.id === d.id)) {{
-                                const target = typeof link.target === 'object' ? link.target : 
-                                    graphData.nodes.find(n => n.id === link.target);
-                                if (target) {{
-                                    connectedNodes.push({{
-                                        node: target,
-                                        relationship: link.type || "connected to"
-                                    }});
-                                }}
-                            }} else if (link.target === d.id || (typeof link.target === 'object' && link.target.id === d.id)) {{
-                                const source = typeof link.source === 'object' ? link.source : 
-                                    graphData.nodes.find(n => n.id === link.source);
-                                if (source) {{
-                                    connectedNodes.push({{
-                                        node: source,
-                                        relationship: link.type ? `has ${{link.type}} from` : "connected to"
-                                    }});
-                                }}
-                            }}
-                        }});
-                        
-                        if (connectedNodes.length > 0) {{
-                            detailsHtml += `
-                                <div class="node-details-item">
-                                    <div class="label">Connected Nodes (${{connectedNodes.length}}):</div>
-                                    <div class="value">
-                                        <ul style="padding-left: 20px; margin: 0;">
-                            `;
-                            
-                            // Show first 5 connected nodes
-                            const displayLimit = 5;
-                            const displayNodes = connectedNodes.slice(0, displayLimit);
-                            
-                            displayNodes.forEach(connection => {{
-                                detailsHtml += `
-                                    <li>
-                                        <a href="#" onclick="centerOnNode({{x: ${{connection.node.x}}, y: ${{connection.node.y}}}}); return false;" 
-                                           style="color: ${{connection.node.type === 'module' ? moduleColor : conceptColor}}; text-decoration: none; font-weight: 500;">
-                                            ${{connection.node.name || connection.node.id}}
-                                        </a>
-                                        <span style="opacity: 0.6; font-size: 0.9em;"> (${{connection.relationship}})</span>
-                                    </li>
-                                `;
-                            }});
-                            
-                            // Show count of additional nodes if there are more
-                            if (connectedNodes.length > displayLimit) {{
-                                const additionalCount = connectedNodes.length - displayLimit;
-                                detailsHtml += `
-                                    <li style="list-style-type: none; margin-top: 8px;">
-                                        <span style="font-style: italic; opacity: 0.7;">+ ${{additionalCount}} more connected node${{additionalCount > 1 ? 's' : ''}}</span>
-                                    </li>
-                                `;
-                            }}
-                            
-                            detailsHtml += `
-                                        </ul>
-                                    </div>
-                                </div>
-                            `;
-                        }}
-                        
-                        nodeDetailsContent.innerHTML = detailsHtml;
-                        
-                        // Update the resources
-                        let resourcesHtml = `
-                            <h4 style="margin-top: 0; color: #1E2A38; font-weight: 600; font-size: 1.1rem;">Learning Resources for ${{d.name || d.id}}</h4>
-                            <div style="margin-top: 15px; background-color: #FFFFFF;">`;
-                        
-                        // Different resources based on node type with better styling
-                        let resources = [];
-                        if (d.type === "module") {{
-                            resources = [
-                                {{ icon: "📋", title: `Module Overview: ${{d.name || d.id}}`, url: "#", type: "module" }},
-                                {{ icon: "📝", title: "Practice Quiz", url: "#", type: "module" }},
-                                {{ icon: "📚", title: "Recommended Reading", url: "#", type: "module" }},
-                                {{ icon: "🎬", title: "Video Lecture Series", url: "#", type: "module" }},
-                                {{ icon: "💬", title: "Discussion Forum", url: "#", type: "module" }}
-                            ];
-                        }} else {{
-                            resources = [
-                                {{ icon: "🔍", title: `Introduction to ${{d.name || d.id}}`, url: "#", type: "concept" }},
-                                {{ icon: "📝", title: `Practice Quiz for ${{d.name || d.id}}`, url: "#", type: "concept" }},
-                                {{ icon: "📚", title: `Further Reading on ${{d.name || d.id}}`, url: "#", type: "concept" }},
-                                {{ icon: "🧩", title: "Interactive Tutorial", url: "#", type: "concept" }}
-                            ];
-                        }}
-                        
-                        resources.forEach(resource => {{
-                            const resourceClass = resource.type === "module" ? "module-resource" : "concept-resource";
-                            resourcesHtml += `
-                                <a href="${{resource.url}}" class="resource-link ${{resourceClass}}">
-                                    <span class="resource-icon">${{resource.icon}}</span>
-                                    <span>${{resource.title}}</span>
-                                </a>
-                            `;
-                        }});
-                        
-                        resourcesHtml += `</div>`;
-                        resourcesContent.innerHTML = resourcesHtml;
-                    }} catch (e) {{
-                        console.error("Error showing node details:", e);
-                    }}
-                }}
-                
-                // Hide node details panel
-                function hideNodeDetails() {{
-                    document.getElementById("nodeDetailsPanel").style.display = "none";
-                }}
-                
-                // Zoom control functions
-                function zoomIn() {{
-                    const svg = d3.select("#graph");
-                    svg.transition().duration(500).call(
-                        d3.zoom().scaleBy, 1.5
-                    );
-                }}
-                
-                function zoomOut() {{
-                    const svg = d3.select("#graph");
-                    svg.transition().duration(500).call(
-                        d3.zoom().scaleBy, 0.75
-                    );
-                }}
-                
-                function resetZoom() {{
-                    try {{
-                        const svg = d3.select("#graph");
-                        const width = svg.node().parentNode.clientWidth;
-                        const height = svg.node().parentNode.clientHeight;
-                        
-                        // Create a temporary g element to calculate bounds
-                        const tempG = svg.append("g").attr("class", "temp");
-                        tempG.selectAll("circle")
-                            .data(graphData.nodes)
-                            .enter()
-                            .append("circle")
-                            .attr("cx", d => d.x || 0)
-                            .attr("cy", d => d.y || 0)
-                            .attr("r", 1);
-                        
-                        // Get bounds of nodes
-                        const bounds = tempG.node().getBBox();
-                        tempG.remove();
-                        
-                        // Calculate scaling factor to fit all nodes
-                        const scale = 0.9 / Math.max(
-                            bounds.width / width,
-                            bounds.height / height
-                        );
-                        
-                        // Calculate center of the graph
-                        const centerX = bounds.x + bounds.width / 2;
-                        const centerY = bounds.y + bounds.height / 2;
-                        
-                        // Create a transform that centers and scales
-                        const transform = d3.zoomIdentity
-                            .translate(width / 2, height / 2)
-                            .scale(scale)
-                            .translate(-centerX, -centerY);
-                        
-                        // Apply the transform with transition
-                        svg.transition()
-                            .duration(750)
-                            .call(d3.zoom().transform, transform);
-                    }} catch (e) {{
-                        console.error("Error resetting zoom:", e);
-                        
-                        // Fallback to a simpler zoom reset
-                        const svg = d3.select("#graph");
-                        svg.transition()
-                            .duration(750)
-                            .call(d3.zoom().transform, d3.zoomIdentity);
-                    }}
-                }}
-                
-                // Toggle fullscreen for the graph
-                function toggleFullscreen() {{
-                    const container = document.querySelector(".graph-container");
+                    # Create a temporary filtered graph
+                    filtered_graph = {
+                        'nodes': filtered_nodes,
+                        'links': filtered_links,
+                        'metadata': graph_data.get('metadata', {})
+                    }
                     
-                    if (!document.fullscreenElement) {{
-                        if (container.requestFullscreen) {{
-                            container.requestFullscreen();
-                        }} else if (container.webkitRequestFullscreen) {{
-                            container.webkitRequestFullscreen();
-                        }} else if (container.msRequestFullscreen) {{
-                            container.msRequestFullscreen();
-                        }}
-                    }} else {{
-                        if (document.exitFullscreen) {{
-                            document.exitFullscreen();
-                        }} else if (document.webkitExitFullscreen) {{
-                            document.webkitExitFullscreen();
-                        }} else if (document.msExitFullscreen) {{
-                            document.msExitFullscreen();
-                        }}
-                    }}
-                }}
-                
-                // Initialize the graph when the document is loaded
-                document.addEventListener('DOMContentLoaded', initGraph);
-                
-                // Also initialize immediately in case DOMContentLoaded already fired
-                initGraph();
-            </script>
-            """
-            
-            # Increase component height for the taller graph
-            st.components.v1.html(html_content, height=1350)
-
-# Math Assessment Tab
-with tab_math_assessment:
-    st.header("Math Problem Assessment")
-    
-    if math_agent is None:
-        st.error("Math Assessment service is not available. Please check your configuration.")
-    else:
-        # Left column: Input
-        left_col, right_col = st.columns([1, 1])
-        
-        with left_col:
-            st.markdown('<div class="card">', unsafe_allow_html=True)
-            st.subheader("🔢 Math Problem")
-            
-            # Form for math problem
-            with st.form(key="math_form"):
-                math_question = st.text_area(
-                    "Question:",
-                    placeholder="Enter a math problem or question...",
-                    height=100,
-                    value=st.session_state.get('math_question', '')
-                )
-                
-                student_answer = st.text_input(
-                    "Your Answer:",
-                    placeholder="Enter your answer..."
-                )
-                
-                # Make correct answer field hidden by default
-                show_correct = st.checkbox("I want to provide a correct answer (optional)", value=False)
-                
-                if show_correct:
-                    correct_answer = st.text_input(
-                        "Correct Answer (Optional):",
-                        placeholder="For verification purposes...",
-                        value=st.session_state.get('correct_answer', '')
-                    )
+                    # Use the filtered graph
+                    display_graph = filtered_graph
                 else:
-                    correct_answer = st.session_state.get('correct_answer', '')
+                    display_graph = graph_data
+            else:
+                display_graph = graph_data
+            
+            # Check if we need to focus on a specific node
+            focus_script = ""
+            if 'focus_node_id' in st.session_state:
+                node_id = st.session_state['focus_node_id']
+                focus_script = f"""
+                // Focus on the searched node
+                setTimeout(function() {{
+                    var nodeId = "{node_id}";
+                    network.selectNodes([nodeId]);
+                    network.focus(nodeId, {{
+                        scale: 1.5,
+                        animation: true
+                    }});
+                    // Clear the selection after focusing
+                    setTimeout(function() {{ st.session_state.focus_node_id = null; }}, 100);
+                }}, 1000);
+                """
+                # Clear the focus node ID
+                st.session_state['focus_node_id'] = None
+            
+            # Make the graph container much taller (800px)
+            st.markdown(f"""
+            <div style="height: 800px; border-radius: 15px; overflow: hidden; margin-top: 10px; 
+                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
+                {generate_graph_html(display_graph, show_labels, enable_physics, 
+                                     height=800, spacing=layout_spacing, focus_script=focus_script)}
+            </div>
+            
+            <!-- Add vis.js directly to ensure it's loaded -->
+            <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+            """, unsafe_allow_html=True)
+            
+            # Debug: Let's log some information about the graph
+            if display_graph:
+                node_count = len(display_graph.get('nodes', []))
+                link_count = len(display_graph.get('links', []))
+                st.markdown(f"<div style='color: #888; font-size: 0.8rem;'>Debug: Graph has {node_count} nodes and {link_count} links</div>", 
+                            unsafe_allow_html=True)
+        else:
+            st.info("No graph data available. Generate a graph or load sample data.")
+            if st.button("Load Sample Data"):
+                try:
+                    from app.knowledge_graph.api_adapter import KnowledgeGraphService
+                    temp_service = KnowledgeGraphService(mock_mode=True)
+                    with open('app/static/data/sample_syllabus.txt', 'r') as f:
+                            sample_syllabus = f.read()
+                    graph_data = temp_service._generate_mock_graph(sample_syllabus)
+                    st.session_state['current_graph'] = graph_data
+                        st.rerun()
+                except Exception as e:
+                    st.error(f"Error loading sample data: {str(e)}")
+        
+    # Resources panel on the right side with colored backgrounds instead of white
+    with resources_col:
+        if 'current_graph' in st.session_state:
+            graph_data = st.session_state['current_graph']
+            
+            # Display course metadata with accent-colored background
+                st.markdown(f"""
+            <div style="background-color: {accent_color}22; padding: 15px; border-radius: 10px; 
+                      margin-bottom: 15px; color: {text_color}; border-left: 4px solid {accent_color};">
+                <h3 style="margin-top: 0; margin-bottom: 15px; color: {accent_color}; 
+                        font-size: 1.3rem; font-weight: 600;">Course Information</h3>
+                <div style="line-height: 1.5;">
+                    <p><strong>Title:</strong> {graph_data.get('metadata', {}).get('course_title', 'Untitled Course')}</p>
+                    <p><strong>Modules:</strong> {len([n for n in graph_data.get('nodes', []) if n.get('type') == 'module'])}</p>
+                    <p><strong>Concepts:</strong> {len([n for n in graph_data.get('nodes', []) if n.get('type') == 'concept'])}</p>
+                    <p><strong>Relationships:</strong> {len(graph_data.get('links', []))}</p>
+                </div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            # Selected node details with colored background
+                st.markdown(f"""
+            <div style="background-color: {module_color}22; padding: 15px; border-radius: 10px; 
+                      margin-bottom: 15px; color: {text_color}; border-left: 4px solid {module_color};">
+                <h3 style="margin-top: 0; margin-bottom: 15px; color: {module_color}; 
+                        font-size: 1.3rem; font-weight: 600;">Node Details</h3>
+                <div id="node-details-container" style="line-height: 1.5;">
+                    <p style="color: #666; font-style: italic;">Click on a node in the graph to see details</p>
+                </div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            # Learning resources with colored background
+                st.markdown(f"""
+            <div style="background-color: {concept_color}22; padding: 15px; border-radius: 10px; 
+                      color: {text_color}; border-left: 4px solid {concept_color};">
+                <h3 style="margin-top: 0; margin-bottom: 15px; color: {concept_color}; 
+                        font-size: 1.3rem; font-weight: 600;">Learning Resources</h3>
+                <div id="node-resources-container" style="line-height: 1.5;">
+                    <p style="color: #666; font-style: italic;">Select a node to view related resources</p>
+                </div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+# Math Assessment mode
+if st.session_state['current_mode'] == 'math_assessment':
+    # Add custom CSS for ChatGPT-like interface with improved aesthetics
+    st.markdown("""
+    <style>
+    /* Main container for the entire chat UI */
+    .chat-interface {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 150px);
+        background-color: #111111;
+        border-radius: 12px;
+        overflow: hidden;
+        max-width: 1000px;
+        margin: 0 auto;
+        position: relative;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+    
+    /* Message display area with scrolling */
+    .message-area {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Input and actions area - fixed at bottom */
+    .input-area {
+        position: sticky;
+        bottom: 0;
+        padding: 16px;
+        background-color: #1e1e1e;
+        border-top: 1px solid #333;
+        z-index: 10;
+    }
+    
+    /* Chat messages with improved styling */
+    .chat-message {
+        padding: 12px 16px;
+        border-radius: 18px;
+        margin-bottom: 15px;
+        font-size: 16px;
+        line-height: 1.5;
+        max-width: 85%;
+        animation: fadeIn 0.3s ease;
+        word-wrap: break-word;
+    }
+    
+    /* Student/user messages - enhanced style */
+    .user-message {
+        background-color: #0D8BF0;
+        color: white;
+        margin-left: auto;
+        margin-right: 0;
+        border-bottom-right-radius: 4px;
+    }
+    
+    /* Tutor/assistant messages - enhanced style */
+    .tutor-message {
+        background-color: #2D2D2D;
+        color: #f0f0f0;
+        margin-right: auto;
+        margin-left: 0;
+        border-bottom-left-radius: 4px;
+    }
+    
+    /* Timestamp - subtle styling */
+    .timestamp {
+        font-size: 12px;
+        opacity: 0.6;
+        margin-top: 5px;
+        text-align: right;
+        color: #aaa;
+    }
+    
+    /* Button styles - smaller and more icon-centric */
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+        justify-content: flex-end;
+    }
+    
+    /* Input styling */
+    .input-container {
+        display: flex;
+        border-radius: 8px;
+        background: #333333;
+        margin-bottom: 10px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    /* Structured response styling */
+    .response-section {
+        margin-top: 15px;
+    }
+    
+    .section-title {
+        font-weight: 600;
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+    
+    .step-item {
+        margin-bottom: 10px;
+        padding: 8px 12px;
+        background-color: rgba(255, 255, 255, 0.08);
+        border-radius: 6px;
+    }
+    
+    /* CoT panel styling */
+    .cot-panel {
+        margin: 10px 0;
+        background: #262626;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #444;
+        cursor: pointer;
+    }
+    
+    .cot-header {
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-weight: 600;
+    }
+    
+    .cot-content {
+        padding: 16px;
+        border-top: 1px solid #444;
+    }
+    
+    .step {
+        padding: 10px 12px;
+        margin-bottom: 12px;
+        background-color: #333;
+        border-left: 3px solid #0D8BF0;
+        border-radius: 0 6px 6px 0;
+        animation: stepIn 0.4s ease forwards;
+        opacity: 0;
+    }
+    
+    /* Confidence bar */
+    .confidence-bar {
+        height: 4px;
+        background-color: #444;
+        border-radius: 2px;
+        overflow: hidden;
+        margin: 8px 0 15px 0;
+    }
+    
+    .confidence-level {
+        height: 100%;
+        border-radius: 2px;
+        transition: width 0.5s ease;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes stepIn {
+        from { 
+            opacity: 0; 
+            transform: translateY(10px);
+        }
+        to { 
+            opacity: 1; 
+            transform: translateY(0);
+        }
+    }
+    
+    /* Hide default Streamlit elements we don't need */
+    .stTextArea [data-baseweb=base-input] {
+        background-color: transparent !important;
+    }
+    
+    .css-1eqtdef {
+        opacity: 0 !important;
+    }
+    
+    /* Custom styling for the textarea */
+    textarea {
+        border: none !important;
+        background-color: transparent !important;
+        color: white !important;
+        resize: none !important;
+        padding: 12px 16px !important;
+        font-size: 16px !important;
+        caret-color: white;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        height: 70px !important;
+        min-height: 70px !important;
+        line-height: 1.5 !important;
+    }
+    
+    textarea:focus {
+        border: none !important;
+        box-shadow: none !important;
+    }
+    
+    /* Fix for Streamlit containers */
+    .stTextArea {
+        background-color: transparent !important;
+    }
+    
+    .stTextArea > div {
+        background-color: transparent !important;
+        border: none !important;
+    }
+    
+    /* Hide Streamlit's default elements for textarea */
+    [data-testid="stTextAreaContainer"] {
+        background-color: transparent !important;
+        border: none !important;
+    }
+    
+    .stTextArea [data-baseweb="base-input"] {
+        background-color: transparent !important;
+        border: none !important;
+    }
+    
+    .css-1eqtdef {
+        opacity: 0 !important;
+    }
+    
+    /* Mobile responsiveness improvements */
+    @media screen and (max-width: 768px) {
+        .chat-interface {
+            height: calc(100vh - 120px);
+        }
+        
+        .input-container {
+            flex-direction: column;
+        }
+        
+        textarea {
+            min-height: 70px !important;
+        }
+        
+        .action-buttons {
+            justify-content: space-around;
+        }
+    }
+    
+    /* Make scrollbar more subtle */
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: #555;
+        border-radius: 10px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    st.header("Math Problem Solving")
+    
+    # Back button
+    if st.button("← Back to Home", key="math_back_btn"):
+        st.session_state['current_mode'] = 'home'
+        st.rerun()
+    
+    # Initialize session state variables if not already set
+    if 'chat_history' not in st.session_state:
+        st.session_state['chat_history'] = []
+    if 'current_problem' not in st.session_state:
+        st.session_state['current_problem'] = ""
+    if 'chat_mode' not in st.session_state:
+        st.session_state['chat_mode'] = True  # Set chat mode to True by default
+    if 'show_reasoning' not in st.session_state:
+        st.session_state['show_reasoning'] = False
+    if 'reasoning_steps' not in st.session_state:
+        st.session_state['reasoning_steps'] = []
+    if 'cot_loading' not in st.session_state:
+        st.session_state['cot_loading'] = False
+    if 'step_indices' not in st.session_state:
+        st.session_state['step_indices'] = []
+    
+    # Create math agent if not already done
+    if 'math_agent' not in st.session_state:
+        try:
+            from app.math_services.agent.math_agent import MathAgent
+            st.session_state['math_agent'] = MathAgent()
+        except Exception as e:
+            st.error(f"Error initializing Math Agent: {str(e)}")
+    
+    math_agent = st.session_state.get('math_agent')
+    
+    # Add necessary session state variables for better flow control
+    if 'problem_submitted' not in st.session_state:
+        st.session_state['problem_submitted'] = False
+    if 'answer_submitted' not in st.session_state:
+        st.session_state['answer_submitted'] = False  
+    if 'solution_revealed' not in st.session_state:
+        st.session_state['solution_revealed'] = False
+    if 'hint_count' not in st.session_state:
+        st.session_state['hint_count'] = 0
+    if 'feedback_generated' not in st.session_state:
+        st.session_state['feedback_generated'] = False
+    if 'answer_is_correct' not in st.session_state:
+        st.session_state['answer_is_correct'] = None
+
+    # Main chat container
+    st.markdown('<div class="chat-interface">', unsafe_allow_html=True)
+    
+    # Message area
+    st.markdown('<div class="message-area">', unsafe_allow_html=True)
+    
+    # Display chat history
+    if st.session_state['chat_history']:
+        for message in st.session_state['chat_history']:
+            role = message.get('role', 'system')
+            content = message.get('message', '')
+            confidence = message.get('confidence', 0.7)
+            timestamp = message.get('timestamp', '')
+            
+            if timestamp:
+                try:
+                    if isinstance(timestamp, str):
+                        # Extract hour and minute
+                        time_display = timestamp.split()[1][:5]
+                    else:
+                        time_display = timestamp.strftime("%H:%M")
+                except:
+                    time_display = ""
+            else:
+                time_display = ""
+            
+            if role.lower() == 'student':
+                # Student message (blue, right-aligned)
+                message_html = f"""
+                <div class="chat-message user-message">
+                    {content.replace("<", "&lt;").replace(">", "&gt;")}
+                    <div class="timestamp">{time_display}</div>
+                </div>
+                """
+                st.markdown(message_html, unsafe_allow_html=True)
+            else:
+                # Format the tutor message with structured sections if it has certain patterns
+                formatted_content = content.replace("<", "&lt;").replace(">", "&gt;")
                 
-                submit_button = st.form_submit_button(label="✓ Check Answer")
+                # Check if the message contains solution explanation with steps
+                if "**Explanation:**" in content and "Step" in content:
+                    # Format step by step solution with proper structure
+                    try:
+                        parts = content.split("**Explanation:**", 1)
+                        header = parts[0].replace("*", "").replace("**", "")
+                        steps_content = parts[1] if len(parts) > 1 else ""
+                        
+                        # Process the "Step X:" parts
+                        if "*Step" in steps_content:
+                            steps_list = ""
+                            for step in steps_content.split("*Step")[1:]:
+                                step_text = step.split("*", 1)[1] if "*" in step else step
+                                steps_list += f'<div class="step-item">Step {step_text}</div>'
+                        else:
+                            steps_list = steps_content
+                        
+                        formatted_content = f"""
+                        {header}
+                        <div class="response-section">
+                            <div class="section-title">Explanation:</div>
+                            <div class="step-solution">
+                                {steps_list}
+                            </div>
+                        </div>
+                        """
+                    except:
+                        # If parsing fails, fall back to the original content
+                        pass
+                
+                # Check for "Key Concepts" section
+                elif "Key Concepts" in content:
+                    # Try to structure the key concepts section
+                    try:
+                        if "Final Answer" in content:
+                            # Split into three main sections
+                            before_key, key_content = content.split("Key Concepts", 1)
+                            key_and_steps, final_answer = key_content.split("Final Answer", 1)
+                            
+                            formatted_content = f"""
+                            {before_key.strip()}
+                            
+                            <div class="section-title">Key Concepts and Formulas</div>
+                            <div class="key-concepts">
+                                {key_and_steps}
+                            </div>
+                            
+                            <div class="section-title">Final Answer</div>
+                            <div class="final-answer">
+                                {final_answer}
+                            </div>
+                            """
+                        else:
+                            formatted_content = content
+                    except:
+                        # If parsing fails, fall back to original
+                        pass
+                
+                # Tutor message (dark gray, left-aligned)
+                message_html = f"""
+                <div class="chat-message tutor-message">
+                    {formatted_content}
+                    <div class="timestamp">{time_display}</div>
+                </div>
+                """
+                st.markdown(message_html, unsafe_allow_html=True)
+                
+                # Show confidence indicator for tutor messages
+                if confidence:
+                    # Determine color based on confidence level
+                    color = "#28A745" if confidence > 0.8 else "#FFC107" if confidence > 0.5 else "#DC3545"
+                    confidence_html = f"""
+                    <div style="display: flex; align-items: center; margin-bottom: 15px; margin-left: 20px; max-width: 170px;">
+                        <div class="confidence-bar">
+                            <div class="confidence-level" style="width: {int(confidence * 100)}%; background-color: {color};"></div>
+                        </div>
+                        <span style="font-size: 12px; color: #999; margin-left: 8px;">{int(confidence * 100)}% confidence</span>
+                    </div>
+                    """
+                    st.markdown(confidence_html, unsafe_allow_html=True)
+    
+    # End message area
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Input area at the bottom
+    st.markdown('<div class="input-area">', unsafe_allow_html=True)
+    
+    # Chain of Thought button
+    cot_col1, cot_col2 = st.columns([9, 1])
+    with cot_col1:
+        # Create an expander-like element that's controlled by our own click handler
+        cot_expanded = st.session_state.get('show_reasoning', False)
+        
+        # Generate Chain of Thought content
+        cot_html = f"""
+        <div class="cot-panel" id="cot-panel" onclick="toggleCoT()">
+            <div class="cot-header">
+                <div>🧠 Chain of Thought Reasoning</div>
+                <div>{'▼' if cot_expanded else '▶'}</div>
+            </div>
+        """
+        
+        # Always display the concise DoT reasoning
+        if st.session_state.get('reasoning_steps', []):
+            # Get the shorter DoT steps or use the regular steps if DoT isn't available
+            dot_steps = []
+            if 'math_agent' in globals() and math_agent and math_agent.current_state:
+                if hasattr(math_agent.current_state, 'context') and math_agent.current_state.context:
+                    dot_steps = math_agent.current_state.context.get('dot_reasoning_steps', [])
+                if not dot_steps and hasattr(math_agent.current_state, 'steps'):
+                    dot_steps = math_agent.current_state.steps
             
-            # Sample problems
-            st.markdown("### Try These Sample Problems:")
-            sample_problems_container = st.container()
+            if not dot_steps:
+                dot_steps = st.session_state.get('reasoning_steps', [])
+                
+                # Limit to just a few steps for conciseness if there are many
+                if len(dot_steps) > 4:
+                    dot_steps = [dot_steps[0], dot_steps[len(dot_steps)//2], dot_steps[-1]]
             
-            with sample_problems_container:
-                sample_cols = st.columns(3)
-                sample_problems = {
-                    "Basic Addition": {
-                        "question": "What is 5 + 3?",
-                        "answer": "8"
-                    },
-                    "Equation Solving": {
-                        "question": "Solve for x in the equation 2x + 5 = 15",
-                        "answer": "x = 5"
-                    },
-                    "Derivative": {
-                        "question": "Find the derivative of f(x) = x^3 + 2x^2 - 5x + 1",
-                        "answer": "3x^2 + 4x - 5"
+            # Display the concise steps (these are always visible)
+            cot_html += '<div class="dot-content" style="padding: 10px 15px;">'
+            for i, step in enumerate(dot_steps):
+                cot_html += f"""
+                <div class="step">
+                    <strong>Step {i+1}:</strong> {step.replace("<", "&lt;").replace(">", "&gt;")}
+                </div>
+                """
+            cot_html += '</div>'
+        
+        if cot_expanded:
+            cot_html += '<div class="cot-content">'
+            
+            # Get the full CoT reasoning steps
+            full_steps = []
+            if 'math_agent' in globals() and math_agent and math_agent.current_state:
+                if hasattr(math_agent.current_state, 'context') and math_agent.current_state.context:
+                    full_steps = math_agent.current_state.context.get('full_reasoning_steps', [])
+            
+            if not full_steps:
+                full_steps = st.session_state.get('reasoning_steps', [])
+            
+            # Only show the full steps if they're different from what's already shown
+            if full_steps and (not dot_steps or len(full_steps) > len(dot_steps)):
+                cot_html += '<div style="border-top: 1px solid #eee; margin-top: 10px; padding-top: 10px;">'
+                cot_html += '<h4>Full Detailed Reasoning:</h4>'
+                
+                for i, step in enumerate(full_steps):
+                    # Calculate a delay for the animation based on index
+                    delay = i * 0.1
+                    cot_html += f"""
+                    <div class="step" style="animation-delay: {delay}s;"">
+                        <strong>Step {i+1}:</strong> {step.replace("<", "&lt;").replace(">", "&gt;")}
+                    </div>
+                    """
+                cot_html += '</div>'
+            elif not st.session_state.get('reasoning_steps', []):
+                if st.session_state.get('cot_loading', False):
+                    cot_html += '<div style="text-align: center; padding: 20px;">Generating detailed reasoning...</div>'
+                else:
+                    cot_html += '<div style="text-align: center; padding: 20px;">No reasoning steps available yet.</div>'
+            
+            cot_html += '</div>'
+        
+        cot_html += '</div>'
+        
+        # Add JavaScript to handle the click
+        cot_html += """
+        <script>
+        function toggleCoT() {
+            // This will be handled by a button click below
+            const coTButton = document.querySelector('[data-testid="baseButton-secondary"]:has(div:contains("🧩"))');
+            if (coTButton) {
+                coTButton.click();
+            }
+        }
+        </script>
+        """
+        
+        st.markdown(cot_html, unsafe_allow_html=True)
+    
+    with cot_col2:
+        # Hidden button that will be clicked by JavaScript
+        cot_btn = st.button("🧠", key="cot_toggle_btn")
+        st.markdown("""
+        <style>
+        [data-testid="baseButton-secondary"]:has(div:contains("🧠")) {
+            opacity: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        if cot_btn:
+            # Toggle the reasoning state
+            st.session_state['show_reasoning'] = not st.session_state.get('show_reasoning', False)
+            
+            # If we're showing reasoning and don't have steps yet, generate them
+            if st.session_state['show_reasoning'] and not st.session_state.get('reasoning_steps', []) and not st.session_state.get('cot_loading', False):
+                st.session_state['cot_loading'] = True
+                st.rerun()  # Rerun to show loading state
+    
+    # Execute CoT generation if in loading state
+    if st.session_state.get('cot_loading', False) and math_agent and math_agent.current_state:
+        try:
+            # Set up context for CoT
+            if not math_agent.current_state.context:
+                math_agent.current_state.context = {}
+            math_agent.current_state.context['reasoning_mode'] = 'cot'
+            
+            updated_state = math_agent.process_interaction('button', 'reasoning', math_agent.current_state)
+            
+            # Store reasoning steps if available
+            if hasattr(updated_state, 'steps') and updated_state.steps:
+                st.session_state['reasoning_steps'] = updated_state.steps
+                st.session_state['step_indices'] = list(range(len(updated_state.steps)))
+                
+            # Update current state
+            math_agent.current_state = updated_state
+            
+            # Clear loading state
+            st.session_state['cot_loading'] = False
+            st.rerun()
+        except Exception as e:
+            st.error(f"Error generating reasoning: {str(e)}")
+            st.session_state['cot_loading'] = False
+    
+    # Add JavaScript for keyboard shortcuts and auto-focus
+    st.markdown("""
+    <script>
+    // Add event listener for keyboard shortcuts and Enter key press
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            const textareas = document.querySelectorAll('textarea');
+            const submitButtons = document.querySelectorAll('button');
+            let chatTextarea;
+            let sendButton, hintButton, feedbackButton, solutionButton, reasoningButton;
+            
+            // Find the chat textarea and buttons
+            textareas.forEach(function(textarea) {
+                if (textarea.placeholder && textarea.placeholder.includes('Type a math problem or question here')) {
+                    chatTextarea = textarea;
+                }
+            });
+            
+            submitButtons.forEach(function(button) {
+                if (button.innerText.includes('📤')) {
+                    sendButton = button;
+                } else if (button.innerText.includes('💡')) {
+                    hintButton = button;
+                } else if (button.innerText.includes('📝')) {
+                    feedbackButton = button;
+                } else if (button.innerText.includes('🎯')) {
+                    solutionButton = button;
+                } else if (button.innerText.includes('🧩')) {
+                    reasoningButton = button;
+                }
+            });
+            
+            // Auto-focus on the textarea
+            if (chatTextarea) {
+                chatTextarea.focus();
+                
+                // Add event listener for Enter key
+                chatTextarea.addEventListener('keydown', function(e) {
+                    // Check if Enter was pressed without Shift (Shift+Enter for new line)
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        if (sendButton) {
+                            sendButton.click();
+                        }
+                    }
+                });
+            }
+            
+            // Add global keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Only apply shortcuts when not typing in textarea
+                if (document.activeElement !== chatTextarea) {
+                    if (e.key === 'h' || e.key === 'H') {
+                        if (hintButton) {
+                            e.preventDefault();
+                            hintButton.click();
+                        }
+                    } else if (e.key === 'f' || e.key === 'F') {
+                        if (feedbackButton) {
+                            e.preventDefault();
+                            feedbackButton.click();
+                        }
+                    } else if (e.key === 's' || e.key === 'S') {
+                        if (solutionButton) {
+                            e.preventDefault();
+                            solutionButton.click();
+                        }
+                    } else if (e.key === 'r' || e.key === 'R') {
+                        if (reasoningButton) {
+                            e.preventDefault();
+                            reasoningButton.click();
+                        }
                     }
                 }
+            });
+        }, 1000); // Small delay to ensure elements are loaded
+    });
+                </script>
+    """, unsafe_allow_html=True)
+    
+    # Handle input clearing when needed
+    if st.session_state.get('_clear_chat_input', False):
+        # Clear the flag
+        st.session_state['_clear_chat_input'] = False
+        input_value = ""
+    else:
+        input_value = st.session_state.get('_input_value', "")
+    
+    # Chat input field with buttons
+    st.markdown('<div class="input-container">', unsafe_allow_html=True)
+    input_placeholder = "Type a math problem or question here..."
+    user_input = st.text_area("", value=input_value, placeholder=input_placeholder, height=70, key="chat_input", label_visibility="collapsed")
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Store the current input value
+    st.session_state['_input_value'] = user_input
+    
+    # Action buttons row with conditional display
+    st.markdown('<div class="action-buttons">', unsafe_allow_html=True)
+    
+    # Using columns for button layout with better proportions for alignment
+    button_cols = st.columns([1, 1, 1, 1, 1])
+    
+    with button_cols[0]:
+        # Only show hint button if solution hasn't been revealed
+        if not st.session_state.get('solution_revealed', False):
+            st.markdown('<div class="hint-btn">', unsafe_allow_html=True)
+            hint_btn = st.button("💡", key="icon_hint_btn", help="Get a hint for this problem (Shortcut: H)")
+            st.markdown('</div>', unsafe_allow_html=True)
+        else:
+            # Placeholder to maintain spacing
+            st.markdown('<div style="height: 40px;"></div>', unsafe_allow_html=True)
+    
+    with button_cols[1]:
+        # Only show feedback button if a problem has been submitted
+        if st.session_state.get('problem_submitted', False):
+            st.markdown('<div class="feedback-btn">', unsafe_allow_html=True)
+            feedback_btn = st.button("📝", key="icon_feedback_btn", help="Get feedback on your answer (Shortcut: F)")
+            st.markdown('</div>', unsafe_allow_html=True)
+    else:
+            # Placeholder to maintain spacing
+            st.markdown('<div style="height: 40px;"></div>', unsafe_allow_html=True)
+    
+    with button_cols[2]:
+        # Only show solution button if a problem has been submitted
+        if st.session_state.get('problem_submitted', False):
+            st.markdown('<div class="solution-btn">', unsafe_allow_html=True)
+            solution_btn = st.button("🎯", key="icon_solution_btn", help="Show the complete solution (Shortcut: S)")
+            st.markdown('</div>', unsafe_allow_html=True)
+        else:
+            # Placeholder to maintain spacing
+            st.markdown('<div style="height: 40px;"></div>', unsafe_allow_html=True)
+    
+    with button_cols[3]:
+        # Only show reasoning button if a problem has been submitted
+        if st.session_state.get('problem_submitted', False):
+            st.markdown('<div class="cot-btn">', unsafe_allow_html=True)
+            reasoning_btn = st.button("🧩", key="icon_reasoning_btn", help="Show step-by-step reasoning (Shortcut: R)")
+            st.markdown('</div>', unsafe_allow_html=True)
+        else:
+            # Placeholder to maintain spacing
+            st.markdown('<div style="height: 40px;"></div>', unsafe_allow_html=True)
+    
+    with button_cols[4]:
+        st.markdown('<div class="send-btn">', unsafe_allow_html=True)
+        submit_chat = st.button("📤", key="icon_send_btn", help="Send message (Shortcut: Enter)")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Process button actions
+    # Hint button
+    if hint_btn and math_agent and math_agent.current_state and st.session_state.get('problem_submitted', False):
+        with st.spinner("Generating hint..."):
+            try:
+                # Increment hint count
+                st.session_state['hint_count'] += 1
                 
-                for i, (name, problem) in enumerate(sample_problems.items()):
-                    with sample_cols[i % 3]:
-                        if st.button(f"📝 {name}", key=f"sample_{i}"):
-                            st.session_state['math_question'] = problem['question']
-                            st.session_state['correct_answer'] = problem['answer']
+                # Use the process_interaction method with button type
+                updated_state = math_agent.process_interaction('button', 'hint', math_agent.current_state)
+                
+                # Extract hint - only get the latest hint
+                hint = "I don't have any hints for this problem yet."
+                if hasattr(updated_state, 'hints') and updated_state.hints:
+                    hint = updated_state.hints[-1]  # Just get the most recent hint
+                
+                # Add to chat history
+                from datetime import datetime
+                st.session_state['chat_history'].append({
+                    'role': 'tutor',
+                    'message': f"💡 **Hint #{st.session_state['hint_count']}:** {hint}",
+                    'timestamp': datetime.now()
+                })
+                
+                # Update current state
+                math_agent.current_state = updated_state
                             st.rerun()
-            
-            st.markdown('<div class="math-topics-container" style="margin-top: 20px;">', unsafe_allow_html=True)
-            st.markdown("### Topic Areas:")
-            topics = ["Algebra", "Calculus", "Geometry", "Statistics", "Trigonometry", "Number Theory"]
-            topic_cols = st.columns(3)
-            
-            for i, topic in enumerate(topics):
-                with topic_cols[i % 3]:
-                    st.markdown(f"""
-                    <div style="padding: 10px; background-color: {accent_color}22; border-radius: 5px; margin-bottom: 10px; text-align: center;">
-                        {topic}
-                    </div>
-                    """, unsafe_allow_html=True)
-            
-            st.markdown('</div>', unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-        
-        # Right column: Feedback and progress
-        with right_col:
-            st.markdown('<div class="card">', unsafe_allow_html=True)
-            st.subheader("📊 Feedback")
-            
-            # Process the math problem if form is submitted
-            if submit_button and math_question and student_answer:
-                with st.spinner("Analyzing your answer..."):
-                    try:
-                        # Initialize state for the math agent
-                        state = {
-                            "question": math_question,
-                            "student_answer": student_answer,
-                            "correct_answer": correct_answer if correct_answer else None,
-                            "analysis": {},
-                            "feedback": {},
-                            "hint_count": 0,
-                            "hints": [],
-                            "needs_hint": False
-                        }
-                        
-                        # Process the math question
-                        result_state = math_agent.analyze(state)
-                        
-                        # Get the results
-                        is_correct = result_state.get("feedback", {}).get("math", {}).get("is_correct", False)
-                        feedback = result_state.get("feedback", {}).get("math", {}).get("assessment", "No feedback available")
-                        feedback_confidence = result_state.get("feedback", {}).get("math", {}).get("confidence", 0.7)
-                        analysis = result_state.get("analysis", {})
-                        analysis_confidence = 0.8  # Default confidence if not provided
-                        
-                        # Check if there's a confidence value in the analysis
-                        if "confidence" in analysis:
-                            analysis_confidence = analysis["confidence"]
-                        
-                        hints = result_state.get("hints", [])
-                        hint_confidence = 0.75  # Default confidence for hints
-                        if "hint_confidence" in result_state:
-                            hint_confidence = result_state["hint_confidence"]
-                        
-                        proximity_score = result_state.get("feedback", {}).get("math", {}).get("proximity_score")
-                        
-                        # Store in session state
-                        if 'problems_attempted' not in st.session_state:
-                            st.session_state['problems_attempted'] = 0
-                        if 'problems_correct' not in st.session_state:
-                            st.session_state['problems_correct'] = 0
-                        
-                        st.session_state['problems_attempted'] += 1
-                        if is_correct:
-                            st.session_state['problems_correct'] += 1
-                        
-                        st.session_state['current_hints'] = hints
-                        st.session_state['hint_index'] = 0
-                        st.session_state['current_problem'] = {
-                            "question": math_question,
-                            "student_answer": student_answer,
-                            "correct_answer": correct_answer,
-                            "is_correct": is_correct,
-                            "feedback": feedback,
-                            "feedback_confidence": feedback_confidence,
-                            "proximity_score": proximity_score,
-                            "analysis": analysis,
-                            "analysis_confidence": analysis_confidence,
-                            "hint_confidence": hint_confidence
-                        }
-                    except Exception as e:
-                        st.error(f"Error analyzing math problem: {str(e)}")
-                        st.info("This might be due to a configuration issue or an API service limitation.")
-            
-            # Display feedback if available
-            if 'current_problem' in st.session_state:
-                problem = st.session_state['current_problem']
+            except Exception as e:
+                st.error(f"Error generating hint: {str(e)}")
+    
+    # Feedback button
+    if feedback_btn and math_agent and math_agent.current_state and st.session_state.get('problem_submitted', False):
+        with st.spinner("Generating feedback..."):
+            try:
+                # Use the process_interaction method with button type
+                updated_state = math_agent.process_interaction('button', 'feedback', math_agent.current_state)
                 
-                # Display question and answer summary
-                st.markdown(f"""
-                <div style="margin-bottom: 15px; padding: 15px; background-color: {accent_color}11; border-radius: 8px;">
-                    <strong>Question:</strong> {problem['question']}<br>
-                    <strong>Your answer:</strong> {problem['student_answer']}
-                </div>
-                """, unsafe_allow_html=True)
-                
-                # Display correctness status with animation
-                if problem['is_correct']:
-                    st.markdown("""
-                    <div class="correct-answer" style="animation: fadeIn 0.5s ease-in-out;">
-                        <span style="font-size: 24px;">✓</span> Correct!
-                    </div>
-                    <style>
-                        @keyframes fadeIn {
-                            from { opacity: 0; transform: translateY(-10px); }
-                            to { opacity: 1; transform: translateY(0); }
-                        }
-                    </style>
-                    """, unsafe_allow_html=True)
-                else:
-                    st.markdown("""
-                    <div class="incorrect-answer" style="animation: shake 0.5s ease-in-out;">
-                        <span style="font-size: 24px;">✗</span> Not quite right
-                    </div>
-                    <style>
-                        @keyframes shake {
-                            0%, 100% { transform: translateX(0); }
-                            25% { transform: translateX(-5px); }
-                            75% { transform: translateX(5px); }
-                        }
-                    </style>
-                    """, unsafe_allow_html=True)
-                
-                # Display analysis if available
-                if 'analysis' in problem and problem['analysis']:
-                    st.markdown("### Analysis:")
-                    display_math_analysis(problem['analysis'], problem['analysis_confidence'])
-                
-                # Display feedback
-                st.markdown("### Feedback:")
-                display_math_feedback(problem['feedback'], problem['feedback_confidence'])
-                
-                # Display proximity score if available
-                if problem['proximity_score'] is not None:
-                    score_value = min(problem['proximity_score'] / 10, 1.0)
-                    st.markdown("### How Close You Were:")
-                    st.progress(score_value)
-                    
-                    # Add labels to the progress bar
-                    progress_label = "Far Off" if score_value < 0.3 else ("Getting There" if score_value < 0.7 else "Very Close")
-                    st.caption(f"Proximity Score: {problem['proximity_score']}/10 - {progress_label}")
-                
-                # Display hints with an expandable section
-                if 'current_hints' in st.session_state and st.session_state['current_hints']:
-                    st.markdown("### Need Help?")
-                    
-                    # Show any previously displayed hints
-                    if st.session_state['hint_index'] > 0:
-                        hints_shown = st.session_state['current_hints'][:st.session_state['hint_index']]
-                        hint_confidence = problem.get('hint_confidence', None)
-                        display_math_hints(hints_shown, hint_confidence)
-                    
-                    # Button to get more hints
-                    if st.session_state['hint_index'] < len(st.session_state['current_hints']):
-                        hint_col1, hint_col2 = st.columns([3, 1])
-                        with hint_col1:
-                            hint_text = f"Get hint #{st.session_state['hint_index']+1} of {len(st.session_state['current_hints'])}"
-                            st.write(hint_text)
-                        with hint_col2:
-                            if st.button("💡 Get Hint", key="hint_button"):
-                                hint = st.session_state['current_hints'][st.session_state['hint_index']]
-                                st.markdown(f'''
-                                <div class="hint" style="animation: fadeIn 0.5s ease-in-out;">
-                                    <strong>Hint #{st.session_state["hint_index"]+1}:</strong> {hint}
-                                </div>
-                                <style>
-                                    @keyframes fadeIn {{
-                                        from {{ opacity: 0; transform: translateY(-5px); }}
-                                        to {{ opacity: 1; transform: translateY(0); }}
-                                    }}
-                                </style>
-                                ''', unsafe_allow_html=True)
-                                
-                                # Display confidence for this hint
-                                hint_confidence = problem.get('hint_confidence', None)
-                                if hint_confidence is not None:
-                                    display_confidence_badge(hint_confidence)
-                                    
-                                st.session_state['hint_index'] += 1
+                # Extract feedback
+                feedback_message = "I couldn't generate detailed feedback for this problem."
+                if hasattr(updated_state, 'feedback') and updated_state.feedback:
+                    if isinstance(updated_state.feedback, dict):
+                        feedback_message = updated_state.feedback.get('detail', '')
+                        if not feedback_message:
+                            feedback_message = updated_state.feedback.get('assessment', '')
                     else:
-                        st.info("You've seen all available hints. If you still need help, try asking a follow-up question in chat mode.")
+                        # Use getattr since feedback might be an object, not a dictionary
+                        feedback_message = getattr(updated_state.feedback, 'detail', '')
+                        if not feedback_message and hasattr(updated_state.feedback, 'assessment'):
+                            feedback_message = getattr(updated_state.feedback, 'assessment', '')
+                
+                # Get the confidence score safely
+                confidence_score = 0.7  # Default confidence
+                if hasattr(updated_state, 'feedback'):
+                    if isinstance(updated_state.feedback, dict):
+                        confidence_score = updated_state.feedback.get('confidence', 0.7)
+                    else:
+                        confidence_score = getattr(updated_state.feedback, 'confidence', 0.7)
+                
+                # Add to chat history
+                from datetime import datetime
+                st.session_state['chat_history'].append({
+                    'role': 'tutor',
+                    'message': f"📝 **Feedback:** {feedback_message}",
+                    'confidence': confidence_score,
+                    'timestamp': datetime.now()
+                })
+                
+                # Update current state
+                math_agent.current_state = updated_state
+                
+                # Mark feedback as generated
+                st.session_state['feedback_generated'] = True
+                
+                st.rerun()
+            except Exception as e:
+                st.error(f"Error generating feedback: {str(e)}")
+    
+    # Solution button
+    if solution_btn and math_agent and math_agent.current_state and st.session_state.get('problem_submitted', False):
+        with st.spinner("Generating solution..."):
+            try:
+                # Use the process_interaction method with button type
+                updated_state = math_agent.process_interaction('button', 'solution', math_agent.current_state)
+                
+                # Add to chat history if there's a chat response
+                solution_text = "Here's the solution:\n\n"
+                if hasattr(updated_state, 'correct_answer') and updated_state.correct_answer:
+                    solution_text += f"**Answer:** {updated_state.correct_answer}\n\n"
+                
+                # Include reasoning steps if available
+                if hasattr(updated_state, 'steps') and updated_state.steps:
+                    st.session_state['reasoning_steps'] = updated_state.steps
+                    solution_text += "**Explanation:**\n\n"
+                    for i, step in enumerate(updated_state.steps):
+                        solution_text += f"*Step {i+1}:* {step}\n\n"
+                
+                from datetime import datetime
+                st.session_state['chat_history'].append({
+                    'role': 'tutor',
+                    'message': solution_text,
+                    'timestamp': datetime.now()
+                })
+                
+                # Update current state
+                math_agent.current_state = updated_state
+                
+                # Mark solution as revealed (disables hint button)
+                st.session_state['solution_revealed'] = True
+                
+                st.rerun()
+                    except Exception as e:
+                st.error(f"Error generating solution: {str(e)}")
+    
+    # Reasoning button
+    if reasoning_btn and st.session_state.get('problem_submitted', False):
+        # Toggle reasoning visibility and generate if needed
+        st.session_state['show_reasoning'] = True
+        if not st.session_state.get('reasoning_steps', []) and not st.session_state.get('cot_loading'):
+            st.session_state['cot_loading'] = True
+        st.rerun()
+    
+    # Submit button (main chat processing)
+    if submit_chat and user_input:
+        with st.spinner("Processing..."):
+            # Add user message to chat history
+            from datetime import datetime
+            st.session_state['chat_history'].append({
+                'role': 'student',
+                'message': user_input,
+                'timestamp': datetime.now()
+            })
+            
+            # Process based on whether we have a current problem or not
+            if st.session_state.get('current_problem'):
+                # This could be either a follow-up question or an answer submission
+                
+                # Check if we're waiting for an answer (problem submitted but answer not yet submitted)
+                if st.session_state.get('problem_submitted', False) and not st.session_state.get('answer_submitted', False):
+                    try:
+                        # This is likely an answer submission
+                        if math_agent and math_agent.current_state:
+                            # Set the student answer in the state
+                            math_agent.current_state.student_answer = user_input
+                            
+                            # First, analyze the answer
+                            updated_state = math_agent.analyze(math_agent.current_state)
+                            
+                            # Determine if the answer is correct
+                            is_correct = False
+                            if hasattr(updated_state, 'analysis') and updated_state.analysis:
+                                if isinstance(updated_state.analysis, dict):
+                                    is_correct = updated_state.analysis.get('is_correct', False)
+                                else:
+                                    is_correct = getattr(updated_state.analysis, 'is_correct', False)
+                            
+                            # Store correctness in session state
+                            st.session_state['answer_is_correct'] = is_correct
+                            
+                            # Then generate feedback automatically
+                            updated_state = math_agent.generate_feedback(updated_state)
+                            
+                            # Extract feedback message
+                            feedback_message = "I couldn't generate detailed feedback for this problem."
+                            if hasattr(updated_state, 'feedback') and updated_state.feedback:
+                                if isinstance(updated_state.feedback, dict):
+                                    feedback_message = updated_state.feedback.get('detail', '')
+                                    if not feedback_message:
+                                        feedback_message = updated_state.feedback.get('assessment', '')
             else:
-                # Display placeholder when no problem has been submitted
-                st.info("Submit a math problem to get feedback")
+                                    feedback_message = getattr(updated_state.feedback, 'detail', '')
+                                    if not feedback_message and hasattr(updated_state.feedback, 'assessment'):
+                                        feedback_message = getattr(updated_state.feedback, 'assessment', '')
+                            
+                            # Get the confidence score safely
+                            confidence_score = 0.7  # Default confidence
+                            if hasattr(updated_state, 'feedback'):
+                                if isinstance(updated_state.feedback, dict):
+                                    confidence_score = updated_state.feedback.get('confidence', 0.7)
+                                else:
+                                    confidence_score = getattr(updated_state.feedback, 'confidence', 0.7)
+                            
+                            # Add automatic feedback to chat history
+                            st.session_state['chat_history'].append({
+                                'role': 'tutor',
+                                'message': f"📝 **Feedback:** {feedback_message}",
+                                'confidence': confidence_score,
+                                'timestamp': datetime.now()
+                            })
+                            
+                            # Mark feedback as generated and answer as submitted
+                            st.session_state['feedback_generated'] = True
+                            st.session_state['answer_submitted'] = True
+                            
+                            # Store reasoning steps if available
+                            if hasattr(updated_state, 'steps') and updated_state.steps:
+                                st.session_state['reasoning_steps'] = updated_state.steps
+                            
+                            # Update current state
+                            math_agent.current_state = updated_state
+                            
+                    except Exception as e:
+                        error_msg = f"Error processing answer: {str(e)}"
+                        st.error(error_msg)
+                        st.session_state['chat_history'].append({
+                            'role': 'tutor',
+                            'message': f"I encountered an error: {str(e)}. Please try again or rephrase your answer.",
+                            'timestamp': datetime.now()
+                        })
                 
-                # Add some helpful information
-                st.markdown("""
-                ### How It Works:
-                1. Enter a math problem in the form
-                2. Provide your answer
-                3. Get instant feedback
-                4. Request hints if needed
-                5. Track your progress over time
-                """)
-            
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-            # Chat follow-up section with toggle
-            st.markdown('<div class="card" style="margin-top: 20px;">', unsafe_allow_html=True)
-            st.subheader("💬 Follow-up Questions")
-            
-            # Initialize session state for interaction mode if not present
-            if 'interaction_mode' not in st.session_state:
-                st.session_state['interaction_mode'] = 'structured'
-            if 'chat_history' not in st.session_state:
-                st.session_state['chat_history'] = []
-            
-            # Add toggle for interaction mode
-            interaction_mode_toggle = st.toggle(
-                "Enable Chat Mode",
-                value=st.session_state['interaction_mode'] == 'chat',
-                help="Toggle between structured feedback mode and chat-based follow-up questions"
-            )
-            
-            # Update interaction mode in session state based on toggle
-            st.session_state['interaction_mode'] = 'chat' if interaction_mode_toggle else 'structured'
-            
-            if st.session_state['interaction_mode'] == 'chat':
-                st.markdown(f"""
-                <div style="padding: 10px; background-color: {accent_color}15; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid {accent_color};">
-                    <p style="margin-bottom: 0;"><strong>Chat Mode:</strong> You can ask follow-up questions about the problem.</p>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                # Only show chat if a problem has been submitted
-                if 'current_problem' in st.session_state:
-                    # Display chat history if available
-                    chat_container = st.container()
-                    with chat_container:
-                        # Display existing chat messages
-                        for message in st.session_state.get('chat_history', []):
-                            if message['role'] == 'student':
-                                st.markdown(f"""
-                                <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
-                                    <div style="background-color: {correct_color}15; padding: 10px; border-radius: 10px; max-width: 80%; 
-                                               border: 1px solid {correct_color}33; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                                        <p style="margin-bottom: 0; color: {text_color};">{message['message']}</p>
-                                    </div>
-                                </div>
-                                """, unsafe_allow_html=True)
-                            else:  # tutor
-                                st.markdown(f"""
-                                <div style="display: flex; justify-content: flex-start; margin-bottom: 10px;">
-                                    <div style="background-color: {accent_color}11; padding: 10px; border-radius: 10px; max-width: 80%;
-                                               border: 1px solid {accent_color}22; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                                        <p style="margin-bottom: 0; color: {text_color};">{message['message']}</p>
-                                    </div>
-                                </div>
-                                """, unsafe_allow_html=True)
-                    
-                    # Input for new follow-up question
-                    with st.form(key="follow_up_form"):
-                        follow_up_question = st.text_input(
-                            "Ask a follow-up question:",
-                            placeholder="e.g., Can you explain why my answer was wrong?",
-                            key="follow_up_input"
-                        )
-                        follow_up_button = st.form_submit_button(label="Send", type="primary")
-                    
-                    if follow_up_button and follow_up_question:
-                        with st.spinner("Processing your question..."):
-                            try:
-                                # Get current problem state
-                                problem = st.session_state['current_problem']
-                                
-                                # Initialize state for the math agent
-                                state = {
-                                    "question": problem['question'],
-                                    "student_answer": problem['student_answer'],
-                                    "correct_answer": problem.get('correct_answer'),
-                                    "analysis": problem.get('analysis', {}),
-                                    "feedback": {
-                                        "math": {
-                                            "assessment": problem['feedback'],
-                                            "is_correct": problem['is_correct'],
-                                            "proximity_score": problem.get('proximity_score', 5),
-                                            "confidence": problem.get('feedback_confidence', 0.7)
-                                        }
-                                    },
-                                    "hint_count": len(st.session_state.get('current_hints', [])),
-                                    "hints": st.session_state.get('current_hints', []),
-                                    "needs_hint": False,
-                                    "interaction_mode": "chat",
-                                    "chat_history": st.session_state.get('chat_history', [])
-                                }
-                                
-                                # Process the follow-up question
-                                result_state = math_agent.handle_follow_up(state, follow_up_question)
-                                
-                                # Get the response
-                                chat_response = result_state.get("chat_response", "I'm not sure how to answer that.")
-                                
-                                # Update chat history in session state
-                                st.session_state['chat_history'] = result_state.get("chat_history", [])
-                                
-                                # Rerun to show the updated chat
-                                st.rerun()
-                                
-                            except Exception as e:
-                                st.error(f"Error processing follow-up question: {str(e)}")
                 else:
-                    st.info("Submit a math problem first to enable follow-up questions")
-            else:
-                st.markdown(f"""
-                <div style="padding: 10px; background-color: {warning_color}15; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid {warning_color};">
-                    <p style="margin-bottom: 0;"><strong>Structured Mode:</strong> Receive standard feedback and hints based on your answers.</p>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                # Show hint request in structured mode
-                if 'current_problem' in st.session_state:
-                    if st.button("📝 Request Hint"):
-                        with st.spinner("Generating hint..."):
-                            try:
-                                # Get current problem state
-                                problem = st.session_state['current_problem']
-                                
-                                # Initialize state for the math agent
-                                state = {
-                                    "question": problem['question'],
-                                    "student_answer": problem['student_answer'],
-                                    "correct_answer": problem.get('correct_answer'),
-                                    "analysis": {},
-                                    "feedback": {
-                                        "math": {
-                                            "assessment": problem['feedback'],
-                                            "is_correct": problem['is_correct'],
-                                            "proximity_score": problem.get('proximity_score', 5)
-                                        }
-                                    },
-                                    "hint_count": len(st.session_state.get('current_hints', [])) + 1,
-                                    "hints": st.session_state.get('current_hints', []),
-                                    "needs_hint": True,
-                                    "interaction_mode": "structured"
-                                }
-                                
-                                # Process the hint request
-                                result_state = math_agent.analyze(state)
-                                
-                                # Update hints in session state
-                                st.session_state['current_hints'] = result_state.get("hints", [])
-                                
-                                # Rerun to show the updated hints
-                                st.rerun()
-                                
-                            except Exception as e:
-                                st.error(f"Error generating hint: {str(e)}")
+                    # This is a follow-up question or comment
+                    try:
+                        # Use the process_interaction method with text type
+                        if math_agent and math_agent.current_state:
+                            updated_state = math_agent.process_interaction('text', user_input, math_agent.current_state)
+                            
+                            # Add response to chat history if available
+                            if hasattr(updated_state, 'chat_response') and updated_state.chat_response:
+                                st.session_state['chat_history'].append({
+                                    'role': 'tutor',
+                                    'message': updated_state.chat_response,
+                                    'timestamp': datetime.now()
+                                })
+                            
+                            # Store reasoning steps if available
+                            if hasattr(updated_state, 'steps') and updated_state.steps:
+                                st.session_state['reasoning_steps'] = updated_state.steps
+                            
+                            # Update current state
+                            math_agent.current_state = updated_state
+                    except Exception as e:
+                        error_msg = f"Error processing follow-up: {str(e)}"
+                        st.error(error_msg)
+                        st.session_state['chat_history'].append({
+                            'role': 'tutor',
+                            'message': f"I encountered an error: {str(e)}. Please try again or rephrase your question.",
+                            'timestamp': datetime.now()
+                        })
             
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-            # Progress card
-            st.markdown('<div class="card">', unsafe_allow_html=True)
-            st.subheader("📈 Your Progress")
-            
-            # Display progress metrics
-            problems_attempted = st.session_state.get('problems_attempted', 0)
-            problems_correct = st.session_state.get('problems_correct', 0)
-            
-            progress_cols = st.columns(2)
-            with progress_cols[0]:
-                st.metric("Problems Attempted", problems_attempted)
-            with progress_cols[1]:
-                st.metric("Problems Correct", problems_correct)
-            
-            if problems_attempted > 0:
-                mastery_percentage = int((problems_correct / problems_attempted) * 100)
-                
-                # Show progress bar with animation
-                st.markdown(f"""
-                <div style="margin-top: 15px;">
-                    <p style="margin-bottom: 5px;">Mastery Level:</p>
-                    <div style="height: 20px; background-color: {accent_color}33; border-radius: 10px; overflow: hidden;">
-                        <div style="width: {mastery_percentage}%; height: 100%; background-color: {accent_color}; 
-                                 border-radius: 10px; animation: growWidth 1s ease-out;">
-                        </div>
-                    </div>
-                    <p style="text-align: right; margin-top: 5px;">{mastery_percentage}%</p>
-                </div>
-                <style>
-                    @keyframes growWidth {{
-                        from {{ width: 0%; }}
-                        to {{ width: {mastery_percentage}%; }}
-                    }}
-                </style>
-                """, unsafe_allow_html=True)
-                
-                # Show mastery level label
-                if mastery_percentage < 30:
-                    mastery_label = "Beginner"
-                elif mastery_percentage < 60:
-                    mastery_label = "Intermediate"
-                elif mastery_percentage < 80:
-                    mastery_label = "Advanced"
                 else:
-                    mastery_label = "Expert"
+                # First problem submission
+                st.session_state['current_problem'] = user_input
+                st.session_state['problem_submitted'] = True
                 
-                st.info(f"Current level: {mastery_label}")
+                try:
+                    # Create a MathState object
+                    from app.math_services.models.state import MathState
+                    math_state = MathState(question=user_input, student_answer="")
+                    
+                    # Solve the problem
+                    if math_agent:
+                        math_state = math_agent.solve(user_input)
+                        
+                        # Store reasoning steps if available
+                        if hasattr(math_state, 'steps') and math_state.steps:
+                            st.session_state['reasoning_steps'] = math_state.steps
+                        
+                        # Add response to chat history
+                        solution_message = f"I've analyzed this problem. "
+                        solution_message += "Please provide your answer, and I'll give you feedback. "
+                        solution_message += "You can also ask for a hint if you need help."
+                        
+                        st.session_state['chat_history'].append({
+                            'role': 'tutor',
+                            'message': solution_message,
+                            'timestamp': datetime.now()
+                        })
+                        
+                        # Update current state in math agent
+                        math_agent.current_state = math_state
+                except Exception as e:
+                    error_msg = f"Error processing problem: {str(e)}"
+                    st.error(error_msg)
+                    st.session_state['chat_history'].append({
+                        'role': 'tutor',
+                        'message': f"I encountered an error: {str(e)}. Please try again or rephrase your problem.",
+                        'timestamp': datetime.now()
+                    })
             
-            st.markdown('</div>', unsafe_allow_html=True)
-
-# Footer
-st.markdown("---")
-st.markdown(f"""
-<footer>
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-        <div>
-            <p>© 2025 Educational Technology Platform | Made with ❤️ for learning</p>
-            <p style="font-size: 0.8rem; margin-top: 10px;">Powered by Streamlit and OpenAI</p>
-        </div>
-        <div style="text-align: right; max-width: 400px; margin-left: 20px;">
-            <p style="color: {accent_color}; font-weight: 600;">About Confidence Indicators</p>
-            <p style="font-size: 0.9rem;">This platform uses confidence ratings to help you understand the reliability of feedback, hints, and analysis.</p>
-        </div>
-    </div>
-    <div style="margin-top: 15px; display: flex; justify-content: center; gap: 20px;">
-        <span style="color: {correct_color}; font-size: 0.8rem;">■ High Confidence</span>
-        <span style="color: {warning_color}; font-size: 0.8rem;">■ Medium Confidence</span>
-        <span style="color: {incorrect_color}; font-size: 0.8rem;">■ Low Confidence</span>
-    </div>
-</footer>
-""", unsafe_allow_html=True) 
+            # Clear input
+            st.session_state['_clear_chat_input'] = True
+            st.rerun()
+    
+    # Close input area and chat interface
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)

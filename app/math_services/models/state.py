@@ -9,12 +9,41 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional, Union
 from datetime import datetime
 from enum import Enum
+import re
 
 
 class InteractionMode(Enum):
     """Interaction mode for the math agent."""
     STRUCTURED = "structured"
     CHAT = "chat"
+
+
+class UIMode(Enum):
+    """UI interaction mode for the math agent."""
+    BUTTON = "button"          # Button-based interaction 
+    TEXT = "text"              # Free-text chat input interaction
+
+
+class UserAction(Enum):
+    """Possible user actions that drive state transitions"""
+    SUBMIT_PROBLEM = "submit_problem"       # New problem submission
+    SUBMIT_ANSWER = "submit_answer"         # Answer to existing problem
+    REQUEST_HINT = "request_hint"           # Request for a hint
+    REQUEST_SOLUTION = "request_solution"   # Request for full solution
+    TOGGLE_MODE = "toggle_mode"             # Switch between structured/chat
+    ASK_FOLLOWUP = "ask_followup"           # Follow-up question in chat mode
+    REQUEST_EXPLANATION = "request_explanation"  # Ask for specific explanation
+    REQUEST_REASONING = "request_reasoning"  # Request reasoning steps
+    RESET = "reset"                         # Reset/start over
+    
+    @classmethod
+    def from_string(cls, action_string: str) -> 'UserAction':
+        """Convert string to UserAction enum"""
+        try:
+            return cls(action_string.lower())
+        except ValueError:
+            # Default to followup if we can't parse
+            return cls.ASK_FOLLOWUP
 
 
 @dataclass
@@ -96,12 +125,18 @@ class MathState:
     
     # Chat interaction
     interaction_mode: InteractionMode = InteractionMode.STRUCTURED
+    ui_mode: UIMode = UIMode.TEXT
     chat_history: List[ChatMessage] = field(default_factory=list)
     chat_response: Optional[str] = None
     
     # Additional context
     context: Dict[str, Any] = field(default_factory=dict)
     events: List[Dict[str, Any]] = field(default_factory=list)
+    
+    # Action tracking
+    last_action: Optional[UserAction] = None
+    next_action: Optional[UserAction] = None
+    action_history: List[Dict[str, Any]] = field(default_factory=list)
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation for backward compatibility."""
@@ -118,10 +153,14 @@ class MathState:
             "needs_hint": self.needs_hint,
             "steps": self.steps,
             "interaction_mode": self.interaction_mode.value,
+            "ui_mode": self.ui_mode.value,
             "chat_history": [msg.to_dict() for msg in self.chat_history],
             "chat_response": self.chat_response,
             "context": self.context,
-            "events": self.events
+            "events": self.events,
+            "last_action": self.last_action.value if self.last_action else None,
+            "next_action": self.next_action.value if self.next_action else None,
+            "action_history": self.action_history
         }
     
     @classmethod
@@ -157,6 +196,10 @@ class MathState:
         mode_str = data.get("interaction_mode", "structured")
         interaction_mode = InteractionMode.CHAT if mode_str == "chat" else InteractionMode.STRUCTURED
         
+        # Determine UI mode
+        ui_mode_str = data.get("ui_mode", "text")
+        ui_mode = UIMode.TEXT if ui_mode_str == "text" else UIMode.BUTTON
+        
         return cls(
             question=data.get("question", ""),
             student_answer=data.get("student_answer", ""),
@@ -170,8 +213,12 @@ class MathState:
             needs_hint=data.get("needs_hint", False),
             steps=data.get("steps", []),
             interaction_mode=interaction_mode,
+            ui_mode=ui_mode,
             chat_history=chat_history,
             chat_response=data.get("chat_response"),
             context=data.get("context", {}),
-            events=data.get("events", [])
+            events=data.get("events", []),
+            last_action=UserAction.from_string(data.get("last_action")) if data.get("last_action") else None,
+            next_action=UserAction.from_string(data.get("next_action")) if data.get("next_action") else None,
+            action_history=data.get("action_history", [])
         ) 

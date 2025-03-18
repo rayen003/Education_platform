@@ -1,0 +1,273 @@
+{
+  "nodes": [
+    {
+      "id": "module_1",
+      "name": "Data Structures",
+      "type": "module"
+    },
+    {
+      "id": "module_2",
+      "name": "Algorithms",
+      "type": "module"
+    },
+    {
+      "id": "module_3",
+      "name": "Object-Oriented Programming",
+      "type": "module"
+    },
+    {
+      "id": "module_4",
+      "name": "Software Development",
+      "type": "module"
+    },
+    {
+      "id": "concept_1",
+      "name": "Arrays and Lists",
+      "type": "concept"
+    },
+    {
+      "id": "concept_2",
+      "name": "Stacks and Queues",
+      "type": "concept"
+    },
+    {
+      "id": "concept_3",
+      "name": "Trees and Graphs",
+      "type": "concept"
+    },
+    {
+      "id": "concept_4",
+      "name": "Hash Tables",
+      "type": "concept"
+    },
+    {
+      "id": "concept_5",
+      "name": "Complexity Analysis",
+      "type": "concept"
+    },
+    {
+      "id": "concept_6",
+      "name": "Sorting Algorithms",
+      "type": "concept"
+    },
+    {
+      "id": "concept_7",
+      "name": "Searching Algorithms",
+      "type": "concept"
+    },
+    {
+      "id": "concept_8",
+      "name": "Recursion",
+      "type": "concept"
+    },
+    {
+      "id": "concept_9",
+      "name": "Classes and Objects",
+      "type": "concept"
+    },
+    {
+      "id": "concept_10",
+      "name": "Inheritance",
+      "type": "concept"
+    },
+    {
+      "id": "concept_11",
+      "name": "Polymorphism",
+      "type": "concept"
+    },
+    {
+      "id": "concept_12",
+      "name": "Encapsulation",
+      "type": "concept"
+    },
+    {
+      "id": "concept_13",
+      "name": "Software Development Life Cycle",
+      "type": "concept"
+    },
+    {
+      "id": "concept_14",
+      "name": "Agile Methodologies",
+      "type": "concept"
+    },
+    {
+      "id": "concept_15",
+      "name": "Version Control",
+      "type": "concept"
+    },
+    {
+      "id": "concept_16",
+      "name": "Testing and Debugging",
+      "type": "concept"
+    }
+  ],
+  "links": [
+    {
+      "source": "module_1",
+      "target": "concept_1",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_1",
+      "target": "concept_2",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_1",
+      "target": "concept_3",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_1",
+      "target": "concept_4",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_2",
+      "target": "concept_5",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_2",
+      "target": "concept_6",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_2",
+      "target": "concept_7",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_2",
+      "target": "concept_8",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_3",
+      "target": "concept_9",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_3",
+      "target": "concept_10",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_3",
+      "target": "concept_11",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_3",
+      "target": "concept_12",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_4",
+      "target": "concept_13",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_4",
+      "target": "concept_14",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_4",
+      "target": "concept_15",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_4",
+      "target": "concept_16",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "concept_1",
+      "target": "concept_2",
+      "type": "related_to",
+      "strength": 0.7
+    },
+    {
+      "source": "concept_5",
+      "target": "concept_6",
+      "type": "prerequisite",
+      "strength": 0.7
+    },
+    {
+      "source": "concept_6",
+      "target": "concept_7",
+      "type": "related_to",
+      "strength": 0.7
+    },
+    {
+      "source": "concept_8",
+      "target": "concept_6",
+      "type": "related_to",
+      "strength": 0.7
+    },
+    {
+      "source": "concept_9",
+      "target": "concept_10",
+      "type": "related_to",
+      "strength": 0.7
+    },
+    {
+      "source": "concept_10",
+      "target": "concept_11",
+      "type": "related_to",
+      "strength": 0.7
+    },
+    {
+      "source": "concept_11",
+      "target": "concept_12",
+      "type": "related_to",
+      "strength": 0.7
+    },
+    {
+      "source": "concept_13",
+      "target": "concept_14",
+      "type": "related_to",
+      "strength": 0.7
+    },
+    {
+      "source": "concept_14",
+      "target": "concept_15",
+      "type": "related_to",
+      "strength": 0.7
+    },
+    {
+      "source": "concept_15",
+      "target": "concept_16",
+      "type": "related_to",
+      "strength": 0.7
+    }
+  ],
+  "metadata": {
+    "timestamp": "2025-03-16T23:56:32.013518",
+    "course_title": "The course title extracted from the syllabus is \"Data Structures.\"",
+    "node_count": 20,
+    "link_count": 26,
+    "module_count": 4,
+    "concept_count": 16,
+    "generated_by": "KnowledgeGraphService (LLM)",
+    "syllabus_length": 453,
+    "graph_id": "1f1161fa-b0a4-4916-ae2d-52eb5e9acdcb"
+  }
+}

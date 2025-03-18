@@ -144,8 +144,13 @@ class MathGenerateFeedbackCommand(BaseCommand):
                 
                 # Verify the feedback
                 try:
+                    # Convert to dictionary for verification
+                    verification_dict = verification_state.to_dict()
+                    # Ensure feedback is properly converted for meta agent
+                    verification_dict["feedback"] = math_feedback.to_dict() if hasattr(math_feedback, "to_dict") else {"assessment": math_feedback.assessment, "is_correct": math_feedback.is_correct}
+                    
                     verification_result = self.meta_agent.verify_output(
-                        verification_state.to_dict(), 
+                        verification_dict, 
                         "feedback", 
                         regenerate_feedback
                     )
@@ -221,8 +226,9 @@ class MathGenerateFeedbackCommand(BaseCommand):
             # If there's a clear correct answer to compare against
             confidence += 0.1
             
-            # If answers are identical or very similar
-            if state._normalize_answer(state.student_answer) == state._normalize_answer(state.correct_answer):
+            # Simple string comparison without normalization
+            # (removed call to _normalize_answer which doesn't exist in MathState)
+            if str(state.student_answer).strip() == str(state.correct_answer).strip():
                 confidence += 0.1
         
         # Analysis results can affect confidence

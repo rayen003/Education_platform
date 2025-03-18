@@ -86,3 +86,62 @@ The platform includes a fallback mock mode when an OpenAI API key isn't availabl
 - Some features may have limited functionality
 
 To use the full capabilities, provide a valid OpenAI API key in the `.env` file.
+
+## Development Journal
+
+### May 22, 2023 - Confidence Metrics System
+
+Added a comprehensive confidence metrics system to the math assessment tool:
+- Implemented `ConfidenceMetrics` class to assess confidence in feedback, hints, analysis, and chat interactions
+- Integrated machine learning-based confidence prediction with calibration
+- Created data collection infrastructure for training and improving confidence models
+- Fixed handling of different state object formats and potential None values in metrics assessment
+- Added feature extraction methods for all assessment types
+- Created enhanced finance demo showcasing confidence assessment capabilities
+
+### May 23, 2023 - Modern UI Implementation
+
+Enhanced the UI with a modern learning platform design:
+- Created a grid-based component layout with cards for different learning resources
+- Updated the UI to include Videos, Lessons, Questions, Mock Exams, Notes, and Flashcards sections
+- Improved visual appearance with consistent styling, icons, and responsive design
+- Integrated confidence visualization components into the assessment workflow
+- Added the ability to show confidence levels visually through progress bars and badges
+
+### May 24, 2023 - Confidence UI Integration
+
+Enhanced the confidence metrics visualization in the UI:
+- Created `confidence_display.py` module with reusable UI components for showing confidence levels
+- Implemented three visualization types:
+  1. Confidence bars: Progress bars with color coding based on confidence level
+  2. Confidence badges: Compact inline indicators for showing confidence next to hints
+  3. Confidence tooltips: Contextual tooltips explaining the confidence assessment
+- Added explanatory tooltips that provide details on how confidence is calculated
+- Integrated confidence visuals throughout the math assessment workflow for:
+  - Problem solution confidence
+  - Analysis of student work
+  - Feedback confidence
+  - Hint reliability
+  - Reasoning step verification
+  - Chat response accuracy
+- Color coded all confidence indicators (green for high, orange for medium, red for low)
+- Added confidence explanation expanders to help users understand the reliability of AI responses
+
+### May 25, 2023 - UI Navigation and Layout Improvements
+
+Redesigned the application interface for improved usability:
+- Simplified the home page to focus on the two core services: Knowledge Graph and Math Assessment
+- Implemented a navigation system that allows users to switch between services
+- Created a page-based navigation model with "Back to Home" options for better user flow
+- Enhanced the Knowledge Graph visualization:
+  - Increased the vertical space allocated to the graph for better visibility
+  - Moved resource information to a sidebar on the right
+  - Improved the styling of resource panels with colored backgrounds instead of white
+  - Added more detailed node information displays
+- Unified the Math Assessment interface:
+  - Combined structured and chat modes into a single chat-based interface
+  - Retained the toggle for switching between modes while maintaining a consistent UI
+  - Improved the chat history display with better formatting and timestamps
+  - Enhanced the hint and follow-up question flow
+- Added responsive layout adjustments for different screen sizes
+- Improved accessibility with better color contrast and larger touch targets

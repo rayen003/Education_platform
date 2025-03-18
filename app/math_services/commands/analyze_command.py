@@ -19,8 +19,8 @@ class MathAnalyzeCalculationCommand(BaseCommand):
     def __init__(self, service_container: ServiceContainer):
         """
         Initialize the command with services.
-        
-        Args:
+    
+    Args:
             service_container: Container with required services
         """
         super().__init__(service_container)
@@ -33,7 +33,7 @@ class MathAnalyzeCalculationCommand(BaseCommand):
             service_container: The service container
         """
         self.llm_service = service_container.get_llm_service()
-        
+    
     def execute(self, state: MathState) -> MathState:
         """
         Analyze a student's answer to determine correctness and identify errors.
@@ -49,7 +49,7 @@ class MathAnalyzeCalculationCommand(BaseCommand):
             "question": state.question,
             "student_answer": state.student_answer,
             "correct_answer": state.correct_answer
-        })
+            })
         
         try:
             # Create the prompt for analysis
@@ -110,7 +110,7 @@ class MathAnalyzeCalculationCommand(BaseCommand):
             })
             
             return state
-            
+                
         except Exception as e:
             logger.error(f"Error analyzing calculation: {str(e)}")
             self.log_error(e, state)

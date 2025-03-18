@@ -1,0 +1,100 @@
+{
+  "nodes": [
+    {
+      "id": "module_1",
+      "name": "Module 1: Introduction to Programming",
+      "type": "module"
+    },
+    {
+      "id": "module_2",
+      "name": "Module 2: Data Structures and Algorithms",
+      "type": "module"
+    },
+    {
+      "id": "concept_1",
+      "name": "Concept 1: Variables and Data Types",
+      "type": "concept"
+    },
+    {
+      "id": "concept_2",
+      "name": "Concept 2: Control Structures",
+      "type": "concept"
+    },
+    {
+      "id": "concept_3",
+      "name": "Concept 3: Arrays and Lists",
+      "type": "concept"
+    },
+    {
+      "id": "concept_4",
+      "name": "Concept 4: Recursion",
+      "type": "concept"
+    },
+    {
+      "id": "concept_5",
+      "name": "Concept 5: Sorting Algorithms",
+      "type": "concept"
+    }
+  ],
+  "links": [
+    {
+      "source": "module_1",
+      "target": "concept_1",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_1",
+      "target": "concept_2",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_2",
+      "target": "concept_3",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_2",
+      "target": "concept_4",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "module_2",
+      "target": "concept_5",
+      "type": "contains",
+      "strength": 1
+    },
+    {
+      "source": "concept_1",
+      "target": "concept_2",
+      "type": "prerequisite",
+      "strength": 0.7
+    },
+    {
+      "source": "concept_3",
+      "target": "concept_4",
+      "type": "related_to",
+      "strength": 0.7
+    },
+    {
+      "source": "concept_4",
+      "target": "concept_5",
+      "type": "related_to",
+      "strength": 0.7
+    }
+  ],
+  "metadata": {
+    "timestamp": "2025-03-16T23:39:31.407919",
+    "course_title": "The course title is not explicitly provided in the text you shared. It seems to be an error message related to a programming or software issue rather than a syllabus. Please provide additional information or context if available, and I can assist you further!",
+    "node_count": 7,
+    "link_count": 8,
+    "module_count": 2,
+    "concept_count": 5,
+    "generated_by": "KnowledgeGraphService (LLM)",
+    "syllabus_length": 79,
+    "graph_id": "561b8bcd-75d9-4a94-ac76-349856bed113"
+  }
+}

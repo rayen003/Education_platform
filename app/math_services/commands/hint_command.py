@@ -1,141 +1,184 @@
 """
-Math Hint Command.
+Hint Command Module.
 
-This module contains the command for generating progressive hints
-for math problems.
+This module provides the command for generating contextual hints for math problems
+using Chain of Draft methodology for concise, targeted hints.
 """
 
 import logging
-import json
+import re
 import traceback
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 
 from app.math_services.commands.base_command import BaseCommand
-from app.math_services.models.state import MathState, InteractionMode
-from app.math_services.services.llm.base_service import BaseLLMService
+from app.math_services.models.state import MathState
 from app.math_services.services.service_container import ServiceContainer
 
 logger = logging.getLogger(__name__)
 
 class MathGenerateHintCommand(BaseCommand):
-    """Command for generating progressive hints for math problems."""
+    """Command for generating hints for math problems using Chain of Draft."""
     
     def __init__(self, service_container: ServiceContainer):
         """
-        Initialize the hint command.
+        Initialize the command with services.
         
         Args:
             service_container: Container with required services
         """
         super().__init__(service_container)
+        
+        # Cache for hints to avoid regeneration
+        self._hint_cache = {}
     
     def _init_services(self, service_container: ServiceContainer) -> None:
         """
-        Initialize services needed by this command.
+        Initialize services required by this command.
         
         Args:
             service_container: The service container
         """
-        self.service_container = service_container
         self.llm_service = service_container.get_llm_service()
-        self.meta_agent = service_container.get_service("meta_agent")
-        logger.info("Initialized MathGenerateHintCommand")
-
+        self.meta_agent = service_container.get_meta_agent()
+    
     def execute(self, state: MathState) -> MathState:
         """
-        Generate a hint for a math problem.
+        Generate a single contextual hint based on the current state.
         
         Args:
-            state: The current state with question and student information
+            state: Current math state
             
         Returns:
-            Updated state with hint
+            Updated state with a new hint
         """
-        logger.info("Generating hint")
-        self.record_event(state, "hint_generation_start", {
-            "question": state.question,
-            "has_previous_hints": len(state.hints) > 0
+        logger.info(f"Generating hint for problem: '{state.question[:50]}...'")
+        
+        # Check if problem is solvable
+        if not state.question:
+            logger.warning("Cannot generate hint: No problem statement")
+            return self.record_event(state, "error", {"message": "No problem statement"})
+        
+        # Get the hint count and existing hints
+        hint_count = state.hint_count
+        hints = state.hints
+        
+        # Generate new hint using Chain of Draft
+        new_hint = self._generate_contextual_hint(
+            state.question,
+            state.student_answer,
+            state.correct_answer,
+            hint_count,
+            hints,
+            state.analysis.to_dict() if hasattr(state.analysis, "to_dict") else {}
+        )
+        
+        # Add the hint to the state
+        state.hints.append(new_hint)
+        state.hint_count = len(state.hints)
+        
+        # Limit to max 5 hints to manage memory
+        if len(state.hints) > 5:
+            state.hints = state.hints[-5:]
+            state.hint_count = len(state.hints)
+        
+        # Record the event
+        self.record_event(state, "hint_generated", {
+            "hint_number": state.hint_count,
+            "hint": new_hint[:50] + "..." if len(new_hint) > 50 else new_hint
         })
         
+        return state
+    
+    def _generate_contextual_hint(self, question: str, student_answer: str, correct_answer: Optional[str], 
+                           hint_count: int, hints: List[str], analysis: Dict[str, Any]) -> str:
+        """
+        Generate a contextual hint using Chain of Draft.
+        
+        Args:
+            question: The math problem
+            student_answer: Student's current answer
+            correct_answer: Correct answer if available
+            hint_count: Number of hints already given
+            hints: Previous hints
+            analysis: Error analysis data
+            
+        Returns:
+            A new contextual hint
+        """
+        # Define the hint progression strategy based on hint count
+        hint_strategies = [
+            "general_approach",      # First hint: General approach
+            "concept_reminder",      # Second hint: Remind of relevant concept
+            "error_specific",        # Third hint: Address specific error
+            "step_guidance",         # Fourth hint: Guide through next step
+            "detailed_direction"     # Fifth+ hint: More detailed direction
+        ]
+        
+        # Get the appropriate strategy
+        strategy_index = min(hint_count, len(hint_strategies) - 1)
+        current_strategy = hint_strategies[strategy_index]
+        
+        # Format previous hints for context
+        previous_hints_context = ""
+        if hints:
+            previous_hints_context = "Previous hints:\n"
+            for i, hint in enumerate(hints):
+                previous_hints_context += f"{i+1}. {hint}\n"
+        
+        # Extract error information if available
+        error_context = ""
+        if "error_type" in analysis and analysis["error_type"]:
+            error_context = f"Error type: {analysis['error_type']}\n"
+            if "misconception" in analysis and analysis["misconception"]:
+                error_context += f"Possible misconception: {analysis['misconception']}\n"
+        
         try:
-            # Log problem details
-            logger.info(f"Problem: {state.question}")
-            logger.info(f"Student answer: {state.student_answer}")
-            logger.info(f"Previous hints count: {len(state.hints)}")
+            # Chain of Draft approach
+            system_prompt = f"""
+            You are an expert math tutor using Chain of Draft to create a hint.
+            
+            The student is on hint #{hint_count + 1}. Use the '{current_strategy}' strategy.
+            
+            Chain of Draft process:
+            1. Identify the key concept needed (5 words max)
+            2. Determine what specific help is needed (5 words max)
+            3. Decide on the most valuable insight (5 words max)
+            4. Compose a concise, helpful hint (1-2 sentences)
+            
+            Show ONLY your final hint from step 4 in your response.
+            Build on previous hints and focus on progressing the student's understanding without solving the problem for them.
+            """
+            
+            user_prompt = f"""
+            Problem: {question}
+            
+            Student's current answer: {student_answer}
+            
+            {error_context}
+            {previous_hints_context}
+            
+            Based on the information above, provide a single, helpful hint using the '{current_strategy}' strategy.
+            The hint should naturally build on any previous hints and help the student make progress.
+            """
             
             # Generate the hint
-            hint = self._generate_hint(
-                problem=state.question,
-                student_answer=state.student_answer,
-                correct_answer=state.correct_answer,
-                hint_count=len(state.hints),
-                hints=state.hints,
-                analysis=state.analysis.to_dict() if state.analysis else {}
+            response = self.llm_service.generate_completion(
+                system_prompt=system_prompt,
+                user_prompt=user_prompt,
+                temperature=0.7,
+                max_tokens=100  # Limit tokens for concise hints
             )
             
-            # Assess confidence in the hint
-            confidence = self._assess_hint_confidence(state, hint)
+            hint = response.get("content", "").strip()
             
-            # Verify the hint if meta-agent is available
-            verification_result = None
-            if self.meta_agent:
-                try:
-                    # Verify the hint
-                    verification_result = self.meta_agent.verify_hint(
-                        state.question,
-                        hint
-                    )
-                    
-                    # Log verification result
-                    logger.info(f"Hint verification result: {verification_result}")
-                    
-                    # Update confidence based on verification
-                    if verification_result:
-                        verification_confidence = verification_result.get("confidence", 0.5)
-                        # Weight the verification more heavily
-                        confidence = (confidence + (verification_confidence * 2)) / 3
-                        
-                        # Adjust bounds based on verification
-                        if verification_result.get("verified", False):
-                            confidence = max(confidence, 0.8)
-                        else:
-                            confidence = min(confidence, 0.6)
-                except Exception as e:
-                    logger.warning(f"Hint verification failed: {str(e)}")
+            # Clean up the hint (remove prefixes like "Hint: " if present)
+            hint = re.sub(r"^(Hint|Hint \d+|Here's a hint):\s*", "", hint, flags=re.IGNORECASE)
             
-            # Add the hint to the state
-            state.hints.append(hint)
-            state.hint_count = len(state.hints)
-            
-            # Store confidence in context
-            if not state.context:
-                state.context = {}
-            state.context["hint_confidence"] = confidence
-            
-            self.record_event(state, "hint_generation_complete", {
-                "hint_length": len(hint),
-                "verification": verification_result.get("verified", True) if verification_result else True,
-                "confidence": confidence
-            })
-            
-            return state
-        
+            return hint.strip()
         except Exception as e:
-            logger.error(f"Error generating hint: {str(e)}")
-            self.log_error(e, state)
-            
-            # Create a fallback hint
-            fallback_hint = "Try breaking down the problem into smaller steps and identify the key variables."
-            state.hints.append(fallback_hint)
-            state.hint_count = len(state.hints)
-            
-            # Set low confidence for fallback hint
-            if not state.context:
-                state.context = {}
-            state.context["hint_confidence"] = 0.2
-            
-            return state
+            logger.error(f"Error generating hint: {e}")
+            return "I couldn't generate a proper hint. Try approaching the problem step by step."
     
     def _assess_hint_confidence(self, state: MathState, hint: str) -> float:
         """
@@ -151,44 +194,20 @@ class MathGenerateHintCommand(BaseCommand):
         # Start with a base confidence
         confidence = 0.7
         
-        # Adjust based on problem complexity
-        word_count = len(state.question.split())
-        if word_count > 50:  # Complex problem
-            confidence -= 0.1
-        elif word_count < 15:  # Simple problem
+        # Adjust based on hint quality factors
+        if len(hint) < 10:
+            confidence -= 0.2  # Too short
+        elif len(hint) > 200:
+            confidence -= 0.1  # Too verbose
+            
+        # Check if hint mentions key concepts from the problem
+        problem_words = set(re.findall(r'\b\w+\b', state.question.lower()))
+        hint_words = set(re.findall(r'\b\w+\b', hint.lower()))
+        concept_overlap = len(problem_words.intersection(hint_words)) / len(problem_words) if problem_words else 0
+        
+        if concept_overlap > 0.3:
             confidence += 0.1
         
-        # Adjust based on hint count - progressively lower confidence with more hints
-        # as later hints are more specific and may be less reliable
-        hint_count = len(state.hints)
-        if hint_count > 2:
-            confidence -= 0.1 * (hint_count - 2)
-        
-        # Check if we have analysis results to inform our hint
-        if state.analysis:
-            if state.analysis.is_correct:
-                # Higher confidence for correct answer hints
-                confidence += 0.1
-            elif state.analysis.error_type:
-                # We understand the error, so higher confidence
-                confidence += 0.05
-        
-        # Assess hint quality characteristics
-        if len(hint) < 20:  # Very short hint
-            confidence -= 0.1
-        elif len(hint) > 200:  # Very long hint
-            confidence -= 0.05
-            
-        # Check for question marks in the hint, which suggest prompting rather than directing
-        if "?" in hint:
-            confidence += 0.05
-            
-        # Check for specific math terms in the hint
-        math_terms = ["equation", "formula", "solve", "calculate", "value", "variable", "function", "graph"]
-        term_count = sum(1 for term in math_terms if term in hint.lower())
-        confidence += min(0.1, term_count * 0.02)  # Up to 0.1 bonus for relevant terms
-        
-        # Set bounds
-        confidence = max(0.3, min(confidence, 0.95))
-        
-        return confidence
+        # Cap confidence at reasonable bounds
+        return max(0.1, min(0.95, confidence))
+

@@ -9,10 +9,12 @@ import json
 import logging
 import os
 import re
-from typing import Dict, Any, List, Optional, TypedDict
+from typing import Dict, Any, List, Optional, TypedDict, Tuple, Union
 from openai import OpenAI
 from dotenv import load_dotenv
 from datetime import datetime
+from enum import Enum, auto
+from dataclasses import dataclass, field
 
 # Try to import SymPy for symbolic math operations
 try:
@@ -33,8 +35,9 @@ except ImportError:
     META_AGENT_AVAILABLE = False
     print("MetaAgent not available, skipping verification")
 
-from app.math_services.models.state import MathState, InteractionMode, ChatMessage
+from app.math_services.models.state import MathState, InteractionMode, ChatMessage, UserAction, UIMode
 from app.math_services.services.service_container import ServiceContainer
+from app.math_services.orchestration.action_router import ActionRouter
 
 # Load environment variables
 load_dotenv()
@@ -43,13 +46,13 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 # Define the state schema
-class MathState(TypedDict):
+class MathStateDict(TypedDict):
     question: str
     student_answer: str
     correct_answer: Optional[str]
     symbolic_answer: Optional[Any]
     analysis: Dict[str, Any]
-    feedback: str
+    feedback: Dict[str, Any]  # Changed from str to Dict to match the actual structure
     proximity_score: Optional[float]
     hint_count: int
     hints: List[str]
@@ -62,15 +65,11 @@ class MathState(TypedDict):
 
 class MathAgent:
     """
-    Agent responsible for analyzing mathematical calculations in student answers.
+    Agent responsible for orchestrating mathematical analysis and interactions.
+    Now optimized to eliminate redundancy with command classes.
     """
     def __init__(self, model="gpt-4o-mini"):
-        """
-        Initialize the math agent.
-        
-        Args:
-            model: The OpenAI model to use
-        """
+        """Initialize the math agent with optimized command loading."""
         # Initialize LLM service and service container
         self.llm_service = OpenAILLMService(model=model)
         
@@ -86,435 +85,296 @@ class MathAgent:
             meta_agent=self.meta_agent
         )
         
-        # Cache for commands
+        # Lazy-loaded command cache
         self._commands = {}
         
+        # Current state tracking
+        self.current_state = None
+        
+        # Add caching for Chain of Draft outputs
+        self._cod_cache = {}
+        self._cod_timestamps = {}
+        self._cod_ttl = 600  # 10 minutes in seconds
+        
+        # Initialize the action router
+        self.action_router = ActionRouter(self)
+        
         logger.info(f"Initialized MathAgent with model {model}")
-        
-    def _check_answer(self, question: str, student_answer: str, correct_answer: str = None) -> bool:
-        """
-        Use ChatGPT-3.5 to check if the student's answer is correct.
-        """
-        # Try to use SymPy for exact comparison if we have symbolic answers
-        if SYMPY_AVAILABLE and correct_answer:
-            try:
-                # Try to parse both answers as expressions
-                student_expr = parse_expr(student_answer.strip())
-                correct_expr = parse_expr(correct_answer.strip())
-                
-                # Check if they are equivalent
-                if simplify(student_expr - correct_expr) == 0:
-                    print("SymPy verified the answer is correct")
-                    return True
-            except Exception as e:
-                print(f"SymPy comparison failed: {e}")
-        
-        # Fall back to ChatGPT-3.5 for assessment
-        messages = [
-            {
-                "role": "system",
-                "content": """You are a math evaluation assistant. Analyze the student's answer to determine if it is correct.
-                
-                Follow these steps:
-                1. Solve the math problem yourself first.
-                2. Compare your solution with the student's answer.
-                3. Consider different formats of correct answers (e.g., '2' vs '2.0' vs 'x=2').
-                4. Respond with 'True' if the student's answer is correct, or 'False' if it's incorrect.
-                
-                Be precise in your evaluation and give the student the benefit of the doubt if their answer is correct but formatted differently.
-                """
-            }
-        ]
-        
-        if correct_answer:
-            messages.append({
-                "role": "user",
-                "content": f"Question: {question}\nStudent Answer: {student_answer}\nCorrect Answer: {correct_answer}"
-            })
-        else:
-            messages.append({
-                "role": "user",
-                "content": f"Question: {question}\nStudent Answer: {student_answer}"
-            })
-        
-        try:
-            # Query ChatGPT-3.5 to assess correctness
-            response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=messages
-            )
-            
-            # Extract the response and convert to boolean
-            result = response.choices[0].message.content.strip().lower() == "true"
-            print(f"Evaluation result: {result}")
-            return result
-        except Exception as e:
-            print(f"Error in OpenAI assessment: {e}")
-            # If OpenAI call fails, do a simple string comparison as fallback
-            if correct_answer:
-                # Remove spaces and make case-insensitive
-                student_clean = student_answer.replace(" ", "").lower()
-                correct_clean = correct_answer.replace(" ", "").lower()
-                return student_clean == correct_clean
-            return False
     
-    def analyze(self, state: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_command(self, command_name: str):
         """
-        Analyze the student's answer and generate feedback.
+        Lazy-load command classes to reduce memory footprint.
         
         Args:
-            state: Dictionary containing the question, student_answer, and feedback fields
+            command_name: Name of the command to load
             
         Returns:
-            Updated state with feedback
+            Initialized command instance
         """
-        print(f"Analyzing math question: {state.get('question', '')}")
-        
-        # Initialize state fields if not present
-        if "hint_count" not in state:
-            state["hint_count"] = 0
-        if "hints" not in state:
-            state["hints"] = []
-        if "needs_hint" not in state:
-            state["needs_hint"] = False
-        if "proximity_score" not in state:
-            state["proximity_score"] = None
-        if "interaction_mode" not in state:
-            state["interaction_mode"] = "structured"  # Default to structured mode
-        if "chat_history" not in state:
-            state["chat_history"] = []
-        
-        try:
-            # Check if we need to build or update the context
-            if "context" not in state:
-                state["context"] = {
-                    "question": state.get("question", ""),
-                    "student_answer": state.get("student_answer", ""),
-                    "correct_answer": state.get("correct_answer", ""),
-                    "previous_hints": state.get("hints", []),
-                    "assessment": "",
-                    "is_correct": False,
-                    "proximity_score": 0
-                }
-            
-            # For the simplified UI demo, let's just use a direct check rather than the workflow
-            # Check if the answer is correct
-            is_correct = self._check_answer(
-                state["question"], 
-                state["student_answer"], 
-                state.get("correct_answer")
-            )
-            
-            # Generate feedback
-            feedback = self._generate_feedback(
-                state["question"], 
-                state["student_answer"], 
-                is_correct
-            )
-            
-            # Generate hints if needed
-            if state.get("needs_hint", False) or not is_correct:
-                hints = self._generate_hints(
-                    state["question"], 
-                    state["student_answer"], 
-                    state.get("hint_count", 0) + 1
-                )
-                state["hints"] = hints
-            
-            # Calculate proximity score
-            proximity_score = self._calculate_proximity(
-                state["question"], 
-                state["student_answer"], 
-                state.get("correct_answer")
-            )
-            
-            # Update the feedback in the state
-            if "feedback" not in state:
-                state["feedback"] = {}
-            if "math" not in state["feedback"]:
-                state["feedback"]["math"] = {}
-            
-            state["feedback"]["math"]["assessment"] = feedback
-            state["feedback"]["math"]["is_correct"] = is_correct
-            state["feedback"]["math"]["proximity_score"] = proximity_score
-            
-            # Update the context with the latest information
-            state["context"].update({
-                "question": state.get("question", ""),
-                "student_answer": state.get("student_answer", ""),
-                "correct_answer": state.get("correct_answer", ""),
-                "previous_hints": state.get("hints", []),
-                "assessment": feedback,
-                "is_correct": is_correct,
-                "proximity_score": proximity_score
-            })
-            
-            return state
-        except Exception as e:
-            print(f"Error in math agent analyze: {str(e)}")
-            if "feedback" not in state:
-                state["feedback"] = {}
-            if "math" not in state["feedback"]:
-                state["feedback"]["math"] = {}
-            
-            state["feedback"]["math"]["assessment"] = "I encountered an error analyzing your answer."
-            state["feedback"]["math"]["is_correct"] = False
-            
-            # Update context with the error information
-            if "context" in state:
-                state["context"].update({
-                    "assessment": "I encountered an error analyzing your answer.",
-                    "is_correct": False
-                })
-            
-            return state
-        
-    def _generate_feedback(self, question: str, student_answer: str, is_correct: bool) -> str:
-        """Generate detailed feedback for the student's answer."""
-        system_prompt = """You are a helpful math tutor providing feedback on a student's answer.
-        
-        Your feedback should:
-        1. Be encouraging and supportive even when the answer is incorrect
-        2. Highlight what the student did correctly (if anything)
-        3. Identify misconceptions or errors in their approach
-        4. Suggest a better approach if the answer is incorrect
-        5. Keep your response concise (2-3 sentences)
-        """
-        
-        user_prompt = f"""
-        Question: {question}
-        Student Answer: {student_answer}
-        Is Correct: {is_correct}
-        
-        Provide feedback for this student's answer.
-        """
-        
-        try:
-            response = self.llm_service.generate_completion(
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
-                temperature=0.7
-            )
-            return response.get("content", "No feedback available")
-        except Exception as e:
-            print(f"Error generating feedback: {e}")
-            return "I couldn't analyze your answer properly. Please try again." 
-
-    def _generate_hints(self, question: str, student_answer: str, hint_count: int) -> List[str]:
-        """Generate a sequence of hints for the problem."""
-        system_prompt = f"""You are a math tutor providing hints for a problem. 
-        The student needs {hint_count} progressive hints that gradually reveal the solution approach.
-        
-        Format your response as a list of {hint_count} hints, with each hint building on the previous one.
-        Start with general conceptual hints and gradually get more specific.
-        
-        Return EXACTLY {hint_count} hints, numbered 1 to {hint_count}.
-        """
-        
-        user_prompt = f"""
-        Question: {question}
-        Student's Current Answer: {student_answer}
-        
-        Provide {hint_count} progressive hints to help the student solve this problem.
-        """
-        
-        try:
-            response = self.llm_service.generate_completion(
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
-                temperature=0.7
-            )
-            
-            content = response.get("content", "")
-            
-            # Parse hints from the response
-            hints = []
-            lines = content.split('\n')
-            for line in lines:
-                line = line.strip()
-                if line and (line.startswith(f"{len(hints)+1}.") or line.startswith(f"Hint {len(hints)+1}:")):
-                    hint_text = line.split(":", 1)[-1] if ":" in line else line.split(".", 1)[-1]
-                    hints.append(hint_text.strip())
-                    if len(hints) >= hint_count:
-                        break
-            
-            # If we couldn't parse the hints properly, create default ones
-            if len(hints) < hint_count:
-                missing = hint_count - len(hints)
-                for i in range(missing):
-                    hints.append(f"Hint {len(hints)+1}: Consider reviewing the relevant concepts for this problem.")
-            
-            return hints
-        except Exception as e:
-            print(f"Error generating hints: {e}")
-            return [f"Hint {i+1}: I couldn't generate a proper hint. Please try again." for i in range(hint_count)]
-
-    def _calculate_proximity(self, question: str, student_answer: str, correct_answer: str = None) -> float:
-        """Calculate how close the student's answer is to the correct answer."""
-        system_prompt = """You are a math assessment system calculating a proximity score.
-        
-        Rate how close the student's answer is to the correct solution on a scale of 0-10:
-        - 10: Completely correct answer and approach
-        - 7-9: Minor errors but correct approach
-        - 4-6: Partially correct with significant errors
-        - 1-3: Incorrect answer but shows some understanding
-        - 0: Completely incorrect or irrelevant
-        
-        Respond ONLY with a number from 0 to 10.
-        """
-        
-        user_prompt = f"""
-        Question: {question}
-        Student Answer: {student_answer}
-        """
-        
-        if correct_answer:
-            user_prompt += f"\nCorrect Answer: {correct_answer}"
-        
-        try:
-            response = self.llm_service.generate_completion(
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
-                temperature=0.3
-            )
-            
-            score_text = response.get("content", "").strip()
-            
-            # Extract the score
-            score = None
-            try:
-                # Try to extract just the number from the response
-                score = float(''.join(c for c in score_text if c.isdigit() or c == '.'))
-                # Ensure it's in the range 0-10
-                score = max(0, min(10, score))
-            except:
-                score = 5.0  # Default score if parsing fails
-                
-            return score
-        except Exception as e:
-            print(f"Error calculating proximity score: {e}")
-            return 5.0  # Default middle score
-
-    def handle_follow_up(self, state: Dict[str, Any], follow_up_question: str) -> Dict[str, Any]:
-        """
-        Handle a follow-up question in the chat interaction mode.
-        
-        Args:
-            state: Current state dictionary
-            follow_up_question: The student's follow-up question
-            
-        Returns:
-            Updated state with chat response
-        """
-        try:
-            # Convert to MathState if needed
-            if not isinstance(state, MathState):
-                math_state = MathState.from_dict(state)
-            else:
-                math_state = state
-                
-            # Get or create the chat command
-            if "chat_command" not in self._commands:
+        if command_name not in self._commands:
+            if command_name == "solve":
+                from app.math_services.commands.solve_command import MathSolveSymbolicallyCommand
+                self._commands[command_name] = MathSolveSymbolicallyCommand(self.services)
+            elif command_name == "analyze":
+                from app.math_services.commands.analyze_command import MathAnalyzeCalculationCommand
+                self._commands[command_name] = MathAnalyzeCalculationCommand(self.services)
+            elif command_name == "hint":
+                from app.math_services.commands.hint_command import MathGenerateHintCommand
+                self._commands[command_name] = MathGenerateHintCommand(self.services)
+            elif command_name == "feedback":
+                from app.math_services.commands.feedback_command import MathGenerateFeedbackCommand
+                self._commands[command_name] = MathGenerateFeedbackCommand(self.services)
+            elif command_name == "chat":
                 from app.math_services.commands.chat_command import MathChatFollowUpCommand
-                self._commands["chat_command"] = MathChatFollowUpCommand(self.services)
+                self._commands[command_name] = MathChatFollowUpCommand(self.services)
+            elif command_name == "reasoning":
+                from app.math_services.commands.reasoning_command import MathGenerateReasoningCommand
+                self._commands[command_name] = MathGenerateReasoningCommand(self.services)
+            else:
+                raise ValueError(f"Unknown command: {command_name}")
+        
+        return self._commands[command_name]
+    
+    # Replace the redundant methods with wrappers around command calls
+    def solve(self, state_or_problem):
+        """Solve a math problem using the dedicated command."""
+        # Handle either a problem string or a state object
+        if isinstance(state_or_problem, str):
+            state = MathState(question=state_or_problem, student_answer="")
+        else:
+            state = state_or_problem
             
-            chat_command = self._commands["chat_command"]
+        command = self._get_command("solve")
+        updated_state = command.execute(state)
+        self.current_state = updated_state
+        return updated_state
+    
+    def analyze(self, state):
+        """Analyze a student answer using the dedicated command."""
+        command = self._get_command("analyze")
+        updated_state = command.execute(state)
+        self.current_state = updated_state
+        return updated_state
+    
+    def generate_feedback(self, state):
+        """Generate feedback using the dedicated command."""
+        command = self._get_command("feedback")
+        updated_state = command.execute(state)
+        self.current_state = updated_state
+        return updated_state
+    
+    def generate_hint(self, state):
+        """Generate a hint using the dedicated command."""
+        command = self._get_command("hint")
+        updated_state = command.execute(state)
+        self.current_state = updated_state
+        return updated_state
+    
+    def handle_follow_up(self, state, follow_up_question):
+        """Handle follow-up questions using the dedicated command."""
+        # Store the follow_up_question in the state context
+        if not hasattr(state, 'context') or state.context is None:
+            state.context = {}
+        
+        state.context['follow_up_question'] = follow_up_question
+        
+        command = self._get_command("chat")
+        updated_state = command.execute(state)
+        self.current_state = updated_state
+        return updated_state
+    
+    def generate_reasoning(self, state, use_cot=False):
+        """
+        Generate reasoning steps with option for Chain of Thought.
+        
+        Args:
+            state: Current math state
+            use_cot: Whether to use full Chain of Thought (True) or Chain of Draft (False)
             
-            # Set the interaction mode to "chat"
-            if math_state.interaction_mode != InteractionMode.CHAT:
-                old_mode = math_state.interaction_mode.value
-                math_state.interaction_mode = InteractionMode.CHAT
-                # Log the mode change
-                print(f"Switching from {old_mode} mode to chat mode")
-            
-            # Process the follow-up question
-            updated_state = chat_command.execute(math_state, follow_up_question)
-            
-            # Convert back to dict if needed for backward compatibility
-            if isinstance(state, dict):
-                return updated_state.to_dict()
-            return updated_state
+        Returns:
+            Updated state with reasoning steps
+        """
+        command = self._get_command("reasoning")
+        # Set the reasoning mode in the context before executing
+        if not hasattr(state, 'context') or not state.context:
+            if hasattr(state, 'context'):
+                state.context = {}
+            else:
+                state['context'] = {}
                 
-        except Exception as e:
-            print(f"Error handling follow-up question: {str(e)}")
+        context_field = state.context if hasattr(state, 'context') else state['context']
+        context_field['reasoning_mode'] = 'cot' if use_cot else 'cod'
+        
+        updated_state = command.execute(state)
+        self.current_state = updated_state
+        return updated_state
+        
+    # Remove redundant methods (_generate_feedback, _generate_hints, etc.)
+    # as they're now handled by the command classes
+
+    def process_action(self, state: MathState, action: str, **params) -> MathState:
+        """
+        Process a user action with event-driven orchestration.
+        
+        Args:
+            state: Current math state
+            action: Action identifier (e.g., "submit_problem", "request_hint")
+            **params: Additional parameters for the action
             
-            # Provide a fallback response
-            fallback_response = (
-                "I'm sorry, I encountered an issue while processing your question. "
-                "Could you please rephrase or ask something else about this math problem?"
+        Returns:
+            Updated state after handling the action
+        """
+        # Prepare action data
+        action_data = {
+            "action": action,
+            **params
+        }
+        
+        # Route the action to the appropriate handler
+        updated_state = self.action_router.route_action(state, action_data)
+        
+        # Update current state reference
+        self.current_state = updated_state
+        
+        return updated_state
+    
+    def process_natural_input(self, text: str, state: Optional[MathState] = None) -> MathState:
+        """
+        Process natural language input and determine the appropriate action.
+        
+        Args:
+            text: Natural language input from the user
+            state: Optional existing state (creates new if None)
+            
+        Returns:
+            Updated state after processing the input
+        """
+        # Create new state if not provided
+        if state is None:
+            state = MathState(
+                question="",
+                student_answer=""
+            )
+        
+        # Infer the most likely action based on content and context
+        action, params = self._infer_action_from_text(text, state)
+        
+        # Add the text to the parameters
+        params["text"] = text
+        
+        # Process the inferred action
+        return self.process_action(state, action.value, **params)
+    
+    def process_interaction(self, interaction_type: str, content: str, state: Optional[MathState] = None) -> MathState:
+        """
+        Process user interaction from either button or chat input.
+        
+        Args:
+            interaction_type: Type of interaction ('button' or 'text')
+            content: Button action or chat text content
+            state: Optional existing state (creates new if None)
+            
+        Returns:
+            Updated state after processing the interaction
+        """
+        # Create new state if not provided
+        if state is None:
+            state = MathState(
+                question="",
+                student_answer=""
             )
             
-            # Try to add to chat history
-            try:
-                if isinstance(state, MathState):
-                    # Add the student's question to chat history
-                    student_message = ChatMessage(
-                        role="student",
-                        message=follow_up_question,
-                        timestamp=datetime.now()
-                    )
-                    state.chat_history.append(student_message)
+        # Set the UI interaction mode
+        ui_mode = UIMode.BUTTON if interaction_type == 'button' else UIMode.TEXT
+        state.ui_mode = ui_mode
+        
+        # Process based on interaction type
+        if ui_mode == UIMode.BUTTON:
+            # Handle button actions directly
+            if content == 'hint':
+                return self.generate_hint(state)
+            elif content == 'feedback':
+                return self.generate_feedback(state)
+            elif content == 'reasoning':
+                # Use verified Chain of Thought for detailed reasoning
+                return self.generate_reasoning(state, use_cot=True)
+            elif content == 'solution':
+                # First generate reasoning, then format it as a solution
+                state = self.generate_reasoning(state, use_cot=True)
+                if hasattr(state, 'chat_history') and state.interaction_mode == InteractionMode.CHAT:
+                    # If in chat mode, add a solution message to chat history
+                    solution_text = "Here's the complete solution:\n\n"
+                    for i, step in enumerate(state.steps):
+                        solution_text += f"Step {i+1}: {step}\n\n"
                     
-                    # Add the fallback response to chat history
                     tutor_message = ChatMessage(
                         role="tutor",
-                        message=fallback_response,
+                        message=solution_text,
                         timestamp=datetime.now()
                     )
                     state.chat_history.append(tutor_message)
-                    
-                    # Add the fallback response to state
-                    state.chat_response = fallback_response
-                else:
-                    # Add to chat history as dict
-                    if "chat_history" not in state:
-                        state["chat_history"] = []
-                        
-                    # Record the student's question
-                    state["chat_history"].append({
-                        "role": "student",
-                        "message": follow_up_question,
-                        "timestamp": str(datetime.now())
-                    })
-                    
-                    # Record the fallback response
-                    state["chat_history"].append({
-                        "role": "tutor",
-                        "message": fallback_response,
-                        "timestamp": str(datetime.now())
-                    })
-                    
-                    # Add the fallback response to state
-                    state["chat_response"] = fallback_response
-            except Exception as chat_error:
-                print(f"Additional error while adding to chat history: {str(chat_error)}")
-                # Simplest fallback - just add the response
-                if isinstance(state, MathState):
-                    state.chat_response = fallback_response
-                else:
-                    state["chat_response"] = fallback_response
-            
-            return state
-
-    def toggle_interaction_mode(self, state: Dict[str, Any]) -> Dict[str, Any]:
+                    state.chat_response = solution_text
+                return state
+            else:
+                # For unknown button actions, treat as action string
+                return self.process_action(state, content)
+        else:  # text mode
+            # For chat input, use natural language processing
+            return self.process_natural_input(content, state)
+    
+    def _infer_action_from_text(self, text: str, state: MathState) -> Tuple[UserAction, Dict[str, Any]]:
         """
-        Toggle between structured and chat interaction modes.
+        Infer the most likely action from natural language input.
         
         Args:
-            state: Current state dictionary
+            text: Natural language input
+            state: Current state
             
         Returns:
-            Updated state with new interaction mode
+            Tuple of (UserAction, parameters dictionary)
         """
-        current_mode = state.get("interaction_mode", "structured")
+        text_lower = text.lower()
+        params = {}
         
-        # Toggle the mode
-        new_mode = "chat" if current_mode == "structured" else "structured"
-        state["interaction_mode"] = new_mode
+        # If we have no question yet, this is a new problem
+        if not state.question:
+            return UserAction.SUBMIT_PROBLEM, params
         
-        print(f"Toggled interaction mode from {current_mode} to {new_mode}")
+        # Check for hint requests
+        if any(phrase in text_lower for phrase in ["hint", "help me", "i'm stuck", "give me a clue"]):
+            return UserAction.REQUEST_HINT, params
         
-        return state
+        # Check for solution requests
+        if any(phrase in text_lower for phrase in ["solution", "solve it", "show me the answer", "what's the full solution"]):
+            return UserAction.REQUEST_SOLUTION, params
+        
+        # Check for explanation requests
+        explanation_match = re.search(r"explain\s+(\w+)", text_lower)
+        if explanation_match or "explain" in text_lower:
+            concept = explanation_match.group(1) if explanation_match else ""
+            return UserAction.REQUEST_EXPLANATION, {"concept": concept}
+        
+        # Check for reasoning requests
+        if any(phrase in text_lower for phrase in ["reasoning", "steps", "process", "method", "approach"]):
+            # Check if full CoT is requested
+            use_cot = any(phrase in text_lower for phrase in ["detailed", "full", "complete", "in depth"])
+            return UserAction.REQUEST_REASONING, {"use_cot": use_cot}
+        
+        # Check for mode toggle requests
+        if any(phrase in text_lower for phrase in ["switch mode", "toggle", "change to", "chat mode", "structured mode"]):
+            return UserAction.TOGGLE_MODE, params
+        
+        # Check for reset requests
+        if any(phrase in text_lower for phrase in ["reset", "start over", "clear", "new problem"]):
+            preserve_history = "keep history" in text_lower
+            return UserAction.RESET, {"preserve_history": preserve_history}
+        
+        # If in structured mode with no answer yet, this is likely an answer submission
+        if state.interaction_mode == InteractionMode.STRUCTURED and not state.student_answer:
+            return UserAction.SUBMIT_ANSWER, {"answer": text}
+        
+        # Default to follow-up question for existing problems
+        return UserAction.ASK_FOLLOWUP, params
 
 # Simple test case
 if __name__ == "__main__":

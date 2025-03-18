@@ -1,0 +1,317 @@
+{
+  "algebra_20250316012650": {
+    "id": "algebra_20250316012650",
+    "question_text": "Solve for x: 10x + 7 = 37",
+    "correct_answer": "3",
+    "interaction_count": 244,
+    "first_seen": "2025-03-16T01:26:50.658064",
+    "characteristics": {
+      "length": 25,
+      "advanced_keyword_count": 0,
+      "medium_keyword_count": 1,
+      "keyword_count": 1,
+      "symbol_count": 0,
+      "formula_count": 1,
+      "complexity": 0.0875
+    },
+    "last_interaction": "2025-03-16T01:26:50.859161"
+  },
+  "statistics_20250316012650": {
+    "id": "statistics_20250316012650",
+    "question_text": "The mean of a normal distribution is \u03bc = 112 and the standard deviation is \u03c3 = 14. What is the probability that a randomly selected observation is less than 126?",
+    "correct_answer": "Greater than 0.5, approximately 0.8638",
+    "interaction_count": 228,
+    "first_seen": "2025-03-16T01:26:50.658980",
+    "characteristics": {
+      "length": 161,
+      "advanced_keyword_count": 1,
+      "medium_keyword_count": 0,
+      "keyword_count": 1,
+      "symbol_count": 0,
+      "formula_count": 0,
+      "complexity": 0.241
+    },
+    "last_interaction": "2025-03-16T01:26:50.854725"
+  },
+  "calculus_20250316012650": {
+    "id": "calculus_20250316012650",
+    "question_text": "Find the derivative of f(x) = 3x^2 + 2x - 5 with respect to x.",
+    "correct_answer": "6x + 2",
+    "interaction_count": 228,
+    "first_seen": "2025-03-16T01:26:50.659609",
+    "characteristics": {
+      "length": 62,
+      "advanced_keyword_count": 1,
+      "medium_keyword_count": 0,
+      "keyword_count": 1,
+      "symbol_count": 0,
+      "formula_count": 2,
+      "complexity": 0.187
+    },
+    "last_interaction": "2025-03-16T01:26:50.854781"
+  },
+  "prob_d907a93f_20250316135043": {
+    "id": "prob_d907a93f_20250316135043",
+    "question_text": "\n    You are analyzing an investment opportunity with the following details:\n    - Initial investment: $500,000\n    - Expected cash flows:\n      * Year 1: $120,000\n      * Year 2: $150,000\n      * Year 3: $180,000\n      * Year 4: $200,000\n      * Year 5: $250,000\n    - Discount rate: 10%\n    \n    Calculate the Net Present Value (NPV) of this investment.\n    ",
+    "correct_answer": "To calculate the Net Present Value (NPV) of the investment opportunity, we will follow these steps:\n\n### Key Concepts and Formulas\n1. **Net Present Value (NPV)**: NPV is calculated using the formula:\n   \\[\n   \\text{NPV} = \\sum_{t=1}^{n} \\frac{C_t}{(1 + r)^t} - C_0\n   \\]\n   where:\n   - \\( C_t \\) = cash flow at time \\( t \\)\n   - \\( r \\) = discount rate\n   - \\( C_0 \\) = initial investment\n   - \\( n \\) = total number of periods (years)\n\n### Step-by-Step Calculation\n\n1. **Identify the variables**:\n   - Initial investment (\\( C_0 \\)): $500,000\n   - Cash flows (\\( C_t \\)):\n     - Year 1: $120,000\n     - Year 2: $150,000\n     - Year 3: $180,000\n     - Year 4: $200,000\n     - Year 5: $250,000\n   - Discount rate (\\( r \\)): 10% or 0.10\n   - Number of years (\\( n \\)): 5\n\n2. **Calculate the present value of each cash flow**:\n   We will calculate the present value (PV) for each cash flow using the formula:\n   \\[\n   PV = \\frac{C_t}{(1 + r)^t}\n   \\]\n\n   - **Year 1**: \n     \\[\n     PV_1 = \\frac{120,000}{(1 + 0.10)^1} = \\frac{120,000}{1.10} = 109,090.91\n     \\]\n\n   - **Year 2**: \n     \\[\n     PV_2 = \\frac{150,000}{(1 + 0.10)^2} = \\frac{150,000}{1.21} = 123,966.94\n     \\]\n\n   - **Year 3**: \n     \\[\n     PV_3 = \\frac{180,000}{(1 + 0.10)^3} = \\frac{180,000}{1.331} = 135,634.96\n     \\]\n\n   - **Year 4**: \n     \\[\n     PV_4 = \\frac{200,000}{(1 + 0.10)^4} = \\frac{200,000}{1.4641} = 136,602.22\n     \\]\n\n   - **Year 5**: \n     \\[\n     PV_5 = \\frac{250,000}{(1 + 0.10)^5} = \\frac{250,000}{1.61051} = 155,058.19\n     \\]\n\n3. **Sum the present values of the cash flows**:\n   \\[\n   \\text{Total PV} = PV_1 + PV_2 + PV_3 + PV_4 + PV_5\n   \\]\n   \\[\n   \\text{Total PV} = 109,090.91 + 123,966.94 + 135,634.96 + 136,602.22 + 155,058.19\n   \\]\n   \\[\n   \\text{Total PV} = 700,353.22\n   \\]\n\n4. **Calculate the NPV**:\n   \\[\n   \\text{NPV} = \\text{Total PV} - C_0\n   \\]\n   \\[\n   \\text{NPV} = 700,353.22 - 500,000\n   \\]\n   \\[\n   \\text{NPV} = 200,353.22\n   \\]\n\n### Final Answer\nThe Net Present Value (NPV) of this investment is:\n\\[\n\\boxed{200,353.22}\n\\]",
+    "interaction_count": 1,
+    "first_seen": "2025-03-16T13:50:43.441263",
+    "characteristics": {
+      "length": 360,
+      "advanced_keyword_count": 0,
+      "medium_keyword_count": 0,
+      "keyword_count": 0,
+      "symbol_count": 0,
+      "formula_count": 0,
+      "complexity": 0.3
+    },
+    "last_interaction": "2025-03-16T13:50:43.441263"
+  },
+  "prob_d907a93f_20250316135049": {
+    "id": "prob_d907a93f_20250316135049",
+    "question_text": "\n    You are analyzing an investment opportunity with the following details:\n    - Initial investment: $500,000\n    - Expected cash flows:\n      * Year 1: $120,000\n      * Year 2: $150,000\n      * Year 3: $180,000\n      * Year 4: $200,000\n      * Year 5: $250,000\n    - Discount rate: 10%\n    \n    Calculate the Net Present Value (NPV) of this investment.\n    ",
+    "interaction_count": 1,
+    "first_seen": "2025-03-16T13:50:49.885065",
+    "characteristics": {
+      "length": 360,
+      "advanced_keyword_count": 0,
+      "medium_keyword_count": 0,
+      "keyword_count": 0,
+      "symbol_count": 0,
+      "formula_count": 0,
+      "complexity": 0.3
+    },
+    "last_interaction": "2025-03-16T13:50:49.885065"
+  },
+  "prob_d907a93f_20250316135055": {
+    "id": "prob_d907a93f_20250316135055",
+    "question_text": "\n    You are analyzing an investment opportunity with the following details:\n    - Initial investment: $500,000\n    - Expected cash flows:\n      * Year 1: $120,000\n      * Year 2: $150,000\n      * Year 3: $180,000\n      * Year 4: $200,000\n      * Year 5: $250,000\n    - Discount rate: 10%\n    \n    Calculate the Net Present Value (NPV) of this investment.\n    ",
+    "correct_answer": "To calculate the Net Present Value (NPV) of the investment opportunity, we will follow these steps:\n\n### Key Concepts and Formulas\n1. **Net Present Value (NPV)**: NPV is calculated using the formula:\n   \\[\n   \\text{NPV} = \\sum_{t=1}^{n} \\frac{C_t}{(1 + r)^t} - C_0\n   \\]\n   where:\n   - \\( C_t \\) = cash flow at time \\( t \\)\n   - \\( r \\) = discount rate\n   - \\( C_0 \\) = initial investment\n   - \\( n \\) = total number of periods (years)\n\n### Step-by-Step Calculation\n\n1. **Identify the variables**:\n   - Initial investment (\\( C_0 \\)): $500,000\n   - Cash flows (\\( C_t \\)):\n     - Year 1: $120,000\n     - Year 2: $150,000\n     - Year 3: $180,000\n     - Year 4: $200,000\n     - Year 5: $250,000\n   - Discount rate (\\( r \\)): 10% or 0.10\n   - Number of years (\\( n \\)): 5\n\n2. **Calculate the present value of each cash flow**:\n   We will calculate the present value (PV) for each cash flow using the formula:\n   \\[\n   PV = \\frac{C_t}{(1 + r)^t}\n   \\]\n\n   - **Year 1**: \n     \\[\n     PV_1 = \\frac{120,000}{(1 + 0.10)^1} = \\frac{120,000}{1.10} = 109,090.91\n     \\]\n\n   - **Year 2**: \n     \\[\n     PV_2 = \\frac{150,000}{(1 + 0.10)^2} = \\frac{150,000}{1.21} = 123,966.94\n     \\]\n\n   - **Year 3**: \n     \\[\n     PV_3 = \\frac{180,000}{(1 + 0.10)^3} = \\frac{180,000}{1.331} = 135,634.96\n     \\]\n\n   - **Year 4**: \n     \\[\n     PV_4 = \\frac{200,000}{(1 + 0.10)^4} = \\frac{200,000}{1.4641} = 136,602.22\n     \\]\n\n   - **Year 5**: \n     \\[\n     PV_5 = \\frac{250,000}{(1 + 0.10)^5} = \\frac{250,000}{1.61051} = 155,058.19\n     \\]\n\n3. **Sum the present values of the cash flows**:\n   \\[\n   \\text{Total PV} = PV_1 + PV_2 + PV_3 + PV_4 + PV_5\n   \\]\n   \\[\n   \\text{Total PV} = 109,090.91 + 123,966.94 + 135,634.96 + 136,602.22 + 155,058.19\n   \\]\n   \\[\n   \\text{Total PV} = 700,353.22\n   \\]\n\n4. **Calculate the NPV**:\n   \\[\n   \\text{NPV} = \\text{Total PV} - C_0\n   \\]\n   \\[\n   \\text{NPV} = 700,353.22 - 500,000\n   \\]\n   \\[\n   \\text{NPV} = 200,353.22\n   \\]\n\n### Final Answer\nThe Net Present Value (NPV) of this investment is:\n\\[\n\\boxed{200,353.22}\n\\]",
+    "interaction_count": 1,
+    "first_seen": "2025-03-16T13:50:55.414112",
+    "characteristics": {
+      "length": 360,
+      "advanced_keyword_count": 0,
+      "medium_keyword_count": 0,
+      "keyword_count": 0,
+      "symbol_count": 0,
+      "formula_count": 0,
+      "complexity": 0.3
+    },
+    "last_interaction": "2025-03-16T13:50:55.414112"
+  },
+  "prob_d907a93f_20250316135127": {
+    "id": "prob_d907a93f_20250316135127",
+    "question_text": "\n    You are analyzing an investment opportunity with the following details:\n    - Initial investment: $500,000\n    - Expected cash flows:\n      * Year 1: $120,000\n      * Year 2: $150,000\n      * Year 3: $180,000\n      * Year 4: $200,000\n      * Year 5: $250,000\n    - Discount rate: 10%\n    \n    Calculate the Net Present Value (NPV) of this investment.\n    ",
+    "interaction_count": 10,
+    "first_seen": "2025-03-16T13:51:27.532066",
+    "characteristics": {
+      "length": 360,
+      "advanced_keyword_count": 0,
+      "medium_keyword_count": 0,
+      "keyword_count": 0,
+      "symbol_count": 0,
+      "formula_count": 0,
+      "complexity": 0.3
+    },
+    "last_interaction": "2025-03-16T13:51:27.535108"
+  },
+  "prob_d907a93f_20250316135245": {
+    "id": "prob_d907a93f_20250316135245",
+    "question_text": "\n    You are analyzing an investment opportunity with the following details:\n    - Initial investment: $500,000\n    - Expected cash flows:\n      * Year 1: $120,000\n      * Year 2: $150,000\n      * Year 3: $180,000\n      * Year 4: $200,000\n      * Year 5: $250,000\n    - Discount rate: 10%\n    \n    Calculate the Net Present Value (NPV) of this investment.\n    ",
+    "correct_answer": "To calculate the Net Present Value (NPV) of the investment, we will follow these steps:\n\n### Key Concepts and Formulas\n\n1. **Net Present Value (NPV)**: The NPV is calculated using the formula:\n   \\[\n   NPV = \\sum_{t=1}^{n} \\frac{C_t}{(1 + r)^t} - C_0\n   \\]\n   where:\n   - \\(C_t\\) = Cash flow at time \\(t\\)\n   - \\(r\\) = Discount rate\n   - \\(C_0\\) = Initial investment\n   - \\(n\\) = Total number of periods (years)\n\n2. **Discounting Cash Flows**: Each cash flow must be discounted back to its present value using the formula:\n   \\[\n   PV = \\frac{C_t}{(1 + r)^t}\n   \\]\n\n### Step-by-Step Calculation\n\n1. **Identify the Given Values**:\n   - Initial investment (\\(C_0\\)) = $500,000\n   - Cash flows (\\(C_t\\)):\n     - Year 1 (\\(C_1\\)) = $120,000\n     - Year 2 (\\(C_2\\)) = $150,000\n     - Year 3 (\\(C_3\\)) = $180,000\n     - Year 4 (\\(C_4\\)) = $200,000\n     - Year 5 (\\(C_5\\)) = $250,000\n   - Discount rate (\\(r\\)) = 10% = 0.10\n\n2. **Calculate Present Value of Each Cash Flow**:\n\n   - **Year 1**:\n     \\[\n     PV_1 = \\frac{120,000}{(1 + 0.10)^1} = \\frac{120,000}{1.10} = 109,090.91\n     \\]\n\n   - **Year 2**:\n     \\[\n     PV_2 = \\frac{150,000}{(1 + 0.10)^2} = \\frac{150,000}{1.21} = 123,966.94\n     \\]\n\n   - **Year 3**:\n     \\[\n     PV_3 = \\frac{180,000}{(1 + 0.10)^3} = \\frac{180,000}{1.331} = 135,634.44\n     \\]\n\n   - **Year 4**:\n     \\[\n     PV_4 = \\frac{200,000}{(1 + 0.10)^4} = \\frac{200,000}{1.4641} = 136,600.73\n     \\]\n\n   - **Year 5**:\n     \\[\n     PV_5 = \\frac{250,000}{(1 + 0.10)^5} = \\frac{250,000}{1.61051} = 155,778.89\n     \\]\n\n3. **Sum the Present Values**:\n   \\[\n   \\text{Total PV} = PV_1 + PV_2 + PV_3 + PV_4 + PV_5\n   \\]\n   \\[\n   \\text{Total PV} = 109,090.91 + 123,966.94 + 135,634.44 + 136,600.73 + 155,778.89\n   \\]\n   \\[\n   \\text{Total PV} = 620,071.91\n   \\]\n\n4. **Calculate NPV**:\n   \\[\n   NPV = \\text{Total PV} - C_0\n   \\]\n   \\[\n   NPV = 620,071.91 - 500,000 = 120,071.91\n   \\]\n\n### Final Answer\n\nThe Net Present Value (NPV) of the investment is:\n\\[\n\\boxed{120,071.91}\n\\] \n\nThis indicates that the investment is expected to generate a profit of $120,071.91 after accounting for the time value of money.",
+    "interaction_count": 1,
+    "first_seen": "2025-03-16T13:52:45.896068",
+    "characteristics": {
+      "length": 360,
+      "advanced_keyword_count": 0,
+      "medium_keyword_count": 0,
+      "keyword_count": 0,
+      "symbol_count": 0,
+      "formula_count": 0,
+      "complexity": 0.3
+    },
+    "last_interaction": "2025-03-16T13:52:45.896068"
+  },
+  "prob_d907a93f_20250316135252": {
+    "id": "prob_d907a93f_20250316135252",
+    "question_text": "\n    You are analyzing an investment opportunity with the following details:\n    - Initial investment: $500,000\n    - Expected cash flows:\n      * Year 1: $120,000\n      * Year 2: $150,000\n      * Year 3: $180,000\n      * Year 4: $200,000\n      * Year 5: $250,000\n    - Discount rate: 10%\n    \n    Calculate the Net Present Value (NPV) of this investment.\n    ",
+    "interaction_count": 1,
+    "first_seen": "2025-03-16T13:52:52.453867",
+    "characteristics": {
+      "length": 360,
+      "advanced_keyword_count": 0,
+      "medium_keyword_count": 0,
+      "keyword_count": 0,
+      "symbol_count": 0,
+      "formula_count": 0,
+      "complexity": 0.3
+    },
+    "last_interaction": "2025-03-16T13:52:52.453867"
+  },
+  "prob_d907a93f_20250316135300": {
+    "id": "prob_d907a93f_20250316135300",
+    "question_text": "\n    You are analyzing an investment opportunity with the following details:\n    - Initial investment: $500,000\n    - Expected cash flows:\n      * Year 1: $120,000\n      * Year 2: $150,000\n      * Year 3: $180,000\n      * Year 4: $200,000\n      * Year 5: $250,000\n    - Discount rate: 10%\n    \n    Calculate the Net Present Value (NPV) of this investment.\n    ",
+    "correct_answer": "To calculate the Net Present Value (NPV) of the investment, we will follow these steps:\n\n### Key Concepts and Formulas\n\n1. **Net Present Value (NPV)**: The NPV is calculated using the formula:\n   \\[\n   NPV = \\sum_{t=1}^{n} \\frac{C_t}{(1 + r)^t} - C_0\n   \\]\n   where:\n   - \\(C_t\\) = Cash flow at time \\(t\\)\n   - \\(r\\) = Discount rate\n   - \\(C_0\\) = Initial investment\n   - \\(n\\) = Total number of periods (years)\n\n2. **Discounting Cash Flows**: Each cash flow must be discounted back to its present value using the formula:\n   \\[\n   PV = \\frac{C_t}{(1 + r)^t}\n   \\]\n\n### Step-by-Step Calculation\n\n1. **Identify the Given Values**:\n   - Initial investment (\\(C_0\\)) = $500,000\n   - Cash flows (\\(C_t\\)):\n     - Year 1 (\\(C_1\\)) = $120,000\n     - Year 2 (\\(C_2\\)) = $150,000\n     - Year 3 (\\(C_3\\)) = $180,000\n     - Year 4 (\\(C_4\\)) = $200,000\n     - Year 5 (\\(C_5\\)) = $250,000\n   - Discount rate (\\(r\\)) = 10% = 0.10\n\n2. **Calculate Present Value of Each Cash Flow**:\n\n   - **Year 1**:\n     \\[\n     PV_1 = \\frac{120,000}{(1 + 0.10)^1} = \\frac{120,000}{1.10} = 109,090.91\n     \\]\n\n   - **Year 2**:\n     \\[\n     PV_2 = \\frac{150,000}{(1 + 0.10)^2} = \\frac{150,000}{1.21} = 123,966.94\n     \\]\n\n   - **Year 3**:\n     \\[\n     PV_3 = \\frac{180,000}{(1 + 0.10)^3} = \\frac{180,000}{1.331} = 135,634.44\n     \\]\n\n   - **Year 4**:\n     \\[\n     PV_4 = \\frac{200,000}{(1 + 0.10)^4} = \\frac{200,000}{1.4641} = 136,600.73\n     \\]\n\n   - **Year 5**:\n     \\[\n     PV_5 = \\frac{250,000}{(1 + 0.10)^5} = \\frac{250,000}{1.61051} = 155,778.89\n     \\]\n\n3. **Sum the Present Values**:\n   \\[\n   \\text{Total PV} = PV_1 + PV_2 + PV_3 + PV_4 + PV_5\n   \\]\n   \\[\n   \\text{Total PV} = 109,090.91 + 123,966.94 + 135,634.44 + 136,600.73 + 155,778.89\n   \\]\n   \\[\n   \\text{Total PV} = 620,071.91\n   \\]\n\n4. **Calculate NPV**:\n   \\[\n   NPV = \\text{Total PV} - C_0\n   \\]\n   \\[\n   NPV = 620,071.91 - 500,000 = 120,071.91\n   \\]\n\n### Final Answer\n\nThe Net Present Value (NPV) of the investment is:\n\\[\n\\boxed{120,071.91}\n\\] \n\nThis indicates that the investment is expected to generate a profit of $120,071.91 after accounting for the time value of money.",
+    "interaction_count": 1,
+    "first_seen": "2025-03-16T13:53:00.839159",
+    "characteristics": {
+      "length": 360,
+      "advanced_keyword_count": 0,
+      "medium_keyword_count": 0,
+      "keyword_count": 0,
+      "symbol_count": 0,
+      "formula_count": 0,
+      "complexity": 0.3
+    },
+    "last_interaction": "2025-03-16T13:53:00.839159"
+  },
+  "prob_d907a93f_20250316135336": {
+    "id": "prob_d907a93f_20250316135336",
+    "question_text": "\n    You are analyzing an investment opportunity with the following details:\n    - Initial investment: $500,000\n    - Expected cash flows:\n      * Year 1: $120,000\n      * Year 2: $150,000\n      * Year 3: $180,000\n      * Year 4: $200,000\n      * Year 5: $250,000\n    - Discount rate: 10%\n    \n    Calculate the Net Present Value (NPV) of this investment.\n    ",
+    "interaction_count": 10,
+    "first_seen": "2025-03-16T13:53:36.494552",
+    "characteristics": {
+      "length": 360,
+      "advanced_keyword_count": 0,
+      "medium_keyword_count": 0,
+      "keyword_count": 0,
+      "symbol_count": 0,
+      "formula_count": 0,
+      "complexity": 0.3
+    },
+    "last_interaction": "2025-03-16T13:53:36.495987"
+  },
+  "prob_d907a93f_20250316135627": {
+    "id": "prob_d907a93f_20250316135627",
+    "question_text": "\n    You are analyzing an investment opportunity with the following details:\n    - Initial investment: $500,000\n    - Expected cash flows:\n      * Year 1: $120,000\n      * Year 2: $150,000\n      * Year 3: $180,000\n      * Year 4: $200,000\n      * Year 5: $250,000\n    - Discount rate: 10%\n    \n    Calculate the Net Present Value (NPV) of this investment.\n    ",
+    "correct_answer": "To calculate the Net Present Value (NPV) of an investment, we need to follow these steps:\n\n### Key Concepts and Formulas\n\n1. **Net Present Value (NPV)**: NPV is a method used to evaluate the profitability of an investment. It is calculated by summing the present values of all expected future cash flows and subtracting the initial investment.\n   \n   The formula for NPV is given by:\n   \\[\n   NPV = \\sum_{t=1}^{n} \\frac{CF_t}{(1 + r)^t} - C_0\n   \\]\n   where:\n   - \\( CF_t \\) = cash flow at time \\( t \\)\n   - \\( r \\) = discount rate (expressed as a decimal)\n   - \\( n \\) = total number of periods (years)\n   - \\( C_0 \\) = initial investment\n\n### Given Data\n\n- Initial Investment (\\( C_0 \\)): $500,000\n- Expected Cash Flows:\n  - Year 1 (\\( CF_1 \\)): $120,000\n  - Year 2 (\\( CF_2 \\)): $150,000\n  - Year 3 (\\( CF_3 \\)): $180,000\n  - Year 4 (\\( CF_4 \\)): $200,000\n  - Year 5 (\\( CF_5 \\)): $250,000\n- Discount Rate (\\( r \\)): 10% or 0.10\n\n### Step-by-Step Calculation\n\n1. **Calculate Present Value (PV) for each cash flow**:\n\n   - For Year 1:\n     \\[\n     PV_1 = \\frac{CF_1}{(1 + r)^1} = \\frac{120,000}{(1 + 0.10)^1} = \\frac{120,000}{1.10} \\approx 109,090.91\n     \\]\n\n   - For Year 2:\n     \\[\n     PV_2 = \\frac{CF_2}{(1 + r)^2} = \\frac{150,000}{(1 + 0.10)^2} = \\frac{150,000}{1.21} \\approx 123,966.94\n     \\]\n\n   - For Year 3:\n     \\[\n     PV_3 = \\frac{CF_3}{(1 + r)^3} = \\frac{180,000}{(1 + 0.10)^3} = \\frac{180,000}{1.331} \\approx 135,635.08\n     \\]\n\n   - For Year 4:\n     \\[\n     PV_4 = \\frac{CF_4}{(1 + r)^4} = \\frac{200,000}{(1 + 0.10)^4} = \\frac{200,000}{1.4641} \\approx 136,601.22\n     \\]\n\n   - For Year 5:\n     \\[\n     PV_5 = \\frac{CF_5}{(1 + r)^5} = \\frac{250,000}{(1 + 0.10)^5} = \\frac{250,000}{1.61051} \\approx 155,043.72\n     \\]\n\n2. **Sum the Present Values**:\n   \\[\n   \\text{Total PV} = PV_1 + PV_2 + PV_3 + PV_4 + PV_5\n   \\]\n   \\[\n   \\text{Total PV} = 109,090.91 + 123,966.94 + 135,635.08 + 136,601.22 + 155,043.72 \\approx  650,437.87\n   \\]\n\n3. **Calculate NPV**:\n   \\[\n   NPV = \\text{Total PV} - C_0\n   \\]\n   \\[\n   NPV = 650,437.87 - 500,000 \\approx 150,437.87\n   \\]\n\n### Final Answer\n\nThe Net Present Value (NPV) of this investment is approximately:\n\\[\n\\boxed{150,437.87}\n\\] \n\nThis means the investment is expected to generate a profit of about $150,437.87 after accounting for the initial investment and the time value of money at a discount rate of 10%.",
+    "interaction_count": 1,
+    "first_seen": "2025-03-16T13:56:27.695470",
+    "characteristics": {
+      "length": 360,
+      "advanced_keyword_count": 0,
+      "medium_keyword_count": 0,
+      "keyword_count": 0,
+      "symbol_count": 0,
+      "formula_count": 0,
+      "complexity": 0.3
+    },
+    "last_interaction": "2025-03-16T13:56:27.695470"
+  },
+  "prob_d907a93f_20250316135632": {
+    "id": "prob_d907a93f_20250316135632",
+    "question_text": "\n    You are analyzing an investment opportunity with the following details:\n    - Initial investment: $500,000\n    - Expected cash flows:\n      * Year 1: $120,000\n      * Year 2: $150,000\n      * Year 3: $180,000\n      * Year 4: $200,000\n      * Year 5: $250,000\n    - Discount rate: 10%\n    \n    Calculate the Net Present Value (NPV) of this investment.\n    ",
+    "interaction_count": 1,
+    "first_seen": "2025-03-16T13:56:32.710989",
+    "characteristics": {
+      "length": 360,
+      "advanced_keyword_count": 0,
+      "medium_keyword_count": 0,
+      "keyword_count": 0,
+      "symbol_count": 0,
+      "formula_count": 0,
+      "complexity": 0.3
+    },
+    "last_interaction": "2025-03-16T13:56:32.710989"
+  },
+  "prob_d907a93f_20250316135640": {
+    "id": "prob_d907a93f_20250316135640",
+    "question_text": "\n    You are analyzing an investment opportunity with the following details:\n    - Initial investment: $500,000\n    - Expected cash flows:\n      * Year 1: $120,000\n      * Year 2: $150,000\n      * Year 3: $180,000\n      * Year 4: $200,000\n      * Year 5: $250,000\n    - Discount rate: 10%\n    \n    Calculate the Net Present Value (NPV) of this investment.\n    ",
+    "correct_answer": "To calculate the Net Present Value (NPV) of an investment, we need to follow these steps:\n\n### Key Concepts and Formulas\n\n1. **Net Present Value (NPV)**: NPV is a method used to evaluate the profitability of an investment. It is calculated by summing the present values of all expected future cash flows and subtracting the initial investment.\n   \n   The formula for NPV is given by:\n   \\[\n   NPV = \\sum_{t=1}^{n} \\frac{CF_t}{(1 + r)^t} - C_0\n   \\]\n   where:\n   - \\( CF_t \\) = cash flow at time \\( t \\)\n   - \\( r \\) = discount rate (expressed as a decimal)\n   - \\( n \\) = total number of periods (years)\n   - \\( C_0 \\) = initial investment\n\n### Given Data\n\n- Initial Investment (\\( C_0 \\)): $500,000\n- Expected Cash Flows:\n  - Year 1 (\\( CF_1 \\)): $120,000\n  - Year 2 (\\( CF_2 \\)): $150,000\n  - Year 3 (\\( CF_3 \\)): $180,000\n  - Year 4 (\\( CF_4 \\)): $200,000\n  - Year 5 (\\( CF_5 \\)): $250,000\n- Discount Rate (\\( r \\)): 10% or 0.10\n\n### Step-by-Step Calculation\n\n1. **Calculate Present Value (PV) for each cash flow**:\n\n   - For Year 1:\n     \\[\n     PV_1 = \\frac{CF_1}{(1 + r)^1} = \\frac{120,000}{(1 + 0.10)^1} = \\frac{120,000}{1.10} \\approx 109,090.91\n     \\]\n\n   - For Year 2:\n     \\[\n     PV_2 = \\frac{CF_2}{(1 + r)^2} = \\frac{150,000}{(1 + 0.10)^2} = \\frac{150,000}{1.21} \\approx 123,966.94\n     \\]\n\n   - For Year 3:\n     \\[\n     PV_3 = \\frac{CF_3}{(1 + r)^3} = \\frac{180,000}{(1 + 0.10)^3} = \\frac{180,000}{1.331} \\approx 135,635.08\n     \\]\n\n   - For Year 4:\n     \\[\n     PV_4 = \\frac{CF_4}{(1 + r)^4} = \\frac{200,000}{(1 + 0.10)^4} = \\frac{200,000}{1.4641} \\approx 136,601.22\n     \\]\n\n   - For Year 5:\n     \\[\n     PV_5 = \\frac{CF_5}{(1 + r)^5} = \\frac{250,000}{(1 + 0.10)^5} = \\frac{250,000}{1.61051} \\approx 155,043.72\n     \\]\n\n2. **Sum the Present Values**:\n   \\[\n   \\text{Total PV} = PV_1 + PV_2 + PV_3 + PV_4 + PV_5\n   \\]\n   \\[\n   \\text{Total PV} = 109,090.91 + 123,966.94 + 135,635.08 + 136,601.22 + 155,043.72 \\approx  650,437.87\n   \\]\n\n3. **Calculate NPV**:\n   \\[\n   NPV = \\text{Total PV} - C_0\n   \\]\n   \\[\n   NPV = 650,437.87 - 500,000 \\approx 150,437.87\n   \\]\n\n### Final Answer\n\nThe Net Present Value (NPV) of this investment is approximately:\n\\[\n\\boxed{150,437.87}\n\\] \n\nThis means the investment is expected to generate a profit of about $150,437.87 after accounting for the initial investment and the time value of money at a discount rate of 10%.",
+    "interaction_count": 1,
+    "first_seen": "2025-03-16T13:56:40.189268",
+    "characteristics": {
+      "length": 360,
+      "advanced_keyword_count": 0,
+      "medium_keyword_count": 0,
+      "keyword_count": 0,
+      "symbol_count": 0,
+      "formula_count": 0,
+      "complexity": 0.3
+    },
+    "last_interaction": "2025-03-16T13:56:40.189268"
+  },
+  "prob_d907a93f_20250316135707": {
+    "id": "prob_d907a93f_20250316135707",
+    "question_text": "\n    You are analyzing an investment opportunity with the following details:\n    - Initial investment: $500,000\n    - Expected cash flows:\n      * Year 1: $120,000\n      * Year 2: $150,000\n      * Year 3: $180,000\n      * Year 4: $200,000\n      * Year 5: $250,000\n    - Discount rate: 10%\n    \n    Calculate the Net Present Value (NPV) of this investment.\n    ",
+    "interaction_count": 10,
+    "first_seen": "2025-03-16T13:57:07.986338",
+    "characteristics": {
+      "length": 360,
+      "advanced_keyword_count": 0,
+      "medium_keyword_count": 0,
+      "keyword_count": 0,
+      "symbol_count": 0,
+      "formula_count": 0,
+      "complexity": 0.3
+    },
+    "last_interaction": "2025-03-16T13:57:07.987020"
+  },
+  "prob_d907a93f_20250317124020": {
+    "id": "prob_d907a93f_20250317124020",
+    "question_text": "\n    You are analyzing an investment opportunity with the following details:\n    - Initial investment: $500,000\n    - Expected cash flows:\n      * Year 1: $120,000\n      * Year 2: $150,000\n      * Year 3: $180,000\n      * Year 4: $200,000\n      * Year 5: $250,000\n    - Discount rate: 10%\n    \n    Calculate the Net Present Value (NPV) of this investment.\n    ",
+    "correct_answer": "To calculate the Net Present Value (NPV) of the investment, we will follow these steps:\n\n### Key Concepts and Formulas Needed\n\n1. **Net Present Value (NPV)**:\n   \\[\n   NPV = \\sum_{t=0}^{n} \\frac{C_t}{(1 + r)^t}\n   \\]\n   - \\( C_t \\): Cash flow at time \\( t \\)\n   - \\( r \\): Discount rate\n   - \\( n \\): Total number of periods\n\n2. For this problem:\n   - The cash flow at Year 0 (initial investment) is negative: \\( C_0 = -500,000 \\)\n   - Cash flows for Years 1 to 5 are given.\n   - The discount rate \\( r = 10\\% = 0.10 \\)\n\n### Step-by-Step Calculation\n\n1. **Identify Cash Flows**:\n   - Year 0: \\( C_0 = -500,000 \\)\n   - Year 1: \\( C_1 = 120,000 \\)\n   - Year 2: \\( C_2 = 150,000 \\)\n   - Year 3: \\( C_3 = 180,000 \\)\n   - Year 4: \\( C_4 = 200,000 \\)\n   - Year 5: \\( C_5 = 250,000 \\)\n\n2. **Calculate Present Value of Each Cash Flow**:\n   - For Year 0:\n     \\[\n     PV_0 = \\frac{-500,000}{(1 + 0.10)^0} = -500,000\n     \\]\n   - For Year 1:\n     \\[\n     PV_1 = \\frac{120,000}{(1 + 0.10)^1} = \\frac{120,000}{1.10} \\approx 109,090.91\n     \\]\n   - For Year 2:\n     \\[\n     PV_2 = \\frac{150,000}{(1 + 0.10)^2} = \\frac{150,000}{1.21} \\approx 123,966.94\n     \\]\n   - For Year 3:\n     \\[\n     PV_3 = \\frac{180,000}{(1 + 0.10)^3} = \\frac{180,000}{1.331} \\approx 135,634.54\n     \\]\n   - For Year 4:\n     \\[\n     PV_4 = \\frac{200,000}{(1 + 0.10)^4} = \\frac{200,000}{1.4641} \\approx 136,600.67\n     \\]\n   - For Year 5:\n     \\[\n     PV_5 = \\frac{250,000}{(1 + 0.10)^5} = \\frac{250,000}{1.61051} \\approx 155,778.88\n     \\]\n\n3. **Sum All Present Values**:\n   Now we can calculate the NPV by summing all the present values we have calculated:\n   \\[\n   NPV = PV_0 + PV_1 + PV_2 + PV_3 + PV_4 + PV_5\n   \\]\n   \\[\n   NPV = -500,000 + 109,090.91 + 123,966.94 + 135,634.54 + 136,600.67 + 155,778.88\n   \\]\n\n4. **Perform the Summation**:\n   \\[\n   NPV = -500,000 + 109,090.91 + 123,966.94 + 135,634.54 + 136,600.67 + 155,778.88\n   \\]\n   \\[\n   NPV = -500,000 + 700,071.94\n   \\]\n   \\[\n   NPV = 200,071.94\n   \\]\n\n### Final Answer\nThe Net Present Value (NPV) of this investment is:\n\\[\n\\boxed{200,071.94}\n\\] \n\nThis positive NPV indicates that the investment is expected to generate more cash than the cost of the investment when discounted at the given rate.",
+    "interaction_count": 1,
+    "first_seen": "2025-03-17T12:40:20.845416",
+    "characteristics": {
+      "length": 360,
+      "advanced_keyword_count": 0,
+      "medium_keyword_count": 0,
+      "keyword_count": 0,
+      "symbol_count": 0,
+      "formula_count": 0,
+      "complexity": 0.3
+    },
+    "last_interaction": "2025-03-17T12:40:20.845416"
+  },
+  "prob_d907a93f_20250317124026": {
+    "id": "prob_d907a93f_20250317124026",
+    "question_text": "\n    You are analyzing an investment opportunity with the following details:\n    - Initial investment: $500,000\n    - Expected cash flows:\n      * Year 1: $120,000\n      * Year 2: $150,000\n      * Year 3: $180,000\n      * Year 4: $200,000\n      * Year 5: $250,000\n    - Discount rate: 10%\n    \n    Calculate the Net Present Value (NPV) of this investment.\n    ",
+    "interaction_count": 1,
+    "first_seen": "2025-03-17T12:40:26.880269",
+    "characteristics": {
+      "length": 360,
+      "advanced_keyword_count": 0,
+      "medium_keyword_count": 0,
+      "keyword_count": 0,
+      "symbol_count": 0,
+      "formula_count": 0,
+      "complexity": 0.3
+    },
+    "last_interaction": "2025-03-17T12:40:26.880269"
+  },
+  "prob_d907a93f_20250317124031": {
+    "id": "prob_d907a93f_20250317124031",
+    "question_text": "\n    You are analyzing an investment opportunity with the following details:\n    - Initial investment: $500,000\n    - Expected cash flows:\n      * Year 1: $120,000\n      * Year 2: $150,000\n      * Year 3: $180,000\n      * Year 4: $200,000\n      * Year 5: $250,000\n    - Discount rate: 10%\n    \n    Calculate the Net Present Value (NPV) of this investment.\n    ",
+    "correct_answer": "To calculate the Net Present Value (NPV) of the investment, we will follow these steps:\n\n### Key Concepts and Formulas Needed\n\n1. **Net Present Value (NPV)**:\n   \\[\n   NPV = \\sum_{t=0}^{n} \\frac{C_t}{(1 + r)^t}\n   \\]\n   - \\( C_t \\): Cash flow at time \\( t \\)\n   - \\( r \\): Discount rate\n   - \\( n \\): Total number of periods\n\n2. For this problem:\n   - The cash flow at Year 0 (initial investment) is negative: \\( C_0 = -500,000 \\)\n   - Cash flows for Years 1 to 5 are given.\n   - The discount rate \\( r = 10\\% = 0.10 \\)\n\n### Step-by-Step Calculation\n\n1. **Identify Cash Flows**:\n   - Year 0: \\( C_0 = -500,000 \\)\n   - Year 1: \\( C_1 = 120,000 \\)\n   - Year 2: \\( C_2 = 150,000 \\)\n   - Year 3: \\( C_3 = 180,000 \\)\n   - Year 4: \\( C_4 = 200,000 \\)\n   - Year 5: \\( C_5 = 250,000 \\)\n\n2. **Calculate Present Value of Each Cash Flow**:\n   - For Year 0:\n     \\[\n     PV_0 = \\frac{-500,000}{(1 + 0.10)^0} = -500,000\n     \\]\n   - For Year 1:\n     \\[\n     PV_1 = \\frac{120,000}{(1 + 0.10)^1} = \\frac{120,000}{1.10} \\approx 109,090.91\n     \\]\n   - For Year 2:\n     \\[\n     PV_2 = \\frac{150,000}{(1 + 0.10)^2} = \\frac{150,000}{1.21} \\approx 123,966.94\n     \\]\n   - For Year 3:\n     \\[\n     PV_3 = \\frac{180,000}{(1 + 0.10)^3} = \\frac{180,000}{1.331} \\approx 135,634.54\n     \\]\n   - For Year 4:\n     \\[\n     PV_4 = \\frac{200,000}{(1 + 0.10)^4} = \\frac{200,000}{1.4641} \\approx 136,600.67\n     \\]\n   - For Year 5:\n     \\[\n     PV_5 = \\frac{250,000}{(1 + 0.10)^5} = \\frac{250,000}{1.61051} \\approx 155,778.88\n     \\]\n\n3. **Sum All Present Values**:\n   Now we can calculate the NPV by summing all the present values we have calculated:\n   \\[\n   NPV = PV_0 + PV_1 + PV_2 + PV_3 + PV_4 + PV_5\n   \\]\n   \\[\n   NPV = -500,000 + 109,090.91 + 123,966.94 + 135,634.54 + 136,600.67 + 155,778.88\n   \\]\n\n4. **Perform the Summation**:\n   \\[\n   NPV = -500,000 + 109,090.91 + 123,966.94 + 135,634.54 + 136,600.67 + 155,778.88\n   \\]\n   \\[\n   NPV = -500,000 + 700,071.94\n   \\]\n   \\[\n   NPV = 200,071.94\n   \\]\n\n### Final Answer\nThe Net Present Value (NPV) of this investment is:\n\\[\n\\boxed{200,071.94}\n\\] \n\nThis positive NPV indicates that the investment is expected to generate more cash than the cost of the investment when discounted at the given rate.",
+    "interaction_count": 1,
+    "first_seen": "2025-03-17T12:40:31.519266",
+    "characteristics": {
+      "length": 360,
+      "advanced_keyword_count": 0,
+      "medium_keyword_count": 0,
+      "keyword_count": 0,
+      "symbol_count": 0,
+      "formula_count": 0,
+      "complexity": 0.3
+    },
+    "last_interaction": "2025-03-17T12:40:31.519266"
+  },
+  "prob_d907a93f_20250317124117": {
+    "id": "prob_d907a93f_20250317124117",
+    "question_text": "\n    You are analyzing an investment opportunity with the following details:\n    - Initial investment: $500,000\n    - Expected cash flows:\n      * Year 1: $120,000\n      * Year 2: $150,000\n      * Year 3: $180,000\n      * Year 4: $200,000\n      * Year 5: $250,000\n    - Discount rate: 10%\n    \n    Calculate the Net Present Value (NPV) of this investment.\n    ",
+    "interaction_count": 10,
+    "first_seen": "2025-03-17T12:41:17.202892",
+    "characteristics": {
+      "length": 360,
+      "advanced_keyword_count": 0,
+      "medium_keyword_count": 0,
+      "keyword_count": 0,
+      "symbol_count": 0,
+      "formula_count": 0,
+      "complexity": 0.3
+    },
+    "last_interaction": "2025-03-17T12:41:17.203642"
+  }
+}

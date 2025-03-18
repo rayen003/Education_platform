@@ -19,17 +19,46 @@ logger = logging.getLogger(__name__)
 class MathChatFollowUpCommand(BaseCommand):
     """Command for handling chat-based follow-up questions in math problem-solving."""
     
-    def execute(self, state: MathState, follow_up_question: str) -> MathState:
+    def execute(self, state: MathState) -> MathState:
         """
         Process a follow-up question and generate a response.
         
         Args:
-            state: The current state
-            follow_up_question: The student's follow-up question
+            state: The current state with follow_up_question in context
             
         Returns:
             Updated state with the response to the follow-up question
         """
+        # Get the follow-up question from state
+        follow_up_question = ""
+        try:
+            if hasattr(state, 'context') and state.context and 'follow_up_question' in state.context:
+                follow_up_question = state.context['follow_up_question']
+            elif hasattr(state, 'context') and state.context and 'action_data' in state.context:
+                follow_up_question = state.context['action_data'].get('text', '')
+            
+            # If still no follow-up question, check if passed as a text attribute
+            if not follow_up_question and hasattr(state, 'text'):
+                follow_up_question = state.text
+                
+            if not follow_up_question:
+                # Last resort: try to extract from the last action in action_history
+                if hasattr(state, 'action_history') and state.action_history:
+                    last_action = state.action_history[-1]
+                    if isinstance(last_action, dict) and 'metadata' in last_action:
+                        follow_up_question = last_action['metadata'].get('text', '')
+                
+            if not follow_up_question:
+                logger.warning("No follow-up question found in state")
+                self.record_event(state, "error", {"message": "No follow-up question found"})
+                state.chat_response = "I'm sorry, I couldn't understand your question. Can you please try again?"
+                return state
+        except Exception as e:
+            logger.error(f"Error extracting follow-up question: {str(e)}")
+            state.chat_response = "I'm sorry, I encountered an error processing your question. Can you please try again?"
+            self.record_event(state, "error", {"message": f"Error extracting follow-up question: {str(e)}"})
+            return state
+            
         logger.info(f"Processing follow-up question: {follow_up_question}")
         
         try:
@@ -46,20 +75,35 @@ class MathChatFollowUpCommand(BaseCommand):
             
             # Get feedback assessment if available
             assessment = ""
-            if state.feedback and "math" in state.feedback:
-                assessment = state.feedback.get("math", {}).get("assessment", "")
+            if hasattr(state, "feedback") and state.feedback:
+                if isinstance(state.feedback, dict) and "math" in state.feedback:
+                    # Dictionary format (legacy)
+                    assessment = state.feedback.get("math", {}).get("assessment", "")
+                elif hasattr(state.feedback, "assessment"):
+                    # MathFeedback object format
+                    assessment = state.feedback.assessment
             
             # Get is_correct status
             is_correct = False
-            if state.analysis:
+            if hasattr(state, "analysis") and state.analysis:
                 is_correct = state.analysis.is_correct
-            elif state.feedback and "math" in state.feedback:
-                is_correct = state.feedback.get("math", {}).get("is_correct", False)
+            elif hasattr(state, "feedback") and state.feedback:
+                if isinstance(state.feedback, dict) and "math" in state.feedback:
+                    # Dictionary format (legacy)
+                    is_correct = state.feedback.get("math", {}).get("is_correct", False)
+                elif hasattr(state.feedback, "is_correct"):
+                    # MathFeedback object format
+                    is_correct = state.feedback.is_correct
             
             # Get proximity score
             proximity_score = state.proximity_score or 0
-            if state.feedback and "math" in state.feedback:
-                proximity_score = state.feedback.get("math", {}).get("proximity_score", 0)
+            if hasattr(state, "feedback") and state.feedback:
+                if isinstance(state.feedback, dict) and "math" in state.feedback:
+                    # Dictionary format (legacy)
+                    proximity_score = state.feedback.get("math", {}).get("proximity_score", 0)
+                elif hasattr(state.feedback, "proximity_score"):
+                    # MathFeedback object format
+                    proximity_score = state.feedback.proximity_score
             
             # Format the chat history for context
             history_formatted = ""
@@ -150,31 +194,61 @@ class MathChatFollowUpCommand(BaseCommand):
             return state
             
         except Exception as e:
+            error_type = type(e).__name__
+            error_message = str(e)
+            logger.error(f"Error in chat follow-up processing: {error_type}: {error_message}")
+            logger.error(traceback.format_exc())
             self.log_error(e, state)
             
-            # Add a fallback response in case of errors
-            fallback_response = (
-                "I'm sorry, I encountered an issue while processing your question. "
-                "Could you please rephrase or ask something else about this math problem?"
-            )
+            # Determine appropriate fallback message based on error type
+            if "ConnectionError" in error_type or "Timeout" in error_type:
+                fallback_response = (
+                    "I'm having trouble connecting to our reasoning engine right now. "
+                    "This might be due to a temporary network issue. Could you please try again in a moment?"
+                )
+            elif "KeyError" in error_type or "AttributeError" in error_type:
+                fallback_response = (
+                    "I'm missing some information I need to answer your question properly. "
+                    "Could you please rephrase your question and make sure it's related to the math problem we're discussing?"
+                )
+            else:
+                fallback_response = (
+                    "I'm sorry, I encountered an issue while processing your question. "
+                    "Could you please rephrase or ask something else about this math problem?"
+                )
             
-            # Add the student's question to chat history
-            student_message = ChatMessage(
-                role="student",
-                message=follow_up_question,
-                timestamp=datetime.now()
-            )
-            state.chat_history.append(student_message)
-            
-            # Add the fallback response to chat history
-            tutor_message = ChatMessage(
-                role="tutor",
-                message=fallback_response,
-                timestamp=datetime.now()
-            )
-            state.chat_history.append(tutor_message)
-            
-            # Add the fallback response to state
-            state.chat_response = fallback_response
+            try:
+                # Safely add the student's question to chat history
+                student_message = ChatMessage(
+                    role="student",
+                    message=follow_up_question,
+                    timestamp=datetime.now()
+                )
+                state.chat_history.append(student_message)
+                
+                # Add the fallback response to chat history
+                tutor_message = ChatMessage(
+                    role="tutor",
+                    message=fallback_response,
+                    timestamp=datetime.now()
+                )
+                state.chat_history.append(tutor_message)
+                
+                # Add the fallback response to state
+                state.chat_response = fallback_response
+                
+                # Record the error event
+                self.record_event(state, "chat_error", {
+                    "error_type": error_type,
+                    "follow_up_question": follow_up_question
+                })
+            except Exception as inner_e:
+                # Last resort error handling if adding to chat history also fails
+                logger.critical(f"Critical error in fallback handling: {str(inner_e)}")
+                logger.critical(traceback.format_exc())
+                
+                # Create a minimal valid state to return
+                if not hasattr(state, "chat_response") or state.chat_response is None:
+                    state.chat_response = "I'm sorry, I encountered a technical issue. Please try again later."
             
             return state 
